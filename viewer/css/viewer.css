@@ -272,66 +272,76 @@ html, body {
 }
 
 /* ============================================================================
-   REALISTIC 3D DUAL-SIDED TURNING LEAF & DYNAMIC SHADOW ENGINE
+   GLITCH-FREE DIAGONAL PAPER FOLD & CYLINDRICAL CURL ENGINE (4-LAYER SYSTEM)
    ============================================================================ */
-.turning-leaf {
+.flip-reveal-layer {
   position: absolute;
   top: 0;
   bottom: 0;
-  z-index: 40;
-  transform-style: preserve-3d;
+  background: #ffffff;
+  z-index: 32;
   pointer-events: none;
   display: none;
-  will-change: transform;
+  overflow: hidden;
+  will-change: clip-path;
 }
 
-.turning-leaf.active {
+.flip-reveal-layer.active {
   display: block;
 }
 
-.leaf-face {
+.reveal-crease-shadow {
   position: absolute;
-  inset: 0;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  background: #ffffff;
-  overflow: hidden;
-}
-
-.leaf-face.leaf-front {
-  z-index: 2;
-}
-
-.leaf-face.leaf-back {
-  transform: rotateY(180deg);
-  background: #f8fafc;
-}
-
-/* Paper Specular Curl & Crease Gradient on Turning Leaf */
-.leaf-curl-gradient {
-  position: absolute;
-  inset: 0;
+  top: -15%;
+  bottom: -15%;
+  width: 90px;
   pointer-events: none;
+  z-index: 5;
   background: linear-gradient(
     90deg,
-    rgba(0,0,0,0.28) 0%,
-    rgba(255,255,255,0.32) 14%,
-    rgba(0,0,0,0.03) 45%,
-    rgba(0,0,0,0.18) 92%,
-    rgba(0,0,0,0.35) 100%
+    rgba(0, 0, 0, 0.42) 0%,
+    rgba(0, 0, 0, 0.16) 45%,
+    rgba(0, 0, 0, 0) 100%
   );
 }
 
-/* Cast Shadow Thrown onto Receiving Page Underneath */
-.flip-cast-shadow {
+.flip-curl-flap-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 45;
+  display: none;
+  filter: drop-shadow(-14px 8px 20px rgba(0, 0, 0, 0.48));
+}
+
+.flip-curl-flap-wrap.active {
+  display: block;
+}
+
+.flip-curl-flap {
   position: absolute;
   top: 0;
   bottom: 0;
+  background: #ffffff;
+  overflow: hidden;
+  will-change: transform, clip-path, left;
+}
+
+.flap-roll-shade {
+  position: absolute;
+  top: -15%;
+  bottom: -15%;
+  width: 78px;
   pointer-events: none;
-  z-index: 30;
-  opacity: 0;
-  transition: opacity 0.15s linear;
-  background: radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 75%);
+  z-index: 6;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.04) 22%,
+    rgba(255, 255, 255, 0.72) 64%,
+    rgba(226, 232, 240, 0.45) 84%,
+    rgba(15, 23, 42, 0.35) 100%
+  );
 }
 
 .page-img {

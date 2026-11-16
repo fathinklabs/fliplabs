@@ -337,7 +337,12 @@ async def upload_and_convert_pdf(
         raise HTTPException(status_code=400, detail="File harus berformat PDF (.pdf)")
 
     current_user = get_user_by_token(authorization)
-    owner_email = current_user["email"] if current_user else "labsdul@gmail.com"
+    if not current_user:
+        raise HTTPException(
+            status_code=401,
+            detail="Akses ditolak: Hanya pengguna yang sudah registrasi dan masuk akun yang dapat mengunggah buku PDF.",
+        )
+    owner_email = current_user["email"]
 
     book_slug = slugify(title)
     temp_pdf = UPLOADS_DIR / f"{book_slug}.pdf"

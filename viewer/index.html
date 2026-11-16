@@ -63,7 +63,7 @@
     </div>
     <div class="drawer-body">
       <div class="search-input-wrap">
-        <input id="searchInput" type="text" class="drawer-input" placeholder="Cari kata kunci (mis: Pythagoras, gradien, sel)...">
+        <input id="searchInput" type="text" class="drawer-input" placeholder="Cari kata kunci (mis: Pythagoras, gradien, pecahan)...">
       </div>
       <div id="searchResults">
         <div style="color:var(--text-muted);font-size:12.5px;padding:8px;">
@@ -117,7 +117,7 @@
           <div id="leftHighlightLayer" class="highlight-layer"></div>
           <canvas id="leftAnnoCanvas" class="annotation-canvas"></canvas>
           <div class="watermark-overlay"><span class="watermark-text">LABSCHOOL DIGITAL LIBRARY</span></div>
-          <div id="cornerLeft" class="corner-peel left" title="Tarik atau klik untuk membalik ke halaman sebelumnya"></div>
+          <div id="cornerLeft" class="corner-peel left" title="Klik atau tarik untuk membalik ke halaman sebelumnya"></div>
         </div>
 
         <!-- Center Spine 3D Crease Shadow -->
@@ -129,21 +129,20 @@
           <div id="rightHighlightLayer" class="highlight-layer"></div>
           <canvas id="rightAnnoCanvas" class="annotation-canvas"></canvas>
           <div class="watermark-overlay"><span class="watermark-text">LABSCHOOL DIGITAL LIBRARY</span></div>
-          <div id="cornerRight" class="corner-peel right" title="Tarik atau klik untuk membalik ke halaman berikutnya"></div>
+          <div id="cornerRight" class="corner-peel right" title="Klik atau tarik untuk membalik ke halaman berikutnya"></div>
         </div>
 
-        <!-- Cast Shadow Thrown onto Underlying Page During 3D Turn -->
-        <div id="flipCastShadow" class="flip-cast-shadow"></div>
+        <!-- Layer 3: Underneath Revealed Page Layer (Clipped by Diagonal Fold Line) -->
+        <div id="flipRevealLayer" class="flip-reveal-layer">
+          <img id="revealImg" class="page-img" src="" alt="Revealed Page">
+          <div id="revealCreaseShadow" class="reveal-crease-shadow"></div>
+        </div>
 
-        <!-- Dual-Sided 3D Turning Leaf (Front & Back Faces with Curl Specular Shading) -->
-        <div id="turningLeaf" class="turning-leaf">
-          <div class="leaf-face leaf-front">
-            <img id="turningFrontImg" class="page-img" src="" alt="Turning Front">
-            <div id="turningFrontCurl" class="leaf-curl-gradient"></div>
-          </div>
-          <div class="leaf-face leaf-back">
-            <img id="turningBackImg" class="page-img" src="" alt="Turning Back">
-            <div id="turningBackCurl" class="leaf-curl-gradient"></div>
+        <!-- Layer 4: Curled Folding Back Flap (Diagonal Paper Curl with 3D Cylindrical Highlight & Drop Shadow) -->
+        <div id="flipCurlFlapWrap" class="flip-curl-flap-wrap">
+          <div id="flipCurlFlap" class="flip-curl-flap">
+            <img id="flapImg" class="page-img" src="" alt="Curled Flap">
+            <div id="flapRollShade" class="flap-roll-shade"></div>
           </div>
         </div>
       </div>

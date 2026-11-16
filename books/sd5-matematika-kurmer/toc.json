@@ -1,0 +1,47 @@
+[
+  {
+    "title": "Sampul Depan (Cover)",
+    "page": 1,
+    "children": []
+  },
+  {
+    "title": "Kata Pengantar & Prakata",
+    "page": 2,
+    "children": []
+  },
+  {
+    "title": "Petunjuk Penggunaan Buku",
+    "page": 3,
+    "children": []
+  },
+  {
+    "title": "Daftar Isi (Bab 1 - Bab 2)",
+    "page": 4,
+    "children": []
+  },
+  {
+    "title": "Pengantar Bab & Pemetaan Materi",
+    "page": 5,
+    "children": []
+  },
+  {
+    "title": "Halaman 6 (vi): Daftar Isi Bab 3 - Bab 6",
+    "page": 6,
+    "children": []
+  },
+  {
+    "title": "Halaman 7 (vii): Daftar Isi Bab 7 - Bab 9",
+    "page": 7,
+    "children": []
+  },
+  {
+    "title": "Halaman 8 (viii): Daftar Gambar (Bagian 1)",
+    "page": 8,
+    "children": []
+  },
+  {
+    "title": "Halaman 9 (ix): Daftar Gambar (Bagian 2)",
+    "page": 9,
+    "children": []
+  }
+]

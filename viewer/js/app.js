@@ -387,81 +387,99 @@ function renderStaticSpread(targetPage) {
 }
 
 /**
- * REALISTIC 60-FPS 3D PAGE-TURN & CURL PHYSICS ANIMATION
- * Uses dual-sided #turningLeaf with specular curl gradient & cast shadow
+ * GLITCH-FREE DIAGONAL PAPER FOLD & CYLINDRICAL CURL PHYSICS ENGINE
+ * Replicates the 4-layer mask + curled flap geometry of physical textbooks
  */
-function animateRealisticFlip(targetPage, direction) {
+async function animateRealisticFlip(targetPage, direction) {
   if (state.isFlipping) return;
   if (!state.isUnlocked) {
     checkPasswordProtectionGate();
     return;
   }
 
+  state.isFlipping = true;
+
+  // Ensure spread layout matches target mode if transitioning from single cover (page 1) to double spread
   const oldInfo = getSpreadPages(state.currentPage);
   const newInfo = getSpreadPages(targetPage);
 
-  // If spread layout mode changes (e.g. cover page 1 -> spread 2-3), still animate smoothly
-  const leaf = document.getElementById('turningLeaf');
-  const frontImg = document.getElementById('turningFrontImg');
-  const backImg = document.getElementById('turningBackImg');
-  const frontCurl = document.getElementById('turningFrontCurl');
-  const backCurl = document.getElementById('turningBackCurl');
-  const castShadow = document.getElementById('flipCastShadow');
+  if (oldInfo.mode !== newInfo.mode && newInfo.mode === 'double') {
+    const leftSlot = document.getElementById('leftPageSlot');
+    const rightSlot = document.getElementById('rightPageSlot');
+    const spread = document.getElementById('bookSpread');
+    const spine = document.getElementById('spineShadow');
+    const stage = document.getElementById('stageViewport');
+    const availW = stage.clientWidth - 104;
+    const availH = stage.clientHeight - 40;
+    const ratio = state.config ? state.config.pageRatio || 1.4142 : 1.4142;
+    let pageH = availH;
+    let pageW = Math.floor(pageH / ratio);
+    if (pageW * 2 > availW) {
+      pageW = Math.floor(availW / 2);
+      pageH = Math.floor(pageW * ratio);
+    }
+    leftSlot.style.display = 'block';
+    leftSlot.style.width = `${pageW}px`;
+    leftSlot.style.height = `${pageH}px`;
+    rightSlot.style.width = `${pageW}px`;
+    rightSlot.style.height = `${pageH}px`;
+    spread.style.width = `${pageW * 2}px`;
+    spread.style.height = `${pageH}px`;
+    spine.style.display = 'block';
+    state.pageW = pageW;
+    state.pageH = pageH;
+    document.getElementById('leftPageImg').src = getPageImageUrl(1);
+    document.getElementById('rightPageImg').src = getPageImageUrl(1);
+  }
 
-  state.isFlipping = true;
-  window.flipSound.playFlip();
+  const revealLayer = document.getElementById('flipRevealLayer');
+  const revealImg = document.getElementById('revealImg');
+  const revealShadow = document.getElementById('revealCreaseShadow');
+  const flapWrap = document.getElementById('flipCurlFlapWrap');
+  const flap = document.getElementById('flipCurlFlap');
+  const flapImg = document.getElementById('flapImg');
+  const rollShade = document.getElementById('flapRollShade');
 
   const w = state.pageW;
   const h = state.pageH;
-  const isDouble = oldInfo.mode === 'double' && newInfo.mode === 'double';
+  const isDouble = newInfo.mode === 'double' || oldInfo.mode === 'double';
 
-  leaf.style.width = `${w}px`;
-  leaf.style.height = `${h}px`;
-  castShadow.style.width = `${w}px`;
+  const incomingLeft = newInfo.mode === 'double' ? newInfo.left : newInfo.right;
+  const incomingRight = newInfo.right;
 
   if (direction === 'next') {
-    const outgoingRight = oldInfo.right;
-    const incomingLeft = newInfo.mode === 'double' ? newInfo.left : newInfo.right;
-    const incomingRight = newInfo.right;
-
-    frontImg.src = getPageImageUrl(outgoingRight);
-    backImg.src = getPageImageUrl(incomingLeft);
-
-    // Update underlying right slot immediately to show the destination page underneath the turning leaf
-    document.getElementById('rightPageImg').src = getPageImageUrl(incomingRight);
-
-    if (isDouble) {
-      leaf.style.left = `${w}px`;
-      leaf.style.transformOrigin = 'left center';
-      castShadow.style.left = `${w}px`;
-    } else {
-      leaf.style.left = `0px`;
-      leaf.style.transformOrigin = 'left center';
-      castShadow.style.left = `0px`;
-    }
+    revealImg.src = getPageImageUrl(incomingRight);
+    flapImg.src = getPageImageUrl(incomingLeft);
   } else {
-    const outgoingLeft = oldInfo.mode === 'double' ? oldInfo.left : oldInfo.right;
-    const incomingRight = newInfo.right;
-    const incomingLeft = newInfo.mode === 'double' ? newInfo.left : newInfo.right;
-
-    frontImg.src = getPageImageUrl(outgoingLeft);
-    backImg.src = getPageImageUrl(incomingRight);
-
-    if (isDouble) {
-      document.getElementById('leftPageImg').src = getPageImageUrl(incomingLeft);
-      leaf.style.left = `0px`;
-      leaf.style.transformOrigin = 'right center';
-      castShadow.style.left = `0px`;
-    } else {
-      document.getElementById('rightPageImg').src = getPageImageUrl(incomingLeft);
-      leaf.style.left = `0px`;
-      leaf.style.transformOrigin = 'left center';
-      castShadow.style.left = `0px`;
-    }
+    revealImg.src = getPageImageUrl(incomingLeft);
+    flapImg.src = getPageImageUrl(incomingRight);
   }
 
-  leaf.classList.add('active');
-  const duration = 560;
+  // Decode images before frame 1 to prevent any blank frame flicker
+  try {
+    await Promise.all([
+      revealImg.decode ? revealImg.decode().catch(() => {}) : Promise.resolve(),
+      flapImg.decode ? flapImg.decode().catch(() => {}) : Promise.resolve(),
+    ]);
+  } catch (e) {}
+
+  window.flipSound.playFlip();
+
+  revealLayer.style.width = `${w}px`;
+  revealLayer.style.height = `${h}px`;
+  revealLayer.style.left = direction === 'next' && isDouble ? `${w}px` : '0px';
+
+  flap.style.width = `${w}px`;
+  flap.style.height = `${h}px`;
+  flapWrap.style.filter =
+    direction === 'next'
+      ? 'drop-shadow(-14px 8px 20px rgba(0, 0, 0, 0.46))'
+      : 'drop-shadow(14px 8px 20px rgba(0, 0, 0, 0.46))';
+
+  revealLayer.classList.add('active');
+  flapWrap.classList.add('active');
+
+  const duration = 600;
   const startTime = performance.now();
 
   function easeInOutCubic(t) {
@@ -471,34 +489,66 @@ function animateRealisticFlip(targetPage, direction) {
   function stepFrame(now) {
     const rawT = Math.min(1, (now - startTime) / duration);
     const p = easeInOutCubic(rawT);
-    const sinArc = Math.sin(p * Math.PI); // peaks at 90 degrees (mid-turn)
+    const sinArc = Math.sin(p * Math.PI);
+    const slant = sinArc * (w * 0.13);
 
-    let angleDeg = 0;
-    let tiltZ = 0;
     if (direction === 'next') {
-      angleDeg = -180 * p;
-      tiltZ = sinArc * -2.2;
-    } else if (isDouble) {
-      angleDeg = 180 * p;
-      tiltZ = sinArc * 2.2;
+      const revealLocalX = w * (1 - p);
+      const rTop = Math.max(0, Math.min(w, revealLocalX + slant));
+      const rBot = Math.max(0, Math.min(w, revealLocalX - slant));
+      revealLayer.style.clipPath = `polygon(${rTop.toFixed(1)}px 0px, ${w}px 0px, ${w}px ${h}px, ${rBot.toFixed(1)}px ${h}px)`;
+
+      revealShadow.style.left = `${(revealLocalX - 6).toFixed(1)}px`;
+      revealShadow.style.transform = `rotate(${(sinArc * 4.8).toFixed(2)}deg)`;
+      revealShadow.style.opacity = (0.85 * sinArc).toFixed(2);
+
+      const leadX = isDouble ? 2 * w * (1 - p) : w * (1 - p) - w * 0.42 * sinArc;
+      const localFoldX = isDouble ? w * p : w * 0.42 * sinArc;
+      const fTop = Math.max(0, Math.min(w, localFoldX + slant));
+      const fBot = Math.max(0, Math.min(w, localFoldX - slant));
+      const tiltDeg = sinArc * 4.8;
+
+      flap.style.left = `${leadX.toFixed(1)}px`;
+      flap.style.transformOrigin = `${localFoldX.toFixed(1)}px 50%`;
+      flap.style.transform = `rotate(${tiltDeg.toFixed(2)}deg)`;
+      flap.style.clipPath = `polygon(0px 0px, ${fTop.toFixed(1)}px 0px, ${fBot.toFixed(1)}px ${h}px, 0px ${h}px)`;
+
+      rollShade.style.left = `${(localFoldX - 70).toFixed(1)}px`;
+      rollShade.style.opacity = (0.35 + 0.65 * sinArc).toFixed(2);
     } else {
-      angleDeg = -180 * (1 - p);
-      tiltZ = sinArc * 2.2;
+      const revealLocalX = w * p;
+      const rTop = Math.max(0, Math.min(w, revealLocalX - slant));
+      const rBot = Math.max(0, Math.min(w, revealLocalX + slant));
+      revealLayer.style.clipPath = `polygon(0px 0px, ${rTop.toFixed(1)}px 0px, ${rBot.toFixed(1)}px ${h}px, 0px ${h}px)`;
+
+      revealShadow.style.left = `${(revealLocalX - 75).toFixed(1)}px`;
+      revealShadow.style.transform = `rotate(${(-sinArc * 4.8).toFixed(2)}deg) scaleX(-1)`;
+      revealShadow.style.opacity = (0.85 * sinArc).toFixed(2);
+
+      const leadX = isDouble ? 2 * w * p - w : w * p - w * (1 - 0.42 * sinArc);
+      const localFoldX = isDouble ? w * (1 - p) : w * (1 - 0.42 * sinArc);
+      const fTop = Math.max(0, Math.min(w, localFoldX - slant));
+      const fBot = Math.max(0, Math.min(w, localFoldX + slant));
+      const tiltDeg = -sinArc * 4.8;
+
+      flap.style.left = `${leadX.toFixed(1)}px`;
+      flap.style.transformOrigin = `${localFoldX.toFixed(1)}px 50%`;
+      flap.style.transform = `rotate(${tiltDeg.toFixed(2)}deg)`;
+      flap.style.clipPath = `polygon(${fTop.toFixed(1)}px 0px, ${w}px 0px, ${w}px ${h}px, ${fBot.toFixed(1)}px ${h}px)`;
+
+      rollShade.style.left = `${localFoldX.toFixed(1)}px`;
+      rollShade.style.transform = 'scaleX(-1)';
+      rollShade.style.opacity = (0.35 + 0.65 * sinArc).toFixed(2);
     }
-
-    leaf.style.transform = `rotateY(${angleDeg.toFixed(2)}deg) skewY(${tiltZ.toFixed(2)}deg)`;
-    leaf.style.boxShadow = `${direction === 'next' ? -18 : 18}px 0 ${Math.round(38 * sinArc + 8)}px rgba(0,0,0,${(0.55 * sinArc).toFixed(2)})`;
-
-    if (frontCurl) frontCurl.style.opacity = (0.25 + 0.75 * sinArc).toFixed(2);
-    if (backCurl) backCurl.style.opacity = (0.25 + 0.75 * sinArc).toFixed(2);
-    castShadow.style.opacity = (0.65 * sinArc).toFixed(2);
 
     if (rawT < 1) {
       requestAnimationFrame(stepFrame);
     } else {
-      leaf.classList.remove('active');
-      leaf.style.transform = '';
-      castShadow.style.opacity = '0';
+      revealLayer.classList.remove('active');
+      flapWrap.classList.remove('active');
+      flap.style.transform = '';
+      flap.style.clipPath = '';
+      rollShade.style.transform = '';
       state.isFlipping = false;
       renderStaticSpread(targetPage);
     }

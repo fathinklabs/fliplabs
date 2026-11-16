@@ -3,6 +3,19 @@ let activeCategory = 'ALL';
 let activeTier = 'ALL';
 let searchKeyword = '';
 let currentUser = null;
+let pendingUploadAfterAuth = false;
+
+function triggerUploadBook() {
+  if (!currentUser) {
+    pendingUploadAfterAuth = true;
+    openAuthModal(
+      'register',
+      '🔒 Fitur Unggah Buku PDF hanya tersedia bagi pengguna yang sudah registrasi akun. Silakan daftar akun baru (atau masuk jika sudah punya akun) terlebih dahulu.'
+    );
+    return;
+  }
+  document.getElementById('uploadModal').classList.add('open');
+}
 
 function loadAuthSession() {
   try {
@@ -22,12 +35,24 @@ function loadAuthSession() {
       };
     } else {
       authBtn.innerHTML = '👤 Masuk / Daftar';
-      authBtn.onclick = () => openAuthModal('login');
+      authBtn.onclick = () => {
+        pendingUploadAfterAuth = false;
+        openAuthModal('login');
+      };
     }
   }
 }
 
-function openAuthModal(tab) {
+function openAuthModal(tab, requirementNotice) {
+  const banner = document.getElementById('authRequirementBanner');
+  if (banner) {
+    if (requirementNotice) {
+      banner.textContent = requirementNotice;
+      banner.style.display = 'block';
+    } else {
+      banner.style.display = 'none';
+    }
+  }
   switchAuthTab(tab || 'login');
   document.getElementById('authModal').classList.add('open');
 }
@@ -65,6 +90,10 @@ async function handleLogin(e) {
     loadAuthSession();
     document.getElementById('authModal').classList.remove('open');
     fetchBooks();
+    if (pendingUploadAfterAuth) {
+      pendingUploadAfterAuth = false;
+      document.getElementById('uploadModal').classList.add('open');
+    }
   } catch (err) {
     statusEl.textContent = '❌ ' + err.message;
   }
@@ -95,6 +124,10 @@ async function handleRegister(e) {
     loadAuthSession();
     document.getElementById('authModal').classList.remove('open');
     fetchBooks();
+    if (pendingUploadAfterAuth) {
+      pendingUploadAfterAuth = false;
+      document.getElementById('uploadModal').classList.add('open');
+    }
   } catch (err) {
     statusEl.textContent = '❌ ' + err.message;
   }
