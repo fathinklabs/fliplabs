@@ -148,6 +148,18 @@ def serve_bookcase_home():
     return FileResponse(str(BOOKCASE_DIR / "index.html"))
 
 
+@app.api_route("/pricing", methods=["GET", "HEAD"], response_class=HTMLResponse)
+@app.api_route("/fliphtml5-pricing.php", methods=["GET", "HEAD"], response_class=HTMLResponse)
+def serve_pricing_page():
+    return FileResponse(str(BOOKCASE_DIR / "pricing.html"))
+
+
+@app.api_route("/templates", methods=["GET", "HEAD"], response_class=HTMLResponse)
+@app.api_route("/templates/", methods=["GET", "HEAD"], response_class=HTMLResponse)
+def serve_templates_page():
+    return FileResponse(str(BOOKCASE_DIR / "templates.html"))
+
+
 @app.api_route("/admin", methods=["GET", "HEAD"], response_class=HTMLResponse)
 def serve_admin_portal():
     return FileResponse(str(ADMIN_DIR / "index.html"))

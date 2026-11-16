@@ -3,69 +3,198 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FlipLabs — Rak Buku Digital 3D Interaktif Labschool (books.labschool.xyz)</title>
-  <link rel="stylesheet" href="/bookcase/bookcase.css?v=2.2">
+  <title>FlipLabs — Interactive HTML5 Digital Publishing & 3D Flipbook Platform</title>
+  <link rel="stylesheet" href="/bookcase/bookcase.css?v=3.0">
 </head>
 <body>
 
-  <!-- Top Navbar -->
+  <!-- Top Navigation Bar (Matching Reference Structure) -->
   <nav class="navbar">
-    <div style="display:flex;align-items:center;gap:12px;">
-      <img src="/viewer/assets/branding/labschool-logo.svg" alt="FlipLabs" style="height:40px;">
+    <div class="nav-left">
+      <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+        <img src="/viewer/assets/branding/labschool-logo.svg" alt="FlipLabs" style="height:38px;">
+      </a>
+      <div class="nav-menu">
+        <a href="#features">Features ▾</a>
+        <a href="#explore">Explore</a>
+        <a href="/templates">Templates ▾</a>
+        <a href="#ai-lab">AI Lab ▾</a>
+        <a href="#solutions">Solutions ▾</a>
+        <a href="/pricing">Pricing</a>
+      </div>
     </div>
+
     <div class="nav-actions">
-      <button class="btn" onclick="document.getElementById('licenseModal').classList.add('open')">
-        💎 Paket Lisensi
-      </button>
       <button class="btn" onclick="openEmbedShelf()">
-        🔗 Embed Rak Buku
-      </button>
-      <button class="btn btn-primary" onclick="triggerUploadBook()">
-        ➕ Unggah PDF Baru
+        🔗 Embed Rak
       </button>
       <a href="/admin" class="btn" id="navAdminBtn" style="display:none;">
         ⚙️ Panel Manajemen
       </a>
       <button id="navAuthBtn" class="btn" onclick="openAuthModal('login')">
-        👤 Masuk / Daftar
+        Sign in
+      </button>
+      <button class="btn btn-primary" onclick="triggerUploadBook()">
+        Try for Free (Upload PDF)
       </button>
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <span class="hero-tag">PLATFORM E-BOOK 3D MANDIRI • BOOKS.LABSCHOOL.XYZ</span>
-    <h1>Perpustakaan & Rak Buku Digital 3D Labschool</h1>
-    <p>
-      Platform e-book interaktif mandiri dengan teknologi pembalik halaman 3D realistis, proteksi kata sandi dokumen,
-      pencarian rumus & teks instan, anotasi stabilo pembelajaran, serta asisten AI kurikulum terintegrasi.
-    </p>
+  <!-- Hero Split Section -->
+  <section class="landing-hero">
+    <div>
+      <span class="hero-tag">✨ INTERACTIVE HTML5 DIGITAL PUBLISHING PLATFORM</span>
+      <h1>Make a Flipbook with Ease — <span>Ubah PDF Jadi Buku 3D Interaktif</span></h1>
+      <p>
+        Konversi dokumen PDF, Buku Paket Kurikulum Merdeka, Modul Praktikum, dan Majalah Sekolah
+        menjadi Flipbook 3D realistis dengan efek lipatan halaman, pencarian rumus instan,
+        stabilo pembelajaran, proteksi kata sandi, dan AI Tutor.
+      </p>
+      <div class="hero-cta-row">
+        <button class="btn btn-primary" style="padding:13px 26px;font-size:15px;" onclick="triggerUploadBook()">
+          📤 Upload PDF (Try for Free)
+        </button>
+        <a href="/templates" class="btn" style="padding:13px 22px;font-size:15px;">
+          🎨 Explore Templates
+        </a>
+        <a href="/pricing" class="btn" style="padding:13px 22px;font-size:15px;">
+          💎 View Pricing
+        </a>
+      </div>
+      <div class="hero-trust-row">
+        <span>⚡ Konversi Multi-Tier WebP Instan</span>
+        <span>🔒 Proteksi Sandi & Domain Lock</span>
+        <span>🤖 AI Book Tutor Terintegrasi</span>
+      </div>
+    </div>
+
+    <!-- Live Interactive 3D Flipbook Preview Stage -->
+    <div class="hero-preview-frame">
+      <div class="frame-topbar">
+        <div class="frame-dots">
+          <i style="background:#ef4444;"></i>
+          <i style="background:#f59e0b;"></i>
+          <i style="background:#10b981;"></i>
+        </div>
+        <span>Live 3D Interactive Demo — Buku Siswa Matematika Kurikulum Merdeka</span>
+        <a href="/view/sd5-matematika-kurmer#p=6" style="color:#38bdf8;text-decoration:none;font-weight:700;">Layar Penuh ↗</a>
+      </div>
+      <iframe src="/view/sd5-matematika-kurmer#p=6" width="100%" height="410" frameborder="0" allowfullscreen></iframe>
+    </div>
   </section>
 
-  <!-- Filter & Search Controls -->
-  <section class="filter-bar">
-    <div class="filter-pills">
-      <button class="pill active" data-cat="ALL">Semua Kategori</button>
-      <button class="pill" data-cat="SMP Kelas 8">SMP Kelas 8</button>
-      <button class="pill" data-cat="Panduan Umum">Panduan Umum</button>
-    </div>
-
-    <div class="filter-pills">
-      <button class="pill active" data-tier="ALL">Semua Plan</button>
-      <button class="pill" data-tier="enterprise">Enterprise</button>
-      <button class="pill" data-tier="pro">Pro</button>
-      <button class="pill" data-tier="basic">Basic</button>
-    </div>
-
-    <div class="search-box">
-      <input id="shelfSearch" type="text" placeholder="🔍 Cari judul buku, mata pelajaran, atau penulis...">
+  <!-- 4-Step How It Works -->
+  <section id="solutions" class="steps-section">
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <h3>Upload Dokumen PDF</h3>
+        <p>Unggah file PDF buku paket, LKPD, atau modul. Sistem otomatis memecah halaman ke multi-resolusi WebP.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <h3>Pilih Template & Branding</h3>
+        <p>Gunakan tema Metro 3D, ekstrak Daftar Isi (TOC) otomatis, dan sematkan identitas logo sekolah.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <h3>Proteksi Sandi & AI Tutor</h3>
+        <p>Aktifkan kata sandi buku rahasia, stabilo catatan siswa, serta asisten tanya-jawab AI per halaman.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">4</div>
+        <h3>Share & Embed ke LMS</h3>
+        <p>Bagikan tautan langsung `#p=1` atau sematkan `<iframe ...>` Rak Buku 3D ke Moodle LMS Labschool.</p>
+      </div>
     </div>
   </section>
 
-  <!-- 3D Virtual Bookshelf -->
-  <main class="bookcase-container">
-    <div id="shelfGrid" class="shelf-row"></div>
-  </main>
+  <!-- Explore Virtual Bookcase Section -->
+  <section id="explore">
+    <div class="section-head">
+      <h2>Explore Interactive 3D Virtual Bookcase</h2>
+      <p>Jelajahi katalog buku digital Kurikulum Merdeka, modul praktikum laboratorium, dan panduan siswa.</p>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-pills">
+        <button class="pill active" data-cat="ALL">Semua Kategori</button>
+        <button class="pill" data-cat="SMP Kelas 8">SMP Kelas 8</button>
+        <button class="pill" data-cat="Panduan Umum">Panduan Umum</button>
+      </div>
+
+      <div class="filter-pills">
+        <button class="pill active" data-tier="ALL">Semua Plan</button>
+        <button class="pill" data-tier="enterprise">Enterprise</button>
+        <button class="pill" data-tier="pro">Pro</button>
+        <button class="pill" data-tier="basic">Basic</button>
+      </div>
+
+      <div class="search-box">
+        <input id="shelfSearch" type="text" placeholder="🔍 Cari judul buku, mata pelajaran, atau penulis...">
+      </div>
+    </div>
+
+    <main class="bookcase-container">
+      <div id="shelfGrid" class="shelf-row"></div>
+    </main>
+  </section>
+
+  <!-- Core Features & AI Lab Section -->
+  <section id="features" class="features-section">
+    <div class="section-head" id="ai-lab">
+      <h2>Powerful Features for Modern Digital Publishing</h2>
+      <p>Dirancang khusus untuk kebutuhan akademik, perpustakaan digital sekolah, dan publikasi interaktif.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">📖</div>
+        <h3>4-Layer Diagonal Paper Curl</h3>
+        <p>Animasi lipatan kertas 3D realistis 60 FPS lengkap dengan efek suara lembaran kertas Web Audio API dan bayangan silinder.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔍</div>
+        <h3>Full-Text OCR & Yellow Highlight</h3>
+        <p>Cari kata kunci atau rumus matematika di ratusan halaman secara instan dengan penanda sorot kuning otomatis di lokasi kata.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔒</div>
+        <h3>Password Protected Books & DRM</h3>
+        <p>Kunci buku ujian atau modul eksklusif dengan kata sandi terenkripsi, pembatasan domain iframe, dan watermark dinamis.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🖍️</div>
+        <h3>Highlighter, Notes & FlipShot</h3>
+        <p>Siswa dan guru dapat memberi stabilo kuning, coretan pena, menandai halaman penting, dan mengunduh potongan gambar FlipShot.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🤖</div>
+        <h3>AI Book Tutor (RAG Context)</h3>
+        <p>Tanyakan isi bab atau rumus langsung pada asisten AI di panel samping yang menjawab lengkap dengan rujukan nomor halaman.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🎨</div>
+        <h3>90+ Templates & Virtual Shelf</h3>
+        <p>Koleksi template siap pakai untuk buku paket, LKPD, majalah sekolah, dan rak buku 3D yang siap di-embed ke Moodle LMS.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <img src="/viewer/assets/branding/labschool-logo.svg" alt="FlipLabs" style="height:34px;">
+        <span style="font-size:13px;color:var(--text-dim);">© 2026 FlipLabs Digital Publishing Platform • books.labschool.xyz</span>
+      </div>
+      <div style="display:flex;gap:20px;font-size:13.5px;">
+        <a href="/" style="color:#cbd5e1;text-decoration:none;">Home</a>
+        <a href="/templates" style="color:#cbd5e1;text-decoration:none;">Templates</a>
+        <a href="/pricing" style="color:#cbd5e1;text-decoration:none;">Pricing</a>
+        <a href="#explore" style="color:#cbd5e1;text-decoration:none;">Explore Bookcase</a>
+      </div>
+    </div>
+  </footer>
 
   <!-- Login & Registration Modal -->
   <div id="authModal" class="modal-overlay">
@@ -77,7 +206,6 @@
 
       <div id="authRequirementBanner" style="display:none;margin-bottom:14px;padding:10px 12px;border-radius:9px;background:rgba(234,179,8,0.14);border:1px solid rgba(234,179,8,0.4);color:#fde047;font-size:12px;line-height:1.45;"></div>
 
-      <!-- Auth Mode Switcher Tabs -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
         <button id="tabBtnLogin" class="btn btn-primary" style="justify-content:center;" onclick="switchAuthTab('login')">Masuk (Login)</button>
         <button id="tabBtnRegister" class="btn" style="justify-content:center;" onclick="switchAuthTab('register')">Daftar Baru</button>
@@ -210,37 +338,6 @@
     </div>
   </div>
 
-  <!-- License Comparison Modal -->
-  <div id="licenseModal" class="modal-overlay">
-    <div class="modal-box" style="max-width:680px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <h3>💎 Matriks Lisensi Fitur FlipLabs</h3>
-        <button class="btn" style="padding:4px 10px;" onclick="document.getElementById('licenseModal').classList.remove('open')">✕</button>
-      </div>
-      <table class="license-table">
-        <thead>
-          <tr>
-            <th>Fitur Viewer & Platform</th>
-            <th>BASIC</th>
-            <th>PRO</th>
-            <th>ENTERPRISE</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>3D Page Flip + Efek Suara Kertas</td><td>✅ Ya</td><td>✅ Ya</td><td>✅ Ya</td></tr>
-          <tr><td>Daftar Isi (TOC) & Galeri Thumbnail</td><td>✅ Ya</td><td>✅ Ya</td><td>✅ Ya</td></tr>
-          <tr><td>Full-Text Search + Sorot Kata Kuning</td><td>✅ Ya</td><td>✅ Ya</td><td>✅ Ya</td></tr>
-          <tr><td>Proteksi Buku dengan Kata Sandi</td><td>❌ Tidak</td><td>✅ Aktif</td><td>✅ Aktif</td></tr>
-          <tr><td>Stabilo, Pena Coretan & Penanda Buku</td><td>❌ Terkunci</td><td>✅ Aktif</td><td>✅ Aktif</td></tr>
-          <tr><td>FlipShot (Potong Gambar Halaman PNG)</td><td>❌ Terkunci</td><td>✅ Aktif</td><td>✅ Aktif</td></tr>
-          <tr><td>Download PDF Asli & Cetak Dokumen</td><td>❌ Dinonaktifkan</td><td>✅ Aktif</td><td>✅ Aktif + DRM</td></tr>
-          <tr><td>AI Book Tutor (Tanya Jawab Isi Buku)</td><td>❌ Terkunci</td><td>❌ Terkunci</td><td>✅ Aktif (Unlimited)</td></tr>
-          <tr><td>Domain Whitelist Lock (*.labschool.xyz)</td><td>❌ Publik</td><td>🟡 Standar</td><td>✅ Ketat + Watermark</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <script src="/bookcase/bookcase.js?v=2.5"></script>
+  <script src="/bookcase/bookcase.js?v=3.0"></script>
 </body>
 </html>

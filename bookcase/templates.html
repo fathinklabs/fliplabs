@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flipbook Templates Gallery | FlipLabs</title>
+  <style>
+    :root {
+      --text-dark: #1e293b;
+      --text-muted: #64748b;
+      --blue-primary: #0088ff;
+      --border-light: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8fafc;
+      color: var(--text-dark);
+      min-height: 100vh;
+    }
+
+    /* Top Header Navigation */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border-light);
+      height: 68px;
+      padding: 0 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 38px;
+    }
+    .brand-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #0f172a;
+      font-weight: 900;
+      font-size: 20px;
+    }
+    .brand-icon {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, #0088ff, #1e40af);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 18px;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 26px;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: #334155;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .nav-links a:hover, .nav-links a.active {
+      color: var(--blue-primary);
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .sign-in-link {
+      text-decoration: none;
+      color: #1e293b;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .btn-try-free {
+      background: var(--blue-primary);
+      color: #ffffff;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    /* Templates Hero Banner */
+    .templates-hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #0284c7 100%);
+      color: #ffffff;
+      padding: 60px 24px 54px;
+      text-align: center;
+    }
+    .templates-hero h1 {
+      font-size: 38px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+    .templates-hero p {
+      font-size: 15.5px;
+      color: #cbd5e1;
+      max-width: 680px;
+      margin: 0 auto 28px;
+      line-height: 1.6;
+    }
+    .search-bar-wrap {
+      max-width: 620px;
+      margin: 0 auto;
+      position: relative;
+      display: flex;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 6px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25);
+    }
+    .search-bar-wrap input {
+      flex: 1;
+      border: none;
+      padding: 12px 16px;
+      font-size: 14.5px;
+      outline: none;
+      color: #0f172a;
+      border-radius: 8px;
+    }
+    .search-bar-wrap button {
+      background: var(--blue-primary);
+      color: #fff;
+      border: none;
+      padding: 0 24px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Main Content Layout (Sidebar + Grid) */
+    .templates-layout {
+      max-width: 1280px;
+      margin: 36px auto 80px;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 30px;
+    }
+
+    /* Category Sidebar */
+    .sidebar-box {
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 20px;
+      height: fit-content;
+      position: sticky;
+      top: 88px;
+    }
+    .sidebar-title {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .cat-btn {
+      width: 100%;
+      text-align: left;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: #334155;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      transition: all 0.15s;
+    }
+    .cat-btn:hover, .cat-btn.active {
+      background: rgba(0, 136, 255, 0.1);
+      color: var(--blue-primary);
+    }
+
+    /* Top Filter Bar & Grid */
+    .grid-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .tier-tabs {
+      display: flex;
+      gap: 8px;
+    }
+    .tier-tab {
+      padding: 7px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border-light);
+      background: #ffffff;
+      color: #475569;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .tier-tab.active {
+      background: var(--blue-primary);
+      color: #ffffff;
+      border-color: var(--blue-primary);
+    }
+
+    .templates-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px;
+    }
+
+    .tpl-card {
+      background: #ffffff;
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: transform 0.24s ease, box-shadow 0.24s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .tpl-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.1);
+    }
+
+    .tpl-preview {
+      height: 250px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+      overflow: hidden;
+    }
+    .tpl-book-mock {
+      width: 142px;
+      height: 198px;
+      border-radius: 3px 6px 6px 3px;
+      box-shadow: -8px 10px 22px rgba(0,0,0,0.35);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 14px;
+      color: #fff;
+      transition: transform 0.3s ease;
+    }
+    .tpl-card:hover .tpl-book-mock {
+      transform: scale(1.05) rotateY(-8deg);
+    }
+    .tpl-book-mock::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      bottom: 2px;
+      right: -5px;
+      width: 5px;
+      background: repeating-linear-gradient(to right, #f8fafc 0px, #cbd5e1 1px, #fff 2px);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .tpl-hover-actions {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(3px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      opacity: 0;
+      transition: opacity 0.22s ease;
+    }
+    .tpl-card:hover .tpl-hover-actions {
+      opacity: 1;
+    }
+    .tpl-btn {
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 700;
+      text-decoration: none;
+      width: 165px;
+      text-align: center;
+      cursor: pointer;
+      border: none;
+    }
+    .tpl-btn.use { background: var(--blue-primary); color: #fff; }
+    .tpl-btn.preview { background: #ffffff; color: #0f172a; }
+
+    .tpl-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      color: #fff;
+      z-index: 4;
+    }
+    .tpl-badge.free { background: #475569; }
+    .tpl-badge.pro { background: #00bcd4; }
+    .tpl-badge.enterprise { background: #6c47ff; }
+
+    .tpl-info {
+      padding: 16px 18px;
+      border-top: 1px solid var(--border-light);
+    }
+    .tpl-info h3 {
+      font-size: 14.5px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #0f172a;
+    }
+    .tpl-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 920px) {
+      .templates-layout { grid-template-columns: 1fr; }
+      .sidebar-box { position: static; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header class="site-header">
+    <div class="header-left">
+      <a href="/" class="brand-link">
+        <div class="brand-icon">📖</div>
+        <span>FLIPLABS</span>
+      </a>
+      <nav class="nav-links">
+        <a href="/#features">Features ▾</a>
+        <a href="/#explore">Explore</a>
+        <a href="/templates" class="active">Templates ▾</a>
+        <a href="/#ai-lab">AI Lab ▾</a>
+        <a href="/#solutions">Solutions ▾</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="header-right">
+      <a href="/#login" class="sign-in-link">Sign in</a>
+      <a href="/#upload" class="btn-try-free">Try for Free</a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="templates-hero">
+    <h1>Explore Customizable 3D Flipbook Templates</h1>
+    <p>
+      Pilih dari berbagai desain template siap pakai untuk Buku Paket Kurikulum Merdeka, Modul Praktikum,
+      LKPD, Majalah Sekolah, Brosur PSB, hingga Laporan Akademik.
+    </p>
+    <div class="search-bar-wrap">
+      <input id="tplSearchInput" type="text" placeholder="Cari template (misal: Matematika, Modul IPA, Majalah, Brosur PSB)...">
+      <button onclick="renderTemplates()">Search</button>
+    </div>
+  </section>
+
+  <!-- Main Content Layout -->
+  <main class="templates-layout">
+    <!-- Left Category Sidebar -->
+    <aside class="sidebar-box">
+      <div class="sidebar-title">Categories</div>
+      <button class="cat-btn active" data-cat="ALL"><span>📚 All Templates</span><span>12</span></button>
+      <button class="cat-btn" data-cat="Textbook"><span>📘 Buku Paket & Kurikulum</span><span>4</span></button>
+      <button class="cat-btn" data-cat="Lab Module"><span>🔬 Modul Praktikum & LKPD</span><span>3</span></button>
+      <button class="cat-btn" data-cat="Magazine"><span>📰 Majalah & Buku Tahunan</span><span>2</span></button>
+      <button class="cat-btn" data-cat="Brochure"><span>🎓 Brosur PSB & Profil</span><span>2</span></button>
+      <button class="cat-btn" data-cat="Handbook"><span>📋 Buku Saku & Panduan</span><span>1</span></button>
+    </aside>
+
+    <!-- Right Templates Grid -->
+    <section>
+      <div class="grid-header">
+        <div style="font-size:14px;font-weight:700;color:#334155;" id="tplCountLabel">Showing 12 Templates</div>
+        <div class="tier-tabs">
+          <button class="tier-tab active" data-tier="ALL">All Plans</button>
+          <button class="tier-tab" data-tier="free">Free</button>
+          <button class="tier-tab" data-tier="pro">Pro</button>
+          <button class="tier-tab" data-tier="enterprise">Enterprise</button>
+        </div>
+      </div>
+
+      <div id="templatesGrid" class="templates-grid"></div>
+    </section>
+  </main>
+
+  <script>
+    const TEMPLATES = [
+      {
+        id: 'tpl-math-smp8',
+        title: 'Buku Paket Matematika SMP Kelas VIII',
+        category: 'Textbook',
+        pages: '12 Hal',
+        tier: 'enterprise',
+        bg: 'linear-gradient(135deg, #1e293b, #0f172a)',
+        coverGrad: 'linear-gradient(135deg, #0284c7, #1e3a8a)',
+        badgeText: 'KURIKULUM MERDEKA',
+        demoBookId: 'smp8-matematika',
+      },
+      {
+        id: 'tpl-math-sd5',
+        title: 'Buku Siswa Matematika Kelas V SD/SMP',
+        category: 'Textbook',
+        pages: '9 Hal',
+        tier: 'enterprise',
+        bg: 'linear-gradient(135deg, #eff6ff, #dbeafe)',
+        coverGrad: 'linear-gradient(135deg, #0369a1, #ea580c)',
+        badgeText: 'KEMENDIKBUD',
+        demoBookId: 'sd5-matematika-kurmer',
+      },
+      {
+        id: 'tpl-ipa-lab',
+        title: 'Modul Praktikum IPA Terpadu & Laboratorium',
+        category: 'Lab Module',
+        pages: '4 Hal',
+        tier: 'pro',
+        bg: 'linear-gradient(135deg, #ecfdf5, #d1fae5)',
+        coverGrad: 'linear-gradient(135deg, #059669, #064e3b)',
+        badgeText: 'SAINS & LAB',
+        demoBookId: 'smp8-ipa-terpadu',
+      },
+      {
+        id: 'tpl-literasi-saku',
+        title: 'Buku Saku Literasi Digital & Etika Siswa',
+        category: 'Handbook',
+        pages: '2 Hal',
+        tier: 'free',
+        bg: 'linear-gradient(135deg, #f5f3ff, #ede9fe)',
+        coverGrad: 'linear-gradient(135deg, #7c3aed, #4c1d95)',
+        badgeText: 'BUKU SAKU',
+        demoBookId: 'panduan-literasi-digital',
+      },
+      {
+        id: 'tpl-lkpd-fisika',
+        title: 'LKPD Interaktif Fisika & Eksperimen STEM',
+        category: 'Lab Module',
+        pages: '16 Hal',
+        tier: 'pro',
+        bg: 'linear-gradient(135deg, #f0f9ff, #e0f2fe)',
+        coverGrad: 'linear-gradient(135deg, #0ea5e9, #2563eb)',
+        badgeText: 'LKPD STEM',
+        demoBookId: 'smp8-ipa-terpadu',
+      },
+      {
+        id: 'tpl-majalah-labs',
+        title: 'Majalah Digital Siswa & Buletin Labschool',
+        category: 'Magazine',
+        pages: '24 Hal',
+        tier: 'pro',
+        bg: 'linear-gradient(135deg, #fff1f2, #ffe4e6)',
+        coverGrad: 'linear-gradient(135deg, #e11d48, #881337)',
+        badgeText: 'E-MAGAZINE',
+        demoBookId: 'smp8-matematika',
+      },
+      {
+        id: 'tpl-psb-brochure',
+        title: 'Brosur Penerimaan Siswa Baru (PSB Labschool)',
+        category: 'Brochure',
+        pages: '8 Hal',
+        tier: 'enterprise',
+        bg: 'linear-gradient(135deg, #fefce8, #fef08a)',
+        coverGrad: 'linear-gradient(135deg, #ca8a04, #713f12)',
+        badgeText: 'BROSUR PSB',
+        demoBookId: 'panduan-literasi-digital',
+      },
+      {
+        id: 'tpl-biologi-atlas',
+        title: 'Atlas Visual Biologi Sel & Anatomi',
+        category: 'Textbook',
+        pages: '20 Hal',
+        tier: 'pro',
+        bg: 'linear-gradient(135deg, #f0fdf4, #dcfce7)',
+        coverGrad: 'linear-gradient(135deg, #16a34a, #14532d)',
+        badgeText: 'ATLAS VISUAL',
+        demoBookId: 'smp8-ipa-terpadu',
+      },
+      {
+        id: 'tpl-yearbook',
+        title: 'Buku Tahunan Angkatan (Yearbook 3D)',
+        category: 'Magazine',
+        pages: '40 Hal',
+        tier: 'enterprise',
+        bg: 'linear-gradient(135deg, #faf5ff, #f3e8ff)',
+        coverGrad: 'linear-gradient(135deg, #9333ea, #3b0764)',
+        badgeText: 'YEARBOOK',
+        demoBookId: 'smp8-matematika',
+      },
+      {
+        id: 'tpl-modul-bahasa',
+        title: 'Modul Bahasa Inggris & Audio Listening',
+        category: 'Textbook',
+        pages: '14 Hal',
+        tier: 'free',
+        bg: 'linear-gradient(135deg, #eff6ff, #e0e7ff)',
+        coverGrad: 'linear-gradient(135deg, #4f46e5, #1e1b4b)',
+        badgeText: 'LANGUAGE',
+        demoBookId: 'sd5-matematika-kurmer',
+      },
+      {
+        id: 'tpl-profil-sekolah',
+        title: 'Katalog Profil & Prestasi Akademik Sekolah',
+        category: 'Brochure',
+        pages: '10 Hal',
+        tier: 'free',
+        bg: 'linear-gradient(135deg, #f8fafc, #e2e8f0)',
+        coverGrad: 'linear-gradient(135deg, #334155, #0f172a)',
+        badgeText: 'COMPANY PROFILE',
+        demoBookId: 'panduan-literasi-digital',
+      },
+      {
+        id: 'tpl-kimia-praktikum',
+        title: 'Panduan Keselamatan & Modul Kimia Dasar',
+        category: 'Lab Module',
+        pages: '12 Hal',
+        tier: 'pro',
+        bg: 'linear-gradient(135deg, #ecfeff, #cffafe)',
+        coverGrad: 'linear-gradient(135deg, #0891b2, #164e63)',
+        badgeText: 'LAB SAFETY',
+        demoBookId: 'smp8-ipa-terpadu',
+      },
+    ];
+
+    let activeCat = 'ALL';
+    let activeTier = 'ALL';
+
+    function renderTemplates() {
+      const q = (document.getElementById('tplSearchInput').value || '').toLowerCase();
+      const grid = document.getElementById('templatesGrid');
+      grid.innerHTML = '';
+
+      const filtered = TEMPLATES.filter((t) => {
+        const matchCat = activeCat === 'ALL' || t.category === activeCat;
+        const matchTier = activeTier === 'ALL' || t.tier === activeTier;
+        const matchQ = !q || t.title.toLowerCase().includes(q) || t.category.toLowerCase().includes(q) || t.badgeText.toLowerCase().includes(q);
+        return matchCat && matchTier && matchQ;
+      });
+
+      document.getElementById('tplCountLabel').textContent = `Showing ${filtered.length} Templates`;
+
+      filtered.forEach((t) => {
+        const card = document.createElement('div');
+        card.className = 'tpl-card';
+        card.innerHTML = `
+          <div class="tpl-preview" style="background:${t.bg};">
+            <span class="tpl-badge ${t.tier}">${t.tier}</span>
+            <div class="tpl-book-mock" style="background:${t.coverGrad};">
+              <div style="font-size:8px;font-weight:800;letter-spacing:0.8px;opacity:0.85;">${t.badgeText}</div>
+              <div style="font-size:13px;font-weight:800;line-height:1.25;">${t.title}</div>
+              <div style="font-size:9px;opacity:0.8;">FLIPLABS TEMPLATE</div>
+            </div>
+            <div class="tpl-hover-actions">
+              <a href="/#upload" class="tpl-btn use">✨ Use Template</a>
+              <a href="/view/${t.demoBookId}#p=1" class="tpl-btn preview">👁 Live 3D Preview</a>
+            </div>
+          </div>
+          <div class="tpl-info">
+            <h3>${t.title}</h3>
+            <div class="tpl-meta">
+              <span>${t.category}</span>
+              <span><b>${t.pages}</b> • Metro 3D</span>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    document.querySelectorAll('.cat-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.cat-btn').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeCat = btn.dataset.cat;
+        renderTemplates();
+      });
+    });
+
+    document.querySelectorAll('.tier-tab').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tier-tab').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeTier = btn.dataset.tier;
+        renderTemplates();
+      });
+    });
+
+    document.getElementById('tplSearchInput').addEventListener('input', renderTemplates);
+    renderTemplates();
+  </script>
+</body>
+</html>

@@ -287,6 +287,16 @@ document.addEventListener('DOMContentLoaded', () => {
   loadAuthSession();
   fetchBooks();
 
+  // Check URL hash triggers from /pricing or /templates
+  const h = window.location.hash.toLowerCase();
+  if (h === '#login') {
+    openAuthModal('login');
+  } else if (h === '#register') {
+    openAuthModal('register');
+  } else if (h === '#upload') {
+    triggerUploadBook();
+  }
+
   document.querySelectorAll('.pill[data-cat]').forEach((btn) => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.pill[data-cat]').forEach((b) => b.classList.remove('active'));
