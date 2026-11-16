@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  fliplabs-dev:
+    build:
+      context: .
+      dockerfile: Containerfile
+    image: fliplabs:dev
+    container_name: fliplabs-dev
+    ports:
+      - "8090:8080"
+    volumes:
+      - ./viewer:/app/viewer
+      - ./bookcase:/app/bookcase
+      - ./converter:/app/converter
+      - ./server:/app/server
+      - ./books:/app/books
+    environment:
+      - ENV=development
+      - APP_DOMAIN=http://localhost:8090
+    restart: unless-stopped

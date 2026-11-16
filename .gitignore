@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Node
+node_modules/
+
+# Environment & Secrets
+.env
+*.pem
+*.key
+
+# Temporary conversion files
+raw_pages/
+server/uploads/*.pdf
+*.tmp
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

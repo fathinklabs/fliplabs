@@ -1,0 +1,61 @@
+{
+  "id": "smp8-matematika",
+  "title": "Buku Paket Matematika SMP Kelas VIII (8) Kurikulum Merdeka",
+  "subtitle": "Aljabar, Koordinat Kartesius, Pythagoras, Lingkaran & Bangun Ruang",
+  "author": "Tim Guru Matematika SMP Labschool",
+  "category": "SMP Kelas 8",
+  "subject": "Matematika",
+  "licenseTier": "enterprise",
+  "totalPageCount": 12,
+  "pageWidth": 1414,
+  "pageHeight": 2000,
+  "pageRatio": 1.4144,
+  "createdAt": "2026-11-16T03:18:04.874058+00:00",
+  "conversionSeconds": 2.13,
+  "theme": {
+    "mode": "metro-dark",
+    "toolbarColor": "#1e222d",
+    "iconColor": "#f1f5f9",
+    "accentColor": "#0ea5e9",
+    "backgroundColor": "#11141c",
+    "backgroundGradient": "radial-gradient(circle at center, #1e293b 0%, #0f172a 100%)"
+  },
+  "branding": {
+    "logoText": "LABSCHOOL DIGITAL LIBRARY",
+    "logoUrl": "/viewer/assets/branding/labschool-logo.svg",
+    "linkUrl": "https://books.labschool.xyz",
+    "showLogo": true,
+    "watermarkText": "LABSCHOOL DIGITAL LIBRARY • ENTERPRISE EDITION"
+  },
+  "features": {
+    "enableFlipSound": true,
+    "enableBackgroundSound": true,
+    "enableDownload": true,
+    "enablePrint": true,
+    "enableSearch": true,
+    "enableBookmarks": true,
+    "enableAnnotations": true,
+    "enableFlipShot": true,
+    "enableThumbnails": true,
+    "enableTOC": true,
+    "enableAutoPlay": true,
+    "enableShare": true,
+    "enableMagnifier": true,
+    "enableAIQuery": true,
+    "downloadUrl": "/books/smp8-matematika/files/book.pdf",
+    "autoPlayDuration": 4
+  },
+  "security": {
+    "isPasswordProtected": false,
+    "password": "",
+    "disableRightClick": true,
+    "allowedDomains": [
+      "books.labschool.xyz",
+      "study.labschool.xyz",
+      "lms.labschool.xyz",
+      "labschool.sch.id",
+      "localhost",
+      "127.0.0.1"
+    ]
+  }
+}

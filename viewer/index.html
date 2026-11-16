@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>FlipLabs — Labschool Interactive PDF Book Viewer</title>
+  <link rel="stylesheet" href="/viewer/css/viewer.css">
+</head>
+<body>
+
+  <!-- Top Header Bar -->
+  <header class="top-bar">
+    <div class="brand-group">
+      <a href="/" title="Kembali ke Rak Buku Digital">
+        <img src="/viewer/assets/branding/labschool-logo.svg" alt="FlipLabs" class="brand-logo">
+      </a>
+      <div class="book-title-wrap">
+        <div id="bookTitle" class="book-title">Memuat Buku Digital...</div>
+        <div id="bookSubtitle" class="book-subtitle">Labschool Digital Library</div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <!-- Live License Tier Switcher -->
+      <select id="tierSwitcher" class="top-btn" title="Uji Mode Lisensi Fitur (Basic / Pro / Enterprise)" style="background:#0f172a;">
+        <option value="basic">Simulasi: BASIC</option>
+        <option value="pro">Simulasi: PRO</option>
+        <option value="enterprise" selected>Simulasi: ENTERPRISE</option>
+      </select>
+      <span id="licenseBadge" class="license-badge enterprise">PLAN: ENTERPRISE</span>
+      <a href="/" class="top-btn" title="Buka Lemari Rak Buku">
+        📚 Rak Buku
+      </a>
+    </div>
+  </header>
+
+  <!-- Floating Annotation Toolbar -->
+  <div id="annotationBar" class="annotation-bar">
+    <button class="anno-chip active" data-tool="highlighter">🖍 Stabilo Kuning</button>
+    <button class="anno-chip" data-tool="pen">🖊 Pena Merah</button>
+    <button class="anno-chip" data-tool="eraser">🧹 Penghapus</button>
+    <button id="btnClearAnno" class="anno-chip" style="background:#991b1b;">Hapus Semua</button>
+  </div>
+
+  <!-- Left Drawers: TOC, Search, Bookmarks -->
+  <aside id="tocDrawer" class="side-drawer">
+    <div class="drawer-header">
+      <span>📑 Daftar Isi (Table of Contents)</span>
+      <button class="drawer-close" onclick="toggleDrawer('tocDrawer', false)">✕</button>
+    </div>
+    <div id="tocList" class="drawer-body"></div>
+  </aside>
+
+  <aside id="searchDrawer" class="side-drawer">
+    <div class="drawer-header">
+      <span>🔍 Pencarian Teks & Rumus</span>
+      <button class="drawer-close" onclick="toggleDrawer('searchDrawer', false)">✕</button>
+    </div>
+    <div class="drawer-body">
+      <div class="search-input-wrap">
+        <input id="searchInput" type="text" class="drawer-input" placeholder="Cari kata kunci (mis: Pythagoras, gradien, sel)...">
+      </div>
+      <div id="searchResults">
+        <div style="color:var(--text-muted);font-size:12.5px;padding:8px;">
+          Ketik minimal 2 huruf untuk mencari teks di seluruh halaman dan menyorot posisi kata secara otomatis.
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <aside id="bookmarkDrawer" class="side-drawer">
+    <div class="drawer-header">
+      <span>🔖 Penanda Halaman (Bookmarks)</span>
+      <button class="drawer-close" onclick="toggleDrawer('bookmarkDrawer', false)">✕</button>
+    </div>
+    <div class="drawer-body">
+      <button id="btnAddBookmark" class="top-btn" style="width:100%;justify-content:center;margin-bottom:12px;padding:9px;">
+        + Tandai / Hapus Halaman Aktif
+      </button>
+      <div id="bookmarkList"></div>
+    </div>
+  </aside>
+
+  <!-- Right Drawer: AI Book Assistant -->
+  <aside id="aiDrawer" class="side-drawer right-side">
+    <div class="drawer-header">
+      <span>🤖 AI Tutor Buku (Enterprise)</span>
+      <button class="drawer-close" onclick="toggleDrawer('aiDrawer', false)">✕</button>
+    </div>
+    <div id="aiChatMessages" class="chat-messages">
+      <div class="chat-bubble ai">
+        Halo! Saya asisten pintar FlipLabs. Tanyakan rumus, rangkuman bab, atau konsep dari buku ini dan saya akan mencarikan jawabannya beserta nomor halaman!
+      </div>
+    </div>
+    <div style="padding:10px;border-top:1px solid var(--border-color);display:flex;gap:6px;">
+      <input id="aiChatInput" type="text" class="drawer-input" placeholder="Tanya isi buku ini...">
+      <button id="btnSendAI" class="top-btn" style="background:var(--accent);border:none;">Kirim</button>
+    </div>
+  </aside>
+
+  <!-- Main 3D FlipBook Stage -->
+  <main id="stageViewport" class="stage-viewport">
+    <button id="btnPrevStage" class="stage-nav-btn prev" title="Halaman Sebelumnya (Panah Kiri)">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+
+    <div id="bookZoomLayer" class="book-zoom-layer">
+      <div id="bookSpread" class="book-spread">
+        <!-- Left Page (Double Spread Mode) -->
+        <div id="leftPageSlot" class="page-slot left-page">
+          <img id="leftPageImg" class="page-img" src="" alt="Left Page">
+          <div id="leftHighlightLayer" class="highlight-layer"></div>
+          <canvas id="leftAnnoCanvas" class="annotation-canvas"></canvas>
+          <div class="watermark-overlay"><span class="watermark-text">LABSCHOOL DIGITAL LIBRARY</span></div>
+          <div id="cornerLeft" class="corner-peel left" title="Klik untuk balik ke halaman sebelumnya"></div>
+        </div>
+
+        <!-- Center Spine 3D Crease Shadow -->
+        <div id="spineShadow" class="spine-shadow"></div>
+
+        <!-- Right Page -->
+        <div id="rightPageSlot" class="page-slot right-page">
+          <img id="rightPageImg" class="page-img" src="" alt="Right Page">
+          <div id="rightHighlightLayer" class="highlight-layer"></div>
+          <canvas id="rightAnnoCanvas" class="annotation-canvas"></canvas>
+          <div class="watermark-overlay"><span class="watermark-text">LABSCHOOL DIGITAL LIBRARY</span></div>
+          <div id="cornerRight" class="corner-peel right" title="Klik untuk balik ke halaman berikutnya"></div>
+        </div>
+      </div>
+    </div>
+
+    <button id="btnNextStage" class="stage-nav-btn next" title="Halaman Berikutnya (Panah Kanan)">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+  </main>
+
+  <!-- Bottom Thumbnail Drawer -->
+  <div id="thumbTray" class="thumb-tray"></div>
+
+  <!-- Bottom Metro Control Toolbar -->
+  <footer class="bottom-toolbar">
+    <button id="btnTOC" class="tool-btn" title="Daftar Isi (Table of Contents)">
+      <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+    </button>
+    <button id="btnThumbnails" class="tool-btn" title="Galeri Thumbnail Halaman">
+      <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    </button>
+    <button id="btnSearch" class="tool-btn" title="Cari Teks & Sorot Kata">
+      <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+    </button>
+
+    <div class="tool-divider"></div>
+
+    <button id="btnFirstPage" class="tool-btn" title="Halaman Pertama (Sampul)">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg>
+    </button>
+    <button id="btnPrevPage" class="tool-btn" title="Halaman Sebelumnya">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+
+    <div class="page-Jump-box" title="Ketik nomor halaman lalu tekan Enter">
+      <input id="pageInput" type="text" class="page-input" value="1">
+      <span id="totalPageLabel" class="page-total-label">/ 12</span>
+    </div>
+
+    <button id="btnNextPage" class="tool-btn" title="Halaman Berikutnya">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+    <button id="btnLastPage" class="tool-btn" title="Halaman Terakhir">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg>
+    </button>
+
+    <div class="tool-divider"></div>
+
+    <button id="btnZoomOut" class="tool-btn" title="Perkecil (Zoom Out)">
+      <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M21 21l-4.35-4.35"/></svg>
+    </button>
+    <button id="btnZoomIn" class="tool-btn" title="Perbesar (Zoom In)">
+      <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M11 8v6M8 11h6M21 21l-4.35-4.35"/></svg>
+    </button>
+    <button id="btnPageMode" class="tool-btn" title="Ganti Mode 1 Halaman / 2 Halaman">
+      <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 4h8a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H2V4zM22 4h-8a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h8V4z"/></svg>
+    </button>
+
+    <div class="tool-divider"></div>
+
+    <button id="btnSound" class="tool-btn active" title="Efek Suara Lembaran Kertas">
+      <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+    </button>
+    <button id="btnAutoPlay" class="tool-btn" title="Auto-Flip Slideshow">
+      <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    </button>
+    <button id="btnBookmark" class="tool-btn" title="Penanda Halaman (Pro/Enterprise)">
+      <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+    </button>
+    <button id="btnAnnotate" class="tool-btn" title="Stabilo & Coretan Catatan (Pro/Enterprise)">
+      <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    </button>
+    <button id="btnFlipShot" class="tool-btn" title="FlipShot: Unduh Gambar Halaman (Pro/Enterprise)">
+      <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    </button>
+
+    <div class="tool-divider"></div>
+
+    <button id="btnPrint" class="tool-btn" title="Cetak Buku (Pro/Enterprise)">
+      <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    </button>
+    <button id="btnDownload" class="tool-btn" title="Unduh PDF Asli (Pro/Enterprise)">
+      <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+    </button>
+    <button id="btnShare" class="tool-btn" title="Bagikan Link & Embed Iframe Moodle">
+      <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+    </button>
+    <button id="btnAIChat" class="tool-btn" title="Tanya AI Tutor Buku (Enterprise)">
+      <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 1 4 4v2h2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2V6a4 4 0 0 1 4-4z"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/></svg>
+    </button>
+    <button id="btnFullscreen" class="tool-btn" title="Layar Penuh (Fullscreen)">
+      <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+    </button>
+  </footer>
+
+  <!-- Share & Iframe Embed Modal -->
+  <div id="shareModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h3 style="font-size:16px;">🔗 Bagikan Buku & Kode Embed LMS Moodle</h3>
+        <button class="drawer-close" onclick="document.getElementById('shareModal').classList.remove('open')">✕</button>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;color:var(--text-muted);">Tautan Langsung ke Halaman Aktif:</label>
+        <textarea id="shareDirectLink" class="code-box" rows="2" readonly></textarea>
+      </div>
+      <div style="margin-bottom:16px;">
+        <label style="font-size:12px;color:var(--text-muted);">Kode Semat Iframe (Moodle LMS / Portal Sekolah):</label>
+        <textarea id="shareEmbedCode" class="code-box" rows="3" readonly></textarea>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button class="top-btn" onclick="navigator.clipboard.writeText(document.getElementById('shareEmbedCode').value); showToast('Kode Iframe disalin!');">
+          📋 Salin Kode Iframe
+        </button>
+        <button class="top-btn" style="background:var(--accent);border:none;" onclick="navigator.clipboard.writeText(document.getElementById('shareDirectLink').value); showToast('Tautan buku disalin!');">
+          📋 Salin Link
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastMsg" class="toast-msg"></div>
+
+  <script src="/viewer/js/sound-fx.js"></script>
+  <script src="/viewer/js/app.js"></script>
+</body>
+</html>

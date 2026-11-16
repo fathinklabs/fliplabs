@@ -1,0 +1,383 @@
+:root {
+  --bg-main: #0b0f19;
+  --card-bg: rgba(30, 41, 59, 0.72);
+  --border-subtle: rgba(148, 163, 184, 0.16);
+  --text-light: #f8fafc;
+  --text-dim: #94a3b8;
+  --brand-primary: #0ea5e9;
+  --brand-secondary: #6366f1;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: radial-gradient(circle at 50% 0%, #1e293b 0%, #090d16 75%);
+  color: var(--text-light);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(11, 15, 25, 0.88);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-light);
+  padding: 9px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.btn:hover {
+  border-color: var(--brand-primary);
+  background: rgba(14, 165, 233, 0.15);
+}
+.btn-primary {
+  background: linear-gradient(135deg, #0284c7, #4f46e5);
+  border: none;
+  box-shadow: 0 4px 16px rgba(14, 165, 233, 0.35);
+}
+.btn-primary:hover {
+  opacity: 0.94;
+  transform: translateY(-1px);
+}
+
+/* Hero Banner */
+.hero {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 36px 24px 20px;
+  text-align: center;
+}
+.hero-tag {
+  display: inline-block;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  background: rgba(14, 165, 233, 0.14);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  margin-bottom: 14px;
+}
+.hero h1 {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 10px;
+}
+.hero p {
+  color: var(--text-dim);
+  max-width: 680px;
+  margin: 0 auto 24px;
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+/* Filter & Search Bar */
+.filter-bar {
+  max-width: 1180px;
+  margin: 0 auto 28px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.filter-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pill {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-dim);
+  padding: 7px 15px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.pill.active, .pill:hover {
+  background: var(--brand-primary);
+  color: #fff;
+  border-color: var(--brand-primary);
+}
+
+.search-box {
+  position: relative;
+  min-width: 280px;
+}
+.search-box input {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid var(--border-subtle);
+  color: #fff;
+  padding: 9px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  outline: none;
+}
+.search-box input:focus {
+  border-color: var(--brand-primary);
+}
+
+/* 3D Virtual Bookshelf Container */
+.bookcase-container {
+  max-width: 1180px;
+  margin: 0 auto 60px;
+  padding: 0 24px;
+}
+
+.shelf-row {
+  position: relative;
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.35) 0%, rgba(15, 23, 42, 0.78) 100%);
+  border: 1px solid var(--border-subtle);
+  border-radius: 18px;
+  padding: 36px 32px 44px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 32px;
+  box-shadow: inset 0 -18px 32px rgba(0,0,0,0.45), 0 20px 50px rgba(0,0,0,0.4);
+}
+
+/* Realistic Wooden/Metallic 3D Shelf Ledge at Bottom */
+.shelf-row::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 14px;
+  height: 16px;
+  background: linear-gradient(90deg, #334155 0%, #475569 50%, #334155 100%);
+  border-radius: 6px;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.85), inset 0 2px 2px rgba(255,255,255,0.22);
+}
+
+/* 3D Book Card on Shelf */
+.book-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.book-3d-wrap {
+  width: 168px;
+  height: 238px;
+  perspective: 1000px;
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+
+.book-3d-cover {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateY(-12deg);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+  box-shadow: -10px 12px 24px rgba(0,0,0,0.65);
+  border-radius: 3px 6px 6px 3px;
+}
+
+.book-3d-wrap:hover .book-3d-cover {
+  transform: rotateY(0deg) translateY(-8px) scale(1.04);
+  box-shadow: 0 20px 38px rgba(14, 165, 233, 0.35);
+}
+
+.book-3d-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 3px 6px 6px 3px;
+  border: 1px solid rgba(255,255,255,0.18);
+  display: block;
+}
+
+/* Book Spine & Pages 3D Edge */
+.book-3d-cover::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 12px;
+  background: linear-gradient(90deg, rgba(0,0,0,0.55), rgba(255,255,255,0.18), transparent);
+  z-index: 3;
+  border-radius: 3px 0 0 3px;
+}
+.book-3d-cover::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  right: -7px;
+  width: 7px;
+  background: repeating-linear-gradient(to right, #f8fafc 0px, #cbd5e1 1px, #e2e8f0 2px);
+  border-radius: 0 2px 2px 0;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.4);
+}
+
+.tier-pill {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  color: #fff;
+  z-index: 5;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+}
+.tier-pill.basic { background: #64748b; }
+.tier-pill.pro { background: linear-gradient(135deg, #0284c7, #2563eb); }
+.tier-pill.enterprise { background: linear-gradient(135deg, #7c3aed, #db2777); }
+
+.book-meta {
+  text-align: center;
+  width: 100%;
+}
+.book-meta h3 {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+  margin-bottom: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.book-meta p {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.book-card-btns {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+.mini-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border-subtle);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.18s;
+}
+.mini-btn.read {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+}
+.mini-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+}
+
+/* Modals */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(5px);
+  z-index: 300;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal-overlay.open {
+  display: flex;
+}
+.modal-box {
+  background: #1e293b;
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 560px;
+  padding: 24px;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.65);
+}
+.form-row {
+  margin-bottom: 14px;
+}
+.form-row label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.form-control {
+  width: 100%;
+  background: #0f172a;
+  border: 1px solid var(--border-subtle);
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  outline: none;
+}
+.form-control:focus {
+  border-color: var(--brand-primary);
+}
+
+/* License Table inside Modal */
+.license-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  margin-top: 10px;
+}
+.license-table th, .license-table td {
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 9px 8px;
+  text-align: left;
+}
+.license-table th {
+  color: #38bdf8;
+}

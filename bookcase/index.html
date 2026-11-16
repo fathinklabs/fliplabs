@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlipLabs — Rak Buku Digital Interaktif Labschool (books.labschool.xyz)</title>
+  <link rel="stylesheet" href="/bookcase/bookcase.css">
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <nav class="navbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <img src="/viewer/assets/branding/labschool-logo.svg" alt="FlipLabs" style="height:40px;">
+    </div>
+    <div class="nav-actions">
+      <button class="btn" onclick="document.getElementById('licenseModal').classList.add('open')">
+        💎 Matriks Lisensi (Basic / Pro / Enterprise)
+      </button>
+      <button class="btn" onclick="openEmbedShelf()">
+        🔗 Embed Rak Buku ke LMS
+      </button>
+      <button class="btn btn-primary" onclick="document.getElementById('uploadModal').classList.add('open')">
+        ➕ Unggah & Konversi PDF Baru
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <span class="hero-tag">SELF-HOSTED FLIPHTML5 ENGINE • BOOKS.LABSCHOOL.XYZ</span>
+    <h1>Perpustakaan & Rak Buku Digital 3D Labschool</h1>
+    <p>
+      Platform e-book interaktif mandiri dengan teknologi pembalik halaman 3D realistis, pencarian rumus & teks instan,
+      anotasi stabilo pembelajaran, serta asisten AI kurikulum terintegrasi untuk ekosistem Moodle LMS Labschool.
+    </p>
+  </section>
+
+  <!-- Filter & Search Controls -->
+  <section class="filter-bar">
+    <div class="filter-pills">
+      <button class="pill active" data-cat="ALL">Semua Kategori</button>
+      <button class="pill" data-cat="SMP Kelas 8">SMP Kelas 8</button>
+      <button class="pill" data-cat="Panduan Umum">Panduan Umum</button>
+    </div>
+
+    <div class="filter-pills">
+      <button class="pill active" data-tier="ALL">Semua Plan</button>
+      <button class="pill" data-tier="enterprise">Enterprise</button>
+      <button class="pill" data-tier="pro">Pro</button>
+      <button class="pill" data-tier="basic">Basic</button>
+    </div>
+
+    <div class="search-box">
+      <input id="shelfSearch" type="text" placeholder="🔍 Cari judul buku, mata pelajaran, atau penulis...">
+    </div>
+  </section>
+
+  <!-- 3D Virtual Bookshelf -->
+  <main class="bookcase-container">
+    <div id="shelfGrid" class="shelf-row"></div>
+  </main>
+
+  <!-- Upload & Convert PDF Modal -->
+  <div id="uploadModal" class="modal-overlay">
+    <div class="modal-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h3>📤 Unggah PDF & Konversi ke Flipbook 3D</h3>
+        <button class="btn" style="padding:4px 10px;" onclick="document.getElementById('uploadModal').classList.remove('open')">✕</button>
+      </div>
+      <form id="uploadForm">
+        <div class="form-row">
+          <label>File Dokumen PDF</label>
+          <input id="pdfFile" type="file" accept="application/pdf" class="form-control" required>
+        </div>
+        <div class="form-row">
+          <label>Judul Buku Digital</label>
+          <input id="upTitle" type="text" class="form-control" placeholder="Contoh: Buku Paket Matematika SMP Kelas 8" required>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-row">
+            <label>Penulis / Tim Penyusun</label>
+            <input id="upAuthor" type="text" class="form-control" value="Tim Guru Labschool">
+          </div>
+          <div class="form-row">
+            <label>Kategori / Kelas</label>
+            <input id="upCategory" type="text" class="form-control" value="SMP Kelas 8">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-row">
+            <label>Mata Pelajaran</label>
+            <input id="upSubject" type="text" class="form-control" value="Matematika">
+          </div>
+          <div class="form-row">
+            <label>Tingkat Lisensi Fitur (Plan)</label>
+            <select id="upTier" class="form-control">
+              <option value="enterprise">ENTERPRISE (Full + AI Tutor + DRM)</option>
+              <option value="pro">PRO (Guru + Stabilo + FlipShot + Download)</option>
+              <option value="basic">BASIC (Siswa Baca 3D Standar - No Download)</option>
+            </select>
+          </div>
+        </div>
+        <div id="uploadStatus" style="font-size:12.5px;color:#38bdf8;margin:10px 0;"></div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px;">
+          <button type="button" class="btn" onclick="document.getElementById('uploadModal').classList.remove('open')">Batal</button>
+          <button id="btnSubmitUpload" type="submit" class="btn btn-primary">🚀 Proses & Terbitkan Flipbook</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Embed Modal -->
+  <div id="embedModal" class="modal-overlay">
+    <div class="modal-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h3 id="embedModalTitle">🔗 Sematkan ke Moodle LMS</h3>
+        <button class="btn" style="padding:4px 10px;" onclick="document.getElementById('embedModal').classList.remove('open')">✕</button>
+      </div>
+      <div class="form-row">
+        <label>Tautan Langsung (Direct URL):</label>
+        <input id="embedDirectUrl" type="text" class="form-control" readonly>
+      </div>
+      <div class="form-row">
+        <label>Kode HTML Iframe (Moodle Page / Label / Book Resource):</label>
+        <textarea id="embedIframeCode" class="form-control" rows="3" readonly style="font-family:monospace;color:#38bdf8;"></textarea>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button class="btn btn-primary" onclick="navigator.clipboard.writeText(document.getElementById('embedIframeCode').value); alert('Kode Iframe berhasil disalin!')">
+          📋 Salin Kode Iframe
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- License Comparison Modal -->
+  <div id="licenseModal" class="modal-overlay">
+    <div class="modal-box" style="max-width:680px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h3>💎 Matriks Lisensi Fitur FlipLabs</h3>
+        <button class="btn" style="padding:4px 10px;" onclick="document.getElementById('licenseModal').classList.remove('open')">✕</button>
+      </div>
+      <table class="license-table">
+        <thead>
+          <tr>
+            <th>Fitur Viewer & Platform</th>
+            <th>BASIC</th>
+            <th>PRO</th>
+            <th>ENTERPRISE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>3D Page Flip + Efek Suara Kertas</td><td>✅ Ya</td><td>✅ Ya</td><td>✅ Ya</td></tr>
+          <tr><td>Daftar Isi (TOC) & Galeri Thumbnail</td><td>✅ Ya</td><td>✅ Ya</td><td>✅ Ya</td></tr>
+          <tr><td>Full-Text Search + Sorot Kata Kuning</td><td>✅ Ya</td><td>✅ Ya</td><td>✅ Ya</td></tr>
+          <tr><td>Stabilo, Pena Coretan & Penanda Buku</td><td>❌ Terkunci</td><td>✅ Aktif</td><td>✅ Aktif</td></tr>
+          <tr><td>FlipShot (Potong Gambar Halaman PNG)</td><td>❌ Terkunci</td><td>✅ Aktif</td><td>✅ Aktif</td></tr>
+          <tr><td>Download PDF Asli & Cetak Dokumen</td><td>❌ Dinonaktifkan</td><td>✅ Aktif</td><td>✅ Aktif + DRM</td></tr>
+          <tr><td>AI Book Tutor (Tanya Jawab Isi Buku)</td><td>❌ Terkunci</td><td>❌ Terkunci</td><td>✅ Aktif (Unlimited)</td></tr>
+          <tr><td>Domain Whitelist Lock (*.labschool.xyz)</td><td>❌ Publik</td><td>🟡 Standar</td><td>✅ Ketat + Watermark</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="/bookcase/bookcase.js"></script>
+</body>
+</html>

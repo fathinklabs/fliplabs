@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  fliplabs-prod:
+    build:
+      context: .
+      dockerfile: Containerfile
+    image: fliplabs:latest
+    container_name: fliplabs-prod
+    ports:
+      - "127.0.0.1:8090:8080"
+    volumes:
+      - ./books:/app/books:Z
+      - ./server/uploads:/app/server/uploads:Z
+    environment:
+      - ENV=production
+      - APP_DOMAIN=https://books.labschool.xyz
+    mem_limit: 512m
+    restart: always

@@ -1,0 +1,61 @@
+{
+  "id": "smp8-ipa-terpadu",
+  "title": "Modul Praktikum IPA Terpadu SMP Kelas VIII",
+  "subtitle": "Panduan Eksperimen Fisika, Biologi & Kimia Laboratorium",
+  "author": "MGMP IPA SMP Labschool",
+  "category": "SMP Kelas 8",
+  "subject": "IPA",
+  "licenseTier": "pro",
+  "totalPageCount": 4,
+  "pageWidth": 1414,
+  "pageHeight": 2000,
+  "pageRatio": 1.4144,
+  "createdAt": "2026-11-16T03:18:05.843972+00:00",
+  "conversionSeconds": 0.89,
+  "theme": {
+    "mode": "metro-dark",
+    "toolbarColor": "#1e222d",
+    "iconColor": "#f1f5f9",
+    "accentColor": "#0ea5e9",
+    "backgroundColor": "#11141c",
+    "backgroundGradient": "radial-gradient(circle at center, #1e293b 0%, #0f172a 100%)"
+  },
+  "branding": {
+    "logoText": "LABSCHOOL DIGITAL LIBRARY",
+    "logoUrl": "/viewer/assets/branding/labschool-logo.svg",
+    "linkUrl": "https://books.labschool.xyz",
+    "showLogo": true,
+    "watermarkText": "LABSCHOOL DIGITAL LIBRARY • PRO EDITION"
+  },
+  "features": {
+    "enableFlipSound": true,
+    "enableBackgroundSound": true,
+    "enableDownload": true,
+    "enablePrint": true,
+    "enableSearch": true,
+    "enableBookmarks": true,
+    "enableAnnotations": true,
+    "enableFlipShot": true,
+    "enableThumbnails": true,
+    "enableTOC": true,
+    "enableAutoPlay": true,
+    "enableShare": true,
+    "enableMagnifier": true,
+    "enableAIQuery": false,
+    "downloadUrl": "/books/smp8-ipa-terpadu/files/book.pdf",
+    "autoPlayDuration": 4
+  },
+  "security": {
+    "isPasswordProtected": false,
+    "password": "",
+    "disableRightClick": false,
+    "allowedDomains": [
+      "books.labschool.xyz",
+      "study.labschool.xyz",
+      "lms.labschool.xyz",
+      "labschool.sch.id",
+      "localhost",
+      "127.0.0.1"
+    ]
+  }
+}

@@ -1,0 +1,63 @@
+[
+  {
+    "title": "Sampul Depan (Cover)",
+    "page": 1,
+    "children": []
+  },
+  {
+    "title": "Kata Pengantar & Petunjuk Buku",
+    "page": 2,
+    "children": []
+  },
+  {
+    "title": "Daftar Isi",
+    "page": 3,
+    "children": []
+  },
+  {
+    "title": "Bab 1: Pola Bilangan",
+    "page": 4,
+    "children": [
+      {
+        "title": "1.1 Barisan dan Deret Aritmetika",
+        "page": 5,
+        "children": []
+      }
+    ]
+  },
+  {
+    "title": "Bab 2: Koordinat Kartesius",
+    "page": 6,
+    "children": []
+  },
+  {
+    "title": "Bab 3: Relasi dan Fungsi",
+    "page": 7,
+    "children": []
+  },
+  {
+    "title": "Bab 4: Persamaan Garis Lurus",
+    "page": 8,
+    "children": []
+  },
+  {
+    "title": "Bab 5: Sistem Persamaan Linear Dua Variabel (SPLDV)",
+    "page": 9,
+    "children": []
+  },
+  {
+    "title": "Bab 6: Teorema Pythagoras",
+    "page": 10,
+    "children": []
+  },
+  {
+    "title": "Bab 7: Lingkaran",
+    "page": 11,
+    "children": []
+  },
+  {
+    "title": "Bab 8: Bangun Ruang Sisi Datar",
+    "page": 12,
+    "children": []
+  }
+]
