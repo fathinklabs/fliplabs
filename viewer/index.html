@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>FlipLabs — Labschool Interactive 3D E-Book Viewer</title>
-  <link rel="stylesheet" href="/viewer/css/viewer.css?v=2.4">
+  <link rel="stylesheet" href="/viewer/css/viewer.css?v=3.2">
 </head>
 <body>
 
@@ -21,19 +21,23 @@
     </div>
 
     <div class="top-actions">
-      <span id="lockStatusBadge" class="top-btn" style="display:none;background:rgba(234,179,8,0.16);border-color:#eab308;color:#fde047;cursor:default;">
+      <button id="btnBuyBookTop" class="top-btn" style="display:none;background:#0088ff;border-color:#0088ff;color:#ffffff;" onclick="openViewerBuyModal()">
+        🛒 Beli Buku Ini
+      </button>
+      <span id="lockStatusBadge" class="top-btn" style="display:none;background:#fefce8;border-color:#eab308;color:#854d0e;cursor:default;">
         🔒 Terproteksi Sandi
       </span>
       <button id="btnQuickPassword" class="top-btn" style="display:none;" title="Atur Proteksi Kata Sandi Buku Ini">
         🔐 Sandi Buku
       </button>
       <!-- Live License Tier Switcher -->
-      <select id="tierSwitcher" class="top-btn" title="Uji Mode Lisensi Fitur (Basic / Pro / Enterprise)" style="background:#0f172a;">
+      <select id="tierSwitcher" class="top-btn" title="Uji Mode Lisensi Fitur (Basic / Pro / Enterprise)">
         <option value="basic">Simulasi: BASIC</option>
         <option value="pro">Simulasi: PRO</option>
         <option value="enterprise" selected>Simulasi: ENTERPRISE</option>
       </select>
       <span id="licenseBadge" class="license-badge enterprise">PLAN: ENTERPRISE</span>
+      <a href="/marketplace" class="top-btn" title="Pasar Buku & Koleksi">🛒 Marketplace</a>
       <a href="/admin" id="viewerAdminBtn" class="top-btn" style="display:none;" title="Panel Manajemen">⚙️ Manajemen</a>
       <a href="/" class="top-btn" title="Buka Lemari Rak Buku">📚 Rak Buku</a>
     </div>
@@ -309,10 +313,36 @@
     </div>
   </div>
 
+  <!-- Marketplace Paywall & Instant Checkout Modal -->
+  <div id="viewerBuyModal" class="modal-backdrop">
+    <div class="modal-card" style="max-width:440px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h3 style="font-size:17px;">🛒 Buka Seluruh Halaman Buku Ini</h3>
+        <button class="drawer-close" onclick="document.getElementById('viewerBuyModal').classList.remove('open')">✕</button>
+      </div>
+      <div id="viewerBuyInfo" style="background:#f0f7ff;border:1px solid #bfdbfe;border-radius:12px;padding:14px;margin-bottom:14px;font-size:13px;line-height:1.5;"></div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:6px;">Metode Pembayaran:</label>
+        <select id="viewerPaymentMethod" class="drawer-input" style="width:100%;">
+          <option value="QRIS">📱 QRIS Instan (GoPay, OVO, Dana, M-Banking)</option>
+          <option value="VA Mandiri / BCA">🏦 Virtual Account Bank (Mandiri / BCA / BNI)</option>
+          <option value="Saldo Koperasi Labschool">🏫 Saldo Kartu Pelajar / Koperasi Labschool</option>
+        </select>
+      </div>
+      <div id="viewerBuyStatus" style="font-size:12.5px;color:#0088ff;font-weight:700;margin-bottom:12px;"></div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button class="top-btn" onclick="document.getElementById('viewerBuyModal').classList.remove('open')">Lanjut Baca Preview</button>
+        <button class="top-btn" style="background:#0088ff;border-color:#0088ff;color:#fff;padding:9px 16px;" onclick="submitViewerBuyBook()">
+          ✅ Beli & Buka Semua Halaman
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toastMsg" class="toast-msg"></div>
 
-  <script src="/viewer/js/sound-fx.js?v=2.5"></script>
-  <script src="/viewer/js/app.js?v=2.5"></script>
+  <script src="/viewer/js/sound-fx.js?v=3.2"></script>
+  <script src="/viewer/js/app.js?v=3.2"></script>
 </body>
 </html>

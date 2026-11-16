@@ -3,21 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FlipLabs — Portal Manajemen, Pengguna & Administrasi</title>
-  <link rel="stylesheet" href="/admin-assets/admin.css?v=2.2">
+  <title>FlipLabs — Portal Manajemen, Pengguna & Marketplace</title>
+  <link rel="stylesheet" href="/admin-assets/admin.css?v=3.2">
 </head>
 <body>
 
   <!-- Top Navigation -->
   <header class="topbar">
     <div style="display:flex;align-items:center;gap:14px;">
-      <a href="/"><img src="/viewer/assets/branding/labschool-logo.svg" alt="FlipLabs" style="height:38px;"></a>
-      <span style="font-size:13px;font-weight:700;color:#38bdf8;border-left:1px solid var(--border-subtle);padding-left:12px;">
+      <a href="/" class="brand-link">
+        <div class="brand-icon">📖</div>
+        <span>FLIPLABS</span>
+      </a>
+      <span style="font-size:12.5px;font-weight:800;color:#0088ff;border-left:1px solid var(--border-subtle);padding-left:12px;">
         PORTAL MANAJEMEN & ADMINISTRASI
       </span>
     </div>
     <div style="display:flex;align-items:center;gap:10px;">
-      <span id="topUserSummary" style="font-size:12.5px;color:var(--text-dim);">Belum Masuk</span>
+      <span id="topUserSummary" style="font-size:12.5px;font-weight:600;color:var(--text-dim);">Belum Masuk</span>
+      <a href="/marketplace" class="btn">🛒 Marketplace</a>
       <a href="/" class="btn">📚 Rak Buku Digital</a>
       <button id="btnTopLogout" class="btn btn-danger" style="display:none;" onclick="logoutAdmin()">Keluar</button>
     </div>
@@ -32,7 +36,7 @@
         <div class="panel-box">
           <h3 style="margin-bottom:6px;">🔐 Masuk Akun (Login)</h3>
           <p style="font-size:12.5px;color:var(--text-dim);margin-bottom:16px;">
-            Masuk sebagai Admin, Guru, atau Siswa untuk mengelola katalog buku dan profil.
+            Masuk sebagai Admin, Guru, atau Siswa untuk mengelola katalog buku, penjualan, dan profil.
           </p>
           <form id="gateLoginForm">
             <div class="form-row">
@@ -43,50 +47,76 @@
               <label>Kata Sandi</label>
               <input id="gateLoginPassword" type="password" class="form-control" placeholder="Masukkan kata sandi..." required>
             </div>
-            <div id="gateAuthMsg" style="font-size:12px;color:#f87171;margin-bottom:10px;"></div>
+            <div class="form-row">
+              <label>Verifikasi Keamanan (Penjumlahan 2 Digit)</label>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <div id="gateCaptchaQuestion" class="captcha-badge">.. + .. = ?</div>
+                <input id="gateCaptchaAnswer" type="number" class="form-control" placeholder="Jawaban" required>
+                <button type="button" class="btn" onclick="loadGateCaptcha()">🔄</button>
+              </div>
+            </div>
+            <div id="gateAuthMsg" style="font-size:12.5px;color:#dc2626;font-weight:600;margin-bottom:10px;"></div>
             <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;">
               Masuk ke Portal Manajemen
             </button>
           </form>
         </div>
 
-        <!-- Registration Card -->
+        <!-- Registration & OTP Verification Card -->
         <div class="panel-box">
-          <h3 style="margin-bottom:6px;">✨ Registrasi Akun Baru</h3>
-          <p style="font-size:12.5px;color:var(--text-dim);margin-bottom:16px;">
-            Daftarkan akun Guru atau Siswa Labschool untuk mengakses fitur perpustakaan digital.
-          </p>
-          <form id="gateRegForm">
-            <div class="form-row">
-              <label>Nama Lengkap</label>
-              <input id="gateRegName" type="text" class="form-control" placeholder="Nama Lengkap Guru / Siswa" required>
-            </div>
-            <div class="form-row">
-              <label>Email</label>
-              <input id="gateRegEmail" type="email" class="form-control" placeholder="nama@labschool.sch.id" required>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div id="gateRegWrap">
+            <h3 style="margin-bottom:6px;">✨ Registrasi Akun Baru</h3>
+            <p style="font-size:12.5px;color:var(--text-dim);margin-bottom:16px;">
+              Daftarkan akun Guru atau Siswa Labschool. Kode verifikasi OTP akan dikirim ke email Anda.
+            </p>
+            <form id="gateRegForm">
               <div class="form-row">
-                <label>Peran (Role)</label>
-                <select id="gateRegRole" class="form-control">
-                  <option value="siswa">Siswa (Basic)</option>
-                  <option value="guru">Guru (Pro)</option>
-                </select>
+                <label>Nama Lengkap</label>
+                <input id="gateRegName" type="text" class="form-control" placeholder="Nama Lengkap Guru / Siswa" required>
               </div>
               <div class="form-row">
-                <label>Unit Sekolah</label>
-                <input id="gateRegUnit" type="text" class="form-control" value="SMP Labschool Jakarta">
+                <label>Email Aktif</label>
+                <input id="gateRegEmail" type="email" class="form-control" placeholder="nama@labschool.sch.id" required>
               </div>
-            </div>
-            <div class="form-row">
-              <label>Kata Sandi Baru</label>
-              <input id="gateRegPassword" type="password" class="form-control" placeholder="Minimal 6 karakter" required>
-            </div>
-            <div id="gateRegMsg" style="font-size:12px;color:#f87171;margin-bottom:10px;"></div>
-            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;">
-              Daftar & Buat Akun
-            </button>
-          </form>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="form-row">
+                  <label>Peran (Role)</label>
+                  <select id="gateRegRole" class="form-control">
+                    <option value="siswa">Siswa (Basic)</option>
+                    <option value="guru">Guru / Penulis (Pro)</option>
+                  </select>
+                </div>
+                <div class="form-row">
+                  <label>Unit Sekolah</label>
+                  <input id="gateRegUnit" type="text" class="form-control" value="SMP Labschool Jakarta">
+                </div>
+              </div>
+              <div class="form-row">
+                <label>Kata Sandi Baru</label>
+                <input id="gateRegPassword" type="password" class="form-control" placeholder="Minimal 6 karakter" required>
+              </div>
+              <div id="gateRegMsg" style="font-size:12.5px;color:#dc2626;font-weight:600;margin-bottom:10px;"></div>
+              <button id="btnGateRegSubmit" type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;">
+                📧 Daftar & Kirim Kode OTP Email
+              </button>
+            </form>
+          </div>
+
+          <div id="gateVerifyWrap" style="display:none;">
+            <h3 style="margin-bottom:6px;">📧 Verifikasi Kode OTP Email</h3>
+            <p style="font-size:12.5px;color:var(--text-dim);margin-bottom:14px;">
+              Masukkan kode OTP 6 digit yang telah dikirim melalui <b>admin@labschool.xyz</b> ke <b id="gateVerifyEmailLabel" style="color:#0088ff;"></b>:
+            </p>
+            <form id="gateVerifyForm">
+              <div class="form-row">
+                <input id="gateVerifyOtp" type="text" maxlength="6" class="form-control" placeholder="6 Digit OTP" style="font-size:20px;font-weight:900;letter-spacing:6px;text-align:center;" required>
+              </div>
+              <div id="gateVerifyMsg" style="font-size:12.5px;color:#dc2626;font-weight:600;margin-bottom:10px;"></div>
+              <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;">
+                ✅ Verifikasi & Aktifkan Akun
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </section>
@@ -97,12 +127,12 @@
       <div class="kpi-grid">
         <div class="kpi-card">
           <div class="kpi-label">Total Katalog Buku Digital</div>
-          <div id="kpiTotalBooks" class="kpi-val">3</div>
-          <div id="kpiTotalPages" class="kpi-sub">18 Halaman WebP</div>
+          <div id="kpiTotalBooks" class="kpi-val">4</div>
+          <div id="kpiTotalPages" class="kpi-sub">27 Halaman WebP</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Total Pembacaan Buku (Views)</div>
-          <div id="kpiTotalViews" class="kpi-val">298</div>
+          <div id="kpiTotalViews" class="kpi-val">420</div>
           <div class="kpi-sub">Pembaca Aktif Ekosistem LMS</div>
         </div>
         <div class="kpi-card">
@@ -110,12 +140,17 @@
           <div id="kpiTotalUsers" class="kpi-val">4</div>
           <div id="kpiPlanSummary" class="kpi-sub">Enterprise • Pro • Basic</div>
         </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Penjualan Marketplace Guru</div>
+          <div id="kpiTotalRevenue" class="kpi-val" style="color:#10b981;">Rp 0</div>
+          <div id="kpiSalesCount" class="kpi-sub">Transaksi Buku Terjual</div>
+        </div>
       </div>
 
       <!-- Navigation Tabs -->
       <div class="tabs-nav">
         <button class="tab-btn active" data-tab="books" onclick="switchDashTab('books')">
-          📚 Manajemen Buku & Kata Sandi
+          📚 Manajemen Buku, Harga Marketplace & Sandi
         </button>
         <button id="tabBtnUsers" class="tab-btn" data-tab="users" onclick="switchDashTab('users')">
           👥 Manajemen Pengguna & Lisensi (Admin)
@@ -125,16 +160,16 @@
         </button>
       </div>
 
-      <!-- TAB 1: BOOK & PASSWORD PROTECTION MANAGEMENT -->
+      <!-- TAB 1: BOOK, MARKETPLACE & PASSWORD PROTECTION MANAGEMENT -->
       <div id="panel-books" class="panel-box">
         <div class="panel-head">
           <div>
-            <h3>📚 Katalog Buku Digital, Lisensi & Proteksi Kata Sandi</h3>
-            <p style="font-size:12px;color:var(--text-dim);margin-top:2px;">
-              Atur judul, tingkat lisensi (Basic/Pro/Enterprise), dan aktifkan proteksi kata sandi pada buku tertentu.
+            <h3>📚 Katalog Buku Digital, Harga Jual Marketplace & Proteksi Kata Sandi</h3>
+            <p style="font-size:12.5px;color:var(--text-dim);margin-top:2px;">
+              Atur judul, tingkat lisensi (Basic/Pro/Enterprise), harga jual buku di Marketplace (Rp), dan proteksi kata sandi.
             </p>
           </div>
-          <a href="/" class="btn btn-primary">➕ Unggah PDF Baru di Rak Buku</a>
+          <a href="/#upload" class="btn btn-primary">➕ Unggah PDF Baru</a>
         </div>
         <div style="overflow-x:auto;">
           <table class="data-table">
@@ -143,9 +178,9 @@
                 <th>Buku Digital</th>
                 <th>Kategori & Mapel</th>
                 <th>Halaman</th>
+                <th>Harga Marketplace</th>
                 <th>Plan Lisensi</th>
                 <th>Status Sandi</th>
-                <th>Dibaca</th>
                 <th>Aksi Manajemen</th>
               </tr>
             </thead>
@@ -159,7 +194,7 @@
         <div class="panel-head">
           <div>
             <h3>👥 Manajemen Pengguna, Peran & Paket Lisensi</h3>
-            <p style="font-size:12px;color:var(--text-dim);margin-top:2px;">
+            <p style="font-size:12.5px;color:var(--text-dim);margin-top:2px;">
               Kelola akun Admin, Guru, dan Siswa serta tingkatkan paket lisensi pengguna (Basic, Pro, Enterprise).
             </p>
           </div>
@@ -186,7 +221,7 @@
       <div id="panel-profile" class="panel-box" style="display:none;max-width:560px;">
         <h3 style="margin-bottom:14px;">👤 Profil & Pengaturan Akun Saya</h3>
         <div style="display:flex;gap:10px;margin-bottom:16px;">
-          <span class="badge" style="background:rgba(14,165,233,0.2);color:#38bdf8;">ROLE: <b id="myRoleBadge">ADMIN</b></span>
+          <span class="badge guru">ROLE: <b id="myRoleBadge">ADMIN</b></span>
           <span class="badge enterprise">PLAN: <b id="myTierBadge">ENTERPRISE</b></span>
         </div>
         <form id="myProfileForm">
@@ -206,7 +241,7 @@
             <label>Ganti Kata Sandi Baru (Kosongkan jika tidak ingin mengubah)</label>
             <input id="myNewPassword" type="password" class="form-control" placeholder="Minimal 6 karakter">
           </div>
-          <div id="myProfileMsg" style="font-size:12.5px;color:#38bdf8;margin-bottom:10px;"></div>
+          <div id="myProfileMsg" style="font-size:12.5px;color:#0088ff;font-weight:700;margin-bottom:10px;"></div>
           <button type="submit" class="btn btn-primary">💾 Simpan Perubahan Profil</button>
         </form>
       </div>
@@ -214,11 +249,11 @@
 
   </main>
 
-  <!-- Modal: Edit Book & Password Protection -->
+  <!-- Modal: Edit Book, Marketplace Price & Password Protection -->
   <div id="editBookModal" class="modal-overlay">
     <div class="modal-box">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-        <h3>✏️ Edit Buku & Proteksi Kata Sandi</h3>
+        <h3>✏️ Edit Buku, Harga Marketplace & Kata Sandi</h3>
         <button class="btn" style="padding:4px 10px;" onclick="document.getElementById('editBookModal').classList.remove('open')">✕</button>
       </div>
       <form id="editBookForm">
@@ -229,7 +264,7 @@
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div class="form-row">
-            <label>Penulis / Penyusun</label>
+            <label>Penulis / Guru Penyusun</label>
             <input id="ebAuthor" type="text" class="form-control" required>
           </div>
           <div class="form-row">
@@ -252,8 +287,27 @@
           </div>
         </div>
 
-        <div style="margin:14px 0;padding:12px;background:rgba(234,179,8,0.08);border:1px solid rgba(234,179,8,0.3);border-radius:10px;">
-          <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#fde047;cursor:pointer;margin-bottom:8px;">
+        <!-- Teacher Marketplace Pricing -->
+        <div style="margin:12px 0;padding:12px;background:#f0f7ff;border:1px solid #bfdbfe;border-radius:10px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;color:#0088ff;cursor:pointer;margin-bottom:10px;">
+            <input id="ebIsForSale" type="checkbox" style="width:16px;height:16px;">
+            <span>🛒 Jual Buku Ini di Books Marketplace (Buku Berbayar)</span>
+          </label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div>
+              <label style="font-size:11.5px;font-weight:700;color:#334155;">Harga Jual (Rp)</label>
+              <input id="ebPrice" type="number" min="0" step="1000" class="form-control" placeholder="Misal: 45000">
+            </div>
+            <div>
+              <label style="font-size:11.5px;font-weight:700;color:#334155;">Jml Hal Preview Gratis</label>
+              <input id="ebPreviewPages" type="number" min="1" max="50" class="form-control" value="3">
+            </div>
+          </div>
+        </div>
+
+        <!-- Password Protection -->
+        <div style="margin:12px 0;padding:12px;background:#fefce8;border:1px solid #fde047;border-radius:10px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;color:#854d0e;cursor:pointer;margin-bottom:8px;">
             <input id="ebPwProtected" type="checkbox" style="width:16px;height:16px;">
             <span>🔒 Aktifkan Proteksi Kata Sandi (Password Protected Book)</span>
           </label>
@@ -376,6 +430,6 @@
     </div>
   </div>
 
-  <script src="/admin-assets/admin.js?v=2.5"></script>
+  <script src="/admin-assets/admin.js?v=3.2"></script>
 </body>
 </html>

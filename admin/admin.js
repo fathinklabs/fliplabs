@@ -1,6 +1,12 @@
 let currentUser = null;
 let booksList = [];
 let usersList = [];
+let gateCaptchaId = '';
+let pendingVerifyEmail = '';
+
+function formatRupiah(num) {
+  return 'Rp ' + Number(num || 0).toLocaleString('id-ID');
+}
 
 function getToken() {
   return localStorage.getItem('fliplabs_token') || '';
@@ -14,10 +20,23 @@ function authHeaders() {
   };
 }
 
+async function loadGateCaptcha() {
+  try {
+    const res = await fetch('/api/auth/captcha');
+    if (res.ok) {
+      const data = await res.json();
+      gateCaptchaId = data.captchaId;
+      document.getElementById('gateCaptchaQuestion').textContent = data.question;
+      document.getElementById('gateCaptchaAnswer').value = '';
+    }
+  } catch (e) {}
+}
+
 async function checkAuthState() {
   const tok = getToken();
   if (!tok) {
     showGate(true);
+    loadGateCaptcha();
     return;
   }
   try {
@@ -33,6 +52,7 @@ async function checkAuthState() {
     localStorage.removeItem('fliplabs_token');
     localStorage.removeItem('fliplabs_user');
     showGate(true);
+    loadGateCaptcha();
   }
 }
 
@@ -63,10 +83,24 @@ async function submitGateLogin(e) {
       body: JSON.stringify({
         email: document.getElementById('gateLoginEmail').value,
         password: document.getElementById('gateLoginPassword').value,
+        captchaId: gateCaptchaId,
+        captchaAnswer: document.getElementById('gateCaptchaAnswer').value,
       }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Gagal login');
+    if (!res.ok) {
+      loadGateCaptcha();
+      const detail = data.detail || 'Gagal login';
+      if (detail.startsWith('UNVERIFIED_EMAIL:')) {
+        const parts = detail.split(':');
+        pendingVerifyEmail = parts[1];
+        document.getElementById('gateVerifyEmailLabel').textContent = pendingVerifyEmail;
+        document.getElementById('gateRegWrap').style.display = 'none';
+        document.getElementById('gateVerifyWrap').style.display = 'block';
+        return;
+      }
+      throw new Error(detail);
+    }
     localStorage.setItem('fliplabs_token', data.token);
     localStorage.setItem('fliplabs_user', JSON.stringify(data.user));
     await checkAuthState();
@@ -78,7 +112,10 @@ async function submitGateLogin(e) {
 async function submitGateRegister(e) {
   e.preventDefault();
   const msgEl = document.getElementById('gateRegMsg');
+  const btn = document.getElementById('btnGateRegSubmit');
   msgEl.textContent = '';
+  btn.disabled = true;
+  btn.textContent = '⏳ Mengirim Kode OTP Email...';
 
   try {
     const res = await fetch('/api/auth/register', {
@@ -94,6 +131,34 @@ async function submitGateRegister(e) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Gagal registrasi');
+    pendingVerifyEmail = data.email;
+    document.getElementById('gateVerifyEmailLabel').textContent = pendingVerifyEmail;
+    document.getElementById('gateRegWrap').style.display = 'none';
+    document.getElementById('gateVerifyWrap').style.display = 'block';
+  } catch (err) {
+    msgEl.textContent = '❌ ' + err.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📧 Daftar & Kirim Kode OTP Email';
+  }
+}
+
+async function submitGateVerifyOtp(e) {
+  e.preventDefault();
+  const msgEl = document.getElementById('gateVerifyMsg');
+  msgEl.textContent = '';
+
+  try {
+    const res = await fetch('/api/auth/verify-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: pendingVerifyEmail,
+        otpCode: document.getElementById('gateVerifyOtp').value,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Kode OTP tidak sesuai');
     localStorage.setItem('fliplabs_token', data.token);
     localStorage.setItem('fliplabs_user', JSON.stringify(data.user));
     await checkAuthState();
@@ -108,6 +173,7 @@ async function logoutAdmin() {
   localStorage.removeItem('fliplabs_user');
   currentUser = null;
   showGate(true);
+  loadGateCaptcha();
 }
 
 async function loadDashboardData() {
@@ -125,6 +191,8 @@ async function loadDashboardData() {
       document.getElementById('kpiTotalUsers').textContent = ov.totalUsers;
       document.getElementById('kpiPlanSummary').textContent =
         `Enterprise: ${ov.planDistribution.enterprise} • Pro: ${ov.planDistribution.pro} • Basic: ${ov.planDistribution.basic}`;
+      document.getElementById('kpiTotalRevenue').textContent = formatRupiah(ov.totalSalesRevenue || 0);
+      document.getElementById('kpiSalesCount').textContent = `${ov.totalSalesCount || 0} Transaksi Terjual`;
     }
 
     if (bkRes.ok) {
@@ -155,32 +223,36 @@ function renderBooksTable() {
   booksList.forEach((b) => {
     const tier = (b.licenseTier || 'enterprise').toLowerCase();
     const isLocked = Boolean(b.isPasswordProtected || (b.security && b.security.isPasswordProtected));
+    const isPaid = Boolean(b.isForSale && b.price > 0);
     const pwBadge = isLocked
-      ? `<span class="badge" style="background:rgba(234,179,8,0.2);color:#fde047;border:1px solid #eab308;">🔒 Terkunci Sandi</span>`
-      : `<span class="badge" style="background:rgba(16,185,129,0.16);color:#6ee7b7;">🔓 Publik</span>`;
+      ? `<span class="badge" style="background:#fefce8;color:#854d0e;border:1px solid #eab308;">🔒 Terkunci Sandi</span>`
+      : `<span class="badge" style="background:#ecfdf5;color:#047857;">🔓 Publik</span>`;
+    const priceBadge = isPaid
+      ? `<span class="badge" style="background:#eff6ff;color:#0088ff;border:1px solid #bfdbfe;">🛒 ${formatRupiah(b.price)}</span><br><small style="color:var(--text-dim);">Preview: ${b.previewPages} Hal</small>`
+      : `<span class="badge" style="background:#f1f5f9;color:#475569;">Gratis</span>`;
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>
         <div style="display:flex;align-items:center;gap:12px;">
-          <img src="/books/${b.id}/files/shot.jpg" onerror="this.src='/books/${b.id}/files/thumb/1.webp'" style="width:38px;height:52px;object-fit:cover;border-radius:4px;">
+          <img src="/books/${b.id}/files/shot.jpg" onerror="this.src='/books/${b.id}/files/thumb/1.webp'" style="width:38px;height:52px;object-fit:cover;border-radius:4px;border:1px solid #e2e8f0;">
           <div>
-            <div style="font-weight:700;color:#fff;">${b.title}</div>
-            <div style="font-size:11.5px;color:var(--text-dim);">${b.author} • ID: <code>${b.id}</code></div>
+            <div style="font-weight:800;color:#0f172a;">${b.title}</div>
+            <div style="font-size:11.5px;color:var(--text-dim);">${b.author} • 👁 ${b.viewsCount || 1} views</div>
           </div>
         </div>
       </td>
       <td>${b.category || '-'}<br><small style="color:var(--text-dim)">${b.subject || ''}</small></td>
       <td><b>${b.totalPageCount}</b> Hal</td>
+      <td>${priceBadge}</td>
       <td><span class="badge ${tier}">${tier}</span></td>
       <td>${pwBadge}</td>
-      <td>👁 <b>${b.viewsCount || 1}</b></td>
       <td>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           <a href="/view/${b.id}#p=1" class="btn" style="padding:5px 10px;font-size:11.5px;">📖 Buka</a>
           ${
             canEdit
-              ? `<button class="btn" style="padding:5px 10px;font-size:11.5px;" onclick="openEditBookModal('${b.id}')">✏️ Edit & Sandi</button>`
+              ? `<button class="btn" style="padding:5px 10px;font-size:11.5px;" onclick="openEditBookModal('${b.id}')">✏️ Edit & Harga</button>`
               : ''
           }
           ${
@@ -207,6 +279,9 @@ function openEditBookModal(bookId) {
   document.getElementById('ebCategory').value = b.category || '';
   document.getElementById('ebSubject').value = b.subject || '';
   document.getElementById('ebTier').value = (b.licenseTier || 'enterprise').toLowerCase();
+  document.getElementById('ebIsForSale').checked = Boolean(b.isForSale && b.price > 0);
+  document.getElementById('ebPrice').value = b.price || 0;
+  document.getElementById('ebPreviewPages').value = b.previewPages || 3;
   document.getElementById('ebPwProtected').checked = isLocked;
   document.getElementById('ebPassword').value = currentPw;
   document.getElementById('editBookModal').classList.add('open');
@@ -217,6 +292,9 @@ async function submitEditBook(e) {
   const bookId = document.getElementById('ebId').value;
   const isProtected = document.getElementById('ebPwProtected').checked;
   const pwVal = document.getElementById('ebPassword').value.trim();
+  const isForSale = document.getElementById('ebIsForSale').checked;
+  const priceVal = parseInt(document.getElementById('ebPrice').value || '0', 10);
+  const previewVal = parseInt(document.getElementById('ebPreviewPages').value || '3', 10);
 
   if (isProtected && !pwVal) {
     alert('Masukkan kata sandi buku jika proteksi kata sandi diaktifkan!');
@@ -236,6 +314,9 @@ async function submitEditBook(e) {
         visibility: 'public',
         isPasswordProtected: isProtected,
         bookPassword: pwVal,
+        isForSale: isForSale,
+        price: isForSale ? priceVal : 0,
+        previewPages: previewVal,
       }),
     });
     const data = await res.json();
@@ -264,7 +345,6 @@ async function deleteBook(bookId, title) {
   }
 }
 
-/* User & License Plan Management */
 function renderUsersTable() {
   const tbody = document.getElementById('usersTableBody');
   tbody.innerHTML = '';
@@ -273,14 +353,14 @@ function renderUsersTable() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>
-        <div style="font-weight:700;color:#fff;">${u.name}</div>
-        <div style="font-size:11.5px;color:var(--text-dim);">${u.email}</div>
+        <div style="font-weight:800;color:#0f172a;">${u.name}</div>
+        <div style="font-size:11.5px;color:var(--text-dim);">${u.email} ${u.email_verified ? '✅' : '⏳ Belum Verifikasi'}</div>
       </td>
       <td>${u.unit}</td>
       <td><span class="badge ${u.role}">${u.role}</span></td>
       <td><span class="badge ${u.license_tier}">${u.license_tier}</span></td>
       <td>
-        <span class="badge" style="background:${u.status === 'active' ? 'rgba(16,185,129,0.18)' : 'rgba(239,68,68,0.2)'};color:${u.status === 'active' ? '#6ee7b7' : '#fca5a5'};">
+        <span class="badge" style="background:${u.status === 'active' ? '#ecfdf5' : '#fef2f2'};color:${u.status === 'active' ? '#047857' : '#dc2626'};">
           ${u.status}
         </span>
       </td>
@@ -424,7 +504,6 @@ async function submitMyProfile(e) {
 function switchDashTab(tabName) {
   ['books', 'users', 'profile'].forEach((t) => {
     const panel = document.getElementById(`panel-${t}`);
-    const btn = document.getElementById(`tabBtn-${t}`) || document.getElementById('tabBtnUsers');
     if (panel) panel.style.display = t === tabName ? 'block' : 'none';
   });
   document.querySelectorAll('.tab-btn').forEach((b) => {
@@ -436,6 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
   checkAuthState();
   document.getElementById('gateLoginForm').addEventListener('submit', submitGateLogin);
   document.getElementById('gateRegForm').addEventListener('submit', submitGateRegister);
+  document.getElementById('gateVerifyForm').addEventListener('submit', submitGateVerifyOtp);
   document.getElementById('editBookForm').addEventListener('submit', submitEditBook);
   document.getElementById('cuForm').addEventListener('submit', submitCreateUser);
   document.getElementById('euForm').addEventListener('submit', submitEditUser);

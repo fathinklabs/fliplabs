@@ -86,8 +86,10 @@ async function initViewer() {
 
   try {
     const base = `/books/${state.bookId}`;
+    const token = localStorage.getItem('fliplabs_token') || '';
+    const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
     const [cfgRes, tocRes, idxRes] = await Promise.all([
-      fetch(`${base}/book-config.json`),
+      fetch(`${base}/book-config.json`, { headers: authHeaders }),
       fetch(`${base}/toc.json`),
       fetch(`${base}/search-index.json`),
     ]);
@@ -98,6 +100,21 @@ async function initViewer() {
     state.searchIndex = idxRes.ok ? await idxRes.json() : { pages: [] };
     state.totalPages = state.config.totalPageCount || 1;
     state.currentPage = Math.min(Math.max(1, state.currentPage), state.totalPages);
+
+    const mp = state.config.marketplace || {};
+    const btnBuyTop = document.getElementById('btnBuyBookTop');
+    if (btnBuyTop) {
+      if (mp.isForSale && !mp.isOwned) {
+        btnBuyTop.style.display = 'inline-flex';
+        btnBuyTop.textContent = `🛒 Beli Buku (Rp ${(mp.price || 0).toLocaleString('id-ID')})`;
+      } else {
+        btnBuyTop.style.display = 'none';
+      }
+    }
+    if (mp.isForSale && !mp.isOwned && state.currentPage > (mp.previewPages || 4)) {
+      state.currentPage = mp.previewPages || 4;
+      setTimeout(() => openViewerBuyModal(), 400);
+    }
 
     loadBookmarks();
     applyBrandingAndTheme();
@@ -554,9 +571,65 @@ async function animateRealisticFlip(targetPage, direction) {
   requestAnimationFrame(stepFrame);
 }
 
+function openViewerBuyModal() {
+  const mp = (state.config && state.config.marketplace) || {};
+  const descEl = document.getElementById('viewerBuyDesc');
+  const priceEl = document.getElementById('viewerBuyPrice');
+  if (descEl) {
+    descEl.textContent = `Anda telah mencapai batas cuplikan gratis (${mp.previewPages || 4} halaman) untuk buku "${state.config ? state.config.title : ''}". Beli buku ini untuk membuka seluruh ${state.totalPages} halaman secara permanen.`;
+  }
+  if (priceEl) {
+    priceEl.textContent = `Rp ${(mp.price || 0).toLocaleString('id-ID')}`;
+  }
+  const modal = document.getElementById('viewerBuyModal');
+  if (modal) modal.classList.add('open');
+}
+
+async function submitViewerBuyBook() {
+  const token = localStorage.getItem('fliplabs_token') || '';
+  if (!token) {
+    showToast('🔒 Silakan Masuk / Daftar akun terlebih dahulu di halaman Marketplace');
+    setTimeout(() => {
+      window.location.href = '/marketplace';
+    }, 1000);
+    return;
+  }
+  const methodEl = document.getElementById('viewerBuyMethod');
+  const method = methodEl ? methodEl.value : 'QRIS Labschool Pay';
+
+  try {
+    const res = await fetch(`/api/marketplace/buy/${state.bookId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ payment_method: method }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Pembelian gagal');
+
+    if (state.config && state.config.marketplace) {
+      state.config.marketplace.isOwned = true;
+    }
+    const btnBuyTop = document.getElementById('btnBuyBookTop');
+    if (btnBuyTop) btnBuyTop.style.display = 'none';
+    const modal = document.getElementById('viewerBuyModal');
+    if (modal) modal.classList.remove('open');
+    showToast(`🎉 Pembelian berhasil! (${data.purchase ? data.purchase.invoice_id : 'LUNAS'}) Seluruh halaman terbuka.`);
+  } catch (err) {
+    showToast('❌ ' + err.message);
+  }
+}
+
 function goToPage(targetPage, dir) {
   targetPage = Math.max(1, Math.min(state.totalPages, targetPage));
   if (targetPage === state.currentPage || state.isFlipping) return;
+  const mp = (state.config && state.config.marketplace) || {};
+  if (mp.isForSale && !mp.isOwned && targetPage > (mp.previewPages || 4)) {
+    openViewerBuyModal();
+    return;
+  }
   const direction = dir || (targetPage > state.currentPage ? 'next' : 'prev');
   animateRealisticFlip(targetPage, direction);
 }

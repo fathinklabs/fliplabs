@@ -4,22 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FlipLabs — Interactive HTML5 Digital Publishing & 3D Flipbook Platform</title>
-  <link rel="stylesheet" href="/bookcase/bookcase.css?v=3.0">
+  <link rel="stylesheet" href="/bookcase/bookcase.css?v=3.2">
 </head>
 <body>
 
-  <!-- Top Navigation Bar (Matching Reference Structure) -->
+  <!-- Top Navigation Bar (Bright Light Studio Theme) -->
   <nav class="navbar">
     <div class="nav-left">
-      <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
-        <img src="/viewer/assets/branding/labschool-logo.svg" alt="FlipLabs" style="height:38px;">
+      <a href="/" class="brand-title">
+        <div class="brand-icon">📖</div>
+        <span>FLIPLABS</span>
       </a>
       <div class="nav-menu">
         <a href="#features">Features ▾</a>
         <a href="#explore">Explore</a>
+        <a href="/marketplace">Marketplace 🛒</a>
         <a href="/templates">Templates ▾</a>
         <a href="#ai-lab">AI Lab ▾</a>
-        <a href="#solutions">Solutions ▾</a>
         <a href="/pricing">Pricing</a>
       </div>
     </div>
@@ -48,23 +49,23 @@
       <p>
         Konversi dokumen PDF, Buku Paket Kurikulum Merdeka, Modul Praktikum, dan Majalah Sekolah
         menjadi Flipbook 3D realistis dengan efek lipatan halaman, pencarian rumus instan,
-        stabilo pembelajaran, proteksi kata sandi, dan AI Tutor.
+        stabilo pembelajaran, proteksi kata sandi, serta **Books Marketplace** Guru & Siswa.
       </p>
       <div class="hero-cta-row">
         <button class="btn btn-primary" style="padding:13px 26px;font-size:15px;" onclick="triggerUploadBook()">
           📤 Upload PDF (Try for Free)
         </button>
-        <a href="/templates" class="btn" style="padding:13px 22px;font-size:15px;">
-          🎨 Explore Templates
+        <a href="/marketplace" class="btn" style="padding:13px 22px;font-size:15px;">
+          🛒 Books Marketplace
         </a>
-        <a href="/pricing" class="btn" style="padding:13px 22px;font-size:15px;">
-          💎 View Pricing
+        <a href="/templates" class="btn" style="padding:13px 22px;font-size:15px;">
+          🎨 Templates
         </a>
       </div>
       <div class="hero-trust-row">
         <span>⚡ Konversi Multi-Tier WebP Instan</span>
-        <span>🔒 Proteksi Sandi & Domain Lock</span>
-        <span>🤖 AI Book Tutor Terintegrasi</span>
+        <span>🔒 Proteksi Sandi & Verifikasi Email XOAUTH2</span>
+        <span>🛒 Marketplace Guru & Koleksi Siswa</span>
       </div>
     </div>
 
@@ -77,7 +78,7 @@
           <i style="background:#10b981;"></i>
         </div>
         <span>Live 3D Interactive Demo — Buku Siswa Matematika Kurikulum Merdeka</span>
-        <a href="/view/sd5-matematika-kurmer#p=6" style="color:#38bdf8;text-decoration:none;font-weight:700;">Layar Penuh ↗</a>
+        <a href="/view/sd5-matematika-kurmer#p=6" style="color:#0088ff;text-decoration:none;font-weight:700;">Layar Penuh ↗</a>
       </div>
       <iframe src="/view/sd5-matematika-kurmer#p=6" width="100%" height="410" frameborder="0" allowfullscreen></iframe>
     </div>
@@ -93,8 +94,8 @@
       </div>
       <div class="step-card">
         <div class="step-num">2</div>
-        <h3>Pilih Template & Branding</h3>
-        <p>Gunakan tema Metro 3D, ekstrak Daftar Isi (TOC) otomatis, dan sematkan identitas logo sekolah.</p>
+        <h3>Pilih Template & Harga Jual</h3>
+        <p>Gunakan tema Metro 3D, ekstrak Daftar Isi otomatis, dan tentukan apakah buku bersifat Gratis atau Berbayar di Marketplace.</p>
       </div>
       <div class="step-card">
         <div class="step-num">3</div>
@@ -103,8 +104,8 @@
       </div>
       <div class="step-card">
         <div class="step-num">4</div>
-        <h3>Share & Embed ke LMS</h3>
-        <p>Bagikan tautan langsung <code>#p=1</code> atau sematkan kode <code>&lt;iframe&gt;</code> Rak Buku 3D ke Moodle LMS Labschool.</p>
+        <h3>Share, Jual & Embed LMS</h3>
+        <p>Bagikan tautan langsung <code>#p=1</code>, jual modul di Marketplace, atau sematkan kode <code>&lt;iframe&gt;</code> ke Moodle LMS.</p>
       </div>
     </div>
   </section>
@@ -113,7 +114,7 @@
   <section id="explore">
     <div class="section-head">
       <h2>Explore Interactive 3D Virtual Bookcase</h2>
-      <p>Jelajahi katalog buku digital Kurikulum Merdeka, modul praktikum laboratorium, dan panduan siswa.</p>
+      <p>Jelajahi katalog buku digital Kurikulum Merdeka, modul premium karya guru, dan koleksi buku siswa.</p>
     </div>
 
     <div class="filter-bar">
@@ -144,7 +145,7 @@
   <section id="features" class="features-section">
     <div class="section-head" id="ai-lab">
       <h2>Powerful Features for Modern Digital Publishing</h2>
-      <p>Dirancang khusus untuk kebutuhan akademik, perpustakaan digital sekolah, dan publikasi interaktif.</p>
+      <p>Dirancang khusus untuk kebutuhan akademik, perpustakaan digital sekolah, dan marketplace modul guru-siswa.</p>
     </div>
     <div class="features-grid">
       <div class="feat-card">
@@ -153,14 +154,14 @@
         <p>Animasi lipatan kertas 3D realistis 60 FPS lengkap dengan efek suara lembaran kertas Web Audio API dan bayangan silinder.</p>
       </div>
       <div class="feat-card">
-        <div class="feat-icon">🔍</div>
-        <h3>Full-Text OCR & Yellow Highlight</h3>
-        <p>Cari kata kunci atau rumus matematika di ratusan halaman secara instan dengan penanda sorot kuning otomatis di lokasi kata.</p>
+        <div class="feat-icon">🛒</div>
+        <h3>Teacher & Student Marketplace</h3>
+        <p>Guru dapat menjual buku/modul digital dengan pratinjau halaman gratis, dan siswa dapat membeli serta menyimpan buku ke Koleksi Pribadi.</p>
       </div>
       <div class="feat-card">
         <div class="feat-icon">🔒</div>
-        <h3>Password Protected Books & DRM</h3>
-        <p>Kunci buku ujian atau modul eksklusif dengan kata sandi terenkripsi, pembatasan domain iframe, dan watermark dinamis.</p>
+        <h3>Password Protected Books & OTP</h3>
+        <p>Kunci buku ujian dengan kata sandi terenkripsi, verifikasi email registrasi via Google Workspace XOAUTH2, dan Captcha penjumlahan.</p>
       </div>
       <div class="feat-card">
         <div class="feat-icon">🖍️</div>
@@ -184,34 +185,34 @@
   <footer class="site-footer">
     <div class="footer-inner">
       <div style="display:flex;align-items:center;gap:12px;">
-        <img src="/viewer/assets/branding/labschool-logo.svg" alt="FlipLabs" style="height:34px;">
-        <span style="font-size:13px;color:var(--text-dim);">© 2026 FlipLabs Digital Publishing Platform • books.labschool.xyz</span>
+        <div class="brand-icon">📖</div>
+        <span style="font-size:13.5px;font-weight:700;color:var(--text-body);">© 2026 FlipLabs Digital Publishing Platform • books.labschool.xyz</span>
       </div>
-      <div style="display:flex;gap:20px;font-size:13.5px;">
-        <a href="/" style="color:#cbd5e1;text-decoration:none;">Home</a>
-        <a href="/templates" style="color:#cbd5e1;text-decoration:none;">Templates</a>
-        <a href="/pricing" style="color:#cbd5e1;text-decoration:none;">Pricing</a>
-        <a href="#explore" style="color:#cbd5e1;text-decoration:none;">Explore Bookcase</a>
+      <div style="display:flex;gap:20px;font-size:13.5px;font-weight:600;">
+        <a href="/" style="color:var(--text-body);text-decoration:none;">Home</a>
+        <a href="/marketplace" style="color:var(--text-body);text-decoration:none;">Marketplace</a>
+        <a href="/templates" style="color:var(--text-body);text-decoration:none;">Templates</a>
+        <a href="/pricing" style="color:var(--text-body);text-decoration:none;">Pricing</a>
       </div>
     </div>
   </footer>
 
-  <!-- Login & Registration Modal -->
+  <!-- Login, Registration & Email Verification Modal -->
   <div id="authModal" class="modal-overlay">
-    <div class="modal-box" style="max-width:440px;">
+    <div class="modal-box" style="max-width:450px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
         <h3 id="authModalTitle">👤 Masuk Akun FlipLabs</h3>
         <button class="btn" style="padding:4px 10px;" onclick="document.getElementById('authModal').classList.remove('open')">✕</button>
       </div>
 
-      <div id="authRequirementBanner" style="display:none;margin-bottom:14px;padding:10px 12px;border-radius:9px;background:rgba(234,179,8,0.14);border:1px solid rgba(234,179,8,0.4);color:#fde047;font-size:12px;line-height:1.45;"></div>
+      <div id="authRequirementBanner" style="display:none;margin-bottom:14px;padding:10px 12px;border-radius:9px;background:#fefce8;border:1px solid #fde047;color:#854d0e;font-size:12.5px;font-weight:600;line-height:1.45;"></div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+      <div id="authTabsWrap" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
         <button id="tabBtnLogin" class="btn btn-primary" style="justify-content:center;" onclick="switchAuthTab('login')">Masuk (Login)</button>
         <button id="tabBtnRegister" class="btn" style="justify-content:center;" onclick="switchAuthTab('register')">Daftar Baru</button>
       </div>
 
-      <!-- Login Form -->
+      <!-- 1. Login Form (with 2-Digit Math Addition Captcha) -->
       <form id="loginForm">
         <div class="form-row">
           <label>Alamat Email</label>
@@ -221,28 +222,36 @@
           <label>Kata Sandi</label>
           <input id="loginPassword" type="password" class="form-control" placeholder="••••••••" required>
         </div>
-        <div id="loginStatus" style="font-size:12px;color:#f87171;margin-bottom:10px;"></div>
+        <div class="form-row">
+          <label>Verifikasi Keamanan (Penjumlahan 2 Digit)</label>
+          <div class="captcha-row">
+            <div id="loginCaptchaQuestion" class="captcha-badge">.. + .. = ?</div>
+            <input id="loginCaptchaAnswer" type="number" class="form-control" placeholder="Hasil penjumlahan" required>
+            <button type="button" class="btn" onclick="loadLoginCaptcha()" title="Ganti Soal Captcha">🔄</button>
+          </div>
+        </div>
+        <div id="loginStatus" style="font-size:12.5px;color:#dc2626;font-weight:600;margin-bottom:10px;"></div>
         <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;">
           🔐 Masuk ke FlipLabs
         </button>
       </form>
 
-      <!-- Registration Form -->
+      <!-- 2. Registration Form -->
       <form id="registerForm" style="display:none;">
         <div class="form-row">
           <label>Nama Lengkap</label>
           <input id="regName" type="text" class="form-control" placeholder="Nama Guru / Siswa" required>
         </div>
         <div class="form-row">
-          <label>Alamat Email Sekolah / Pribadi</label>
-          <input id="regEmail" type="email" class="form-control" placeholder="nama@labschool.sch.id" required>
+          <label>Alamat Email Aktif (Untuk Pengiriman Kode OTP)</label>
+          <input id="regEmail" type="email" class="form-control" placeholder="nama@labschool.sch.id / gmail.com" required>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div class="form-row">
             <label>Peran (Role)</label>
             <select id="regRole" class="form-control">
-              <option value="siswa">Siswa (Plan Basic)</option>
-              <option value="guru">Guru / Pengajar (Plan Pro)</option>
+              <option value="siswa">Siswa (Pembeli & Koleksi Buku)</option>
+              <option value="guru">Guru / Penulis (Bisa Jual Buku)</option>
             </select>
           </div>
           <div class="form-row">
@@ -254,19 +263,39 @@
           <label>Kata Sandi (Minimal 6 Karakter)</label>
           <input id="regPassword" type="password" class="form-control" placeholder="Minimal 6 karakter" required>
         </div>
-        <div id="regStatus" style="font-size:12px;color:#f87171;margin-bottom:10px;"></div>
-        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;">
-          ✨ Daftar & Aktifkan Akun
+        <div id="regStatus" style="font-size:12.5px;color:#dc2626;font-weight:600;margin-bottom:10px;"></div>
+        <button id="btnSubmitRegister" type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;">
+          📧 Daftar & Kirim Kode Verifikasi Email
         </button>
+      </form>
+
+      <!-- 3. Email Verification OTP Form -->
+      <form id="verifyEmailForm" style="display:none;">
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:14px;margin-bottom:14px;font-size:13px;color:#1e3a8a;">
+          📧 Kode verifikasi 6 digit telah dikirim melalui <b>admin@labschool.xyz</b> ke:<br>
+          <b id="verifyTargetEmail" style="font-size:14px;color:#0088ff;"></b>
+        </div>
+        <div class="form-row">
+          <label>Masukkan Kode Verifikasi OTP (6 Digit)</label>
+          <input id="verifyOtpInput" type="text" maxlength="6" class="form-control" placeholder="Contoh: 482915" style="font-size:20px;font-weight:900;letter-spacing:6px;text-align:center;" required>
+        </div>
+        <div id="verifyStatus" style="font-size:12.5px;color:#dc2626;font-weight:600;margin-bottom:10px;"></div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;margin-bottom:8px;">
+          ✅ Verifikasi Email & Aktifkan Akun
+        </button>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <button type="button" class="btn" style="font-size:12px;padding:6px 10px;" onclick="resendEmailOtp()">🔄 Kirim Ulang OTP</button>
+          <button type="button" class="btn" style="font-size:12px;padding:6px 10px;" onclick="switchAuthTab('login')">← Kembali ke Login</button>
+        </div>
       </form>
     </div>
   </div>
 
-  <!-- Upload & Convert PDF Modal -->
+  <!-- Upload & Convert PDF Modal (With Teacher Marketplace Selling Options) -->
   <div id="uploadModal" class="modal-overlay">
     <div class="modal-box">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <h3>📤 Unggah PDF & Konversi ke Flipbook 3D</h3>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h3>📤 Unggah PDF & Terbitkan Buku 3D</h3>
         <button class="btn" style="padding:4px 10px;" onclick="document.getElementById('uploadModal').classList.remove('open')">✕</button>
       </div>
       <form id="uploadForm">
@@ -280,7 +309,7 @@
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div class="form-row">
-            <label>Penulis / Tim Penyusun</label>
+            <label>Penulis / Guru Penyusun</label>
             <input id="upAuthor" type="text" class="form-control" value="Tim Guru Labschool">
           </div>
           <div class="form-row">
@@ -298,15 +327,25 @@
             <select id="upTier" class="form-control">
               <option value="enterprise">ENTERPRISE (Full + AI Tutor + DRM)</option>
               <option value="pro">PRO (Guru + Stabilo + FlipShot + Download)</option>
-              <option value="basic">BASIC (Siswa Baca 3D Standar - No Download)</option>
+              <option value="basic">BASIC (Siswa Baca 3D Standar)</option>
             </select>
           </div>
         </div>
-        <div class="form-row">
-          <label>🔒 Kata Sandi Proteksi Buku (Opsional — Kosongkan jika buku publik)</label>
-          <input id="upPassword" type="text" class="form-control" placeholder="Contoh: UJIAN2026 (Kosongkan bila tanpa password)">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;background:#f0f7ff;padding:12px;border-radius:10px;border:1px solid #bfdbfe;margin-bottom:14px;">
+          <div class="form-row" style="margin-bottom:0;">
+            <label>🛒 Harga Jual Buku (Rp) <small>(0 = Gratis)</small></label>
+            <input id="upPrice" type="number" min="0" step="1000" class="form-control" value="0" placeholder="Misal: 45000">
+          </div>
+          <div class="form-row" style="margin-bottom:0;">
+            <label>📖 Jml Halaman Preview Gratis</label>
+            <input id="upPreviewPages" type="number" min="1" max="50" class="form-control" value="3">
+          </div>
         </div>
-        <div id="uploadStatus" style="font-size:12.5px;color:#38bdf8;margin:10px 0;"></div>
+        <div class="form-row">
+          <label>🔒 Kata Sandi Proteksi Buku (Opsional — Kosongkan jika tanpa password)</label>
+          <input id="upPassword" type="text" class="form-control" placeholder="Kosongkan bila tidak dikunci sandi">
+        </div>
+        <div id="uploadStatus" style="font-size:12.5px;color:#0088ff;font-weight:600;margin:10px 0;"></div>
         <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px;">
           <button type="button" class="btn" onclick="document.getElementById('uploadModal').classList.remove('open')">Batal</button>
           <button id="btnSubmitUpload" type="submit" class="btn btn-primary">🚀 Proses & Terbitkan Flipbook</button>
@@ -328,7 +367,7 @@
       </div>
       <div class="form-row">
         <label>Kode HTML Iframe (Moodle Page / Label / Book Resource):</label>
-        <textarea id="embedIframeCode" class="form-control" rows="3" readonly style="font-family:monospace;color:#38bdf8;"></textarea>
+        <textarea id="embedIframeCode" class="form-control" rows="3" readonly style="font-family:monospace;color:#0088ff;"></textarea>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:8px;">
         <button class="btn btn-primary" onclick="navigator.clipboard.writeText(document.getElementById('embedIframeCode').value); alert('Kode Iframe berhasil disalin!')">
@@ -338,6 +377,6 @@
     </div>
   </div>
 
-  <script src="/bookcase/bookcase.js?v=3.0"></script>
+  <script src="/bookcase/bookcase.js?v=3.2"></script>
 </body>
 </html>

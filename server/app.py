@@ -1,22 +1,27 @@
 #!/usr/bin/env python3
 """
-FlipLabs Lightweight Production Backend Server (FastAPI)
---------------------------------------------------------
-Provides 3D E-Book Viewer, Virtual Bookcase, PDF Ingestion Converter,
-User Registration, Authentication, Role & License Plan Management, and Admin Console.
+FlipLabs Production Backend Server (FastAPI v3.0)
+-------------------------------------------------
+Provides:
+- 3D E-Book Viewer, Virtual Bookcase, Templates Gallery, Pricing & Books Marketplace
+- Google Workspace XOAUTH2 Email Verification (admin@labschool.xyz)
+- 2-Digit Addition Login Captcha
+- Teacher Book Selling & Student Book Buying / Personal Book Collection
 """
 
 import datetime
 import json
 import os
+import random
 import re
+import secrets
 import shutil
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, UploadFile
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -28,14 +33,18 @@ from converter import LICENSE_PRESETS, convert_pdf_to_flipbook, slugify  # noqa:
 from auth_db import (  # noqa: E402
     create_session,
     delete_session,
+    generate_math_captcha,
     get_all_book_stats,
     get_conn,
     get_user_by_token,
+    get_user_owned_books,
     hash_password,
     increment_book_view,
     init_db,
+    verify_math_captcha,
     verify_password,
 )
+from mailer import send_verification_email  # noqa: E402
 
 BOOKS_DIR = ROOT_DIR / "books"
 VIEWER_DIR = ROOT_DIR / "viewer"
@@ -48,9 +57,9 @@ UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 ADMIN_DIR.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(
-    title="FlipLabs — Labschool Interactive 3D E-Book Platform",
-    description="Perpustakaan Digital 3D, Konversi E-Book & Manajemen Lisensi Labschool (books.labschool.xyz)",
-    version="2.0.0",
+    title="FlipLabs — Labschool Interactive 3D E-Book & Marketplace Platform",
+    description="Perpustakaan Digital 3D, Konversi E-Book, Marketplace Buku Guru-Siswa & Manajemen Lisensi (books.labschool.xyz)",
+    version="3.0.0",
 )
 
 
@@ -66,19 +75,48 @@ def on_startup():
 
 
 @app.get("/books/{book_id}/book-config.json")
-def serve_sanitized_book_config(book_id: str):
-    """Serve book-config.json with password stripped so it cannot be read via DevTools."""
+def serve_sanitized_book_config(
+    book_id: str,
+    authorization: Optional[str] = Header(None),
+):
+    """Serve book-config.json with password stripped and marketplace ownership attached."""
     cfg_path = BOOKS_DIR / book_id / "book-config.json"
     if not cfg_path.exists():
         raise HTTPException(status_code=404, detail="Config buku tidak ditemukan")
     with open(cfg_path, "r", encoding="utf-8") as f:
         cfg = json.load(f)
+
     sec = cfg.get("security", {})
     has_pw = bool(sec.get("isPasswordProtected") and sec.get("password"))
     cfg["security"] = {
         "isPasswordProtected": has_pw,
         "disableRightClick": sec.get("disableRightClick", False),
         "allowedDomains": sec.get("allowedDomains", []),
+    }
+
+    # Attach marketplace info
+    stats_map = get_all_book_stats()
+    st = stats_map.get(book_id, {})
+    is_for_sale = bool(st.get("is_for_sale", 0) and st.get("price", 0) > 0)
+    price = int(st.get("price", 0))
+    preview_pages = int(st.get("preview_pages", 3))
+
+    user = get_user_by_token(authorization)
+    owned_ids = get_user_owned_books(user["email"]) if user else []
+    is_owned = bool(
+        not is_for_sale
+        or (user and user.get("role") == "admin")
+        or (book_id in owned_ids)
+    )
+
+    cfg["marketplace"] = {
+        "isForSale": is_for_sale,
+        "price": price,
+        "previewPages": preview_pages,
+        "salesCount": int(st.get("sales_count", 0)),
+        "ownerEmail": st.get("owner_email", "guru@labschool.xyz"),
+        "description": st.get("description", ""),
+        "isOwned": is_owned,
     }
     return JSONResponse(cfg)
 
@@ -103,7 +141,6 @@ def verify_book_password(
     if not sec.get("isPasswordProtected") or not real_pw:
         return {"status": "ok", "unlocked": True}
 
-    # Allow admin bypass if requested with __ADMIN_BYPASS__
     user = get_user_by_token(authorization)
     if user and user.get("role") == "admin" and req.password == "__ADMIN_BYPASS__":
         return {"status": "ok", "unlocked": True}
@@ -118,10 +155,6 @@ app.mount("/viewer", StaticFiles(directory=str(VIEWER_DIR), html=True), name="vi
 app.mount("/bookcase", StaticFiles(directory=str(BOOKCASE_DIR), html=True), name="bookcase")
 app.mount("/admin-assets", StaticFiles(directory=str(ADMIN_DIR), html=True), name="admin_assets")
 app.mount("/books", StaticFiles(directory=str(BOOKS_DIR)), name="books")
-
-
-def get_current_user(authorization: Optional[str] = Header(None)) -> Optional[Dict[str, Any]]:
-    return get_user_by_token(authorization)
 
 
 def require_user(authorization: Optional[str] = Header(None)) -> Dict[str, Any]:
@@ -140,7 +173,7 @@ def require_admin(authorization: Optional[str] = Header(None)) -> Dict[str, Any]
 
 @app.api_route("/health", methods=["GET", "HEAD"])
 def health_check():
-    return {"status": "ok", "service": "fliplabs", "domain": "books.labschool.xyz", "version": "2.0.0"}
+    return {"status": "ok", "service": "fliplabs", "domain": "books.labschool.xyz", "version": "3.0.0"}
 
 
 @app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
@@ -160,6 +193,12 @@ def serve_templates_page():
     return FileResponse(str(BOOKCASE_DIR / "templates.html"))
 
 
+@app.api_route("/marketplace", methods=["GET", "HEAD"], response_class=HTMLResponse)
+@app.api_route("/marketplace/", methods=["GET", "HEAD"], response_class=HTMLResponse)
+def serve_marketplace_page():
+    return FileResponse(str(BOOKCASE_DIR / "marketplace.html"))
+
+
 @app.api_route("/admin", methods=["GET", "HEAD"], response_class=HTMLResponse)
 def serve_admin_portal():
     return FileResponse(str(ADMIN_DIR / "index.html"))
@@ -175,12 +214,20 @@ def serve_book_viewer(book_id: str):
 
 
 # ============================================================================
-# AUTHENTICATION & REGISTRATION ENDPOINTS
+# CAPTCHA, AUTHENTICATION & EMAIL VERIFICATION ENDPOINTS
 # ============================================================================
+
+@app.get("/api/auth/captcha")
+def get_login_captcha():
+    """Returns a simple 2-digit math addition challenge (e.g. 24 + 35 = ?)."""
+    return generate_math_captcha()
+
 
 class LoginRequest(BaseModel):
     email: str
     password: str
+    captchaId: Optional[str] = None
+    captchaAnswer: Optional[str] = None
 
 
 class RegisterRequest(BaseModel):
@@ -188,7 +235,16 @@ class RegisterRequest(BaseModel):
     email: str
     password: str
     unit: str = "SMP Labschool Jakarta"
-    role: str = "siswa"  # siswa | guru
+    role: str = "siswa"
+
+
+class VerifyEmailOtpRequest(BaseModel):
+    email: str
+    otpCode: str
+
+
+class ResendOtpRequest(BaseModel):
+    email: str
 
 
 class ProfileUpdateRequest(BaseModel):
@@ -199,6 +255,14 @@ class ProfileUpdateRequest(BaseModel):
 
 @app.post("/api/auth/login")
 def login_endpoint(req: LoginRequest):
+    # Verify 2-digit math captcha if captchaId is provided
+    if req.captchaId is not None:
+        if not verify_math_captcha(req.captchaId, req.captchaAnswer or ""):
+            raise HTTPException(
+                status_code=400,
+                detail="Jawaban Captcha penjumlahan salah atau kedaluwarsa. Silakan hitung kembali.",
+            )
+
     conn = get_conn()
     row = conn.execute(
         "SELECT * FROM users WHERE lower(email) = lower(?)",
@@ -212,6 +276,12 @@ def login_endpoint(req: LoginRequest):
     if row["status"] != "active":
         raise HTTPException(status_code=403, detail="Akun Anda sedang dinonaktifkan oleh Administrator")
 
+    if int(row["email_verified"] or 0) == 0:
+        raise HTTPException(
+            status_code=403,
+            detail=f"UNVERIFIED_EMAIL:{row['email']}:Alamat email belum diverifikasi. Silakan masukkan kode OTP 6 digit yang telah dikirim ke email Anda.",
+        )
+
     token = create_session(row["id"])
     user_dict = {
         "id": row["id"],
@@ -221,6 +291,7 @@ def login_endpoint(req: LoginRequest):
         "license_tier": row["license_tier"],
         "unit": row["unit"],
         "status": row["status"],
+        "email_verified": 1,
     }
     return {"status": "ok", "token": token, "user": user_dict}
 
@@ -234,39 +305,144 @@ def register_endpoint(req: RegisterRequest):
     role = req.role.lower() if req.role.lower() in ("siswa", "guru") else "siswa"
     default_tier = "pro" if role == "guru" else "basic"
     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    otp_code = str(random.randint(100000, 999999))
+    verify_tok = secrets.token_urlsafe(24)
 
     conn = get_conn()
-    existing = conn.execute("SELECT id FROM users WHERE lower(email) = ?", (email,)).fetchone()
+    existing = conn.execute("SELECT id, email_verified FROM users WHERE lower(email) = ?", (email,)).fetchone()
     if existing:
+        if int(existing["email_verified"] or 0) == 1:
+            conn.close()
+            raise HTTPException(status_code=409, detail="Email sudah terdaftar. Silakan langsung login.")
+        else:
+            # Update OTP for unverified account
+            conn.execute(
+                """
+                UPDATE users
+                SET name = ?, password_hash = ?, role = ?, license_tier = ?, unit = ?,
+                    verification_code = ?, verify_token = ?
+                WHERE id = ?
+                """,
+                (req.name.strip(), hash_password(req.password), role, default_tier, req.unit.strip(), otp_code, verify_tok, existing["id"]),
+            )
+            conn.commit()
+            conn.close()
+    else:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            INSERT INTO users
+            (name, email, password_hash, role, license_tier, unit, status, email_verified, verification_code, verify_token, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, 'active', 0, ?, ?, ?)
+            """,
+            (req.name.strip(), email, hash_password(req.password), role, default_tier, req.unit.strip(), otp_code, verify_tok, now),
+        )
+        conn.commit()
         conn.close()
-        raise HTTPException(status_code=409, detail="Email sudah terdaftar. Silakan langsung login.")
 
-    cur = conn.cursor()
-    cur.execute(
-        """
-        INSERT INTO users (name, email, password_hash, role, license_tier, unit, status, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, 'active', ?)
-        """,
-        (req.name.strip(), email, hash_password(req.password), role, default_tier, req.unit.strip(), now),
+    verify_url = f"https://books.labschool.xyz/verify-email?token={verify_tok}"
+    mail_res = send_verification_email(
+        to_email=email,
+        full_name=req.name.strip(),
+        otp_code=otp_code,
+        verify_url=verify_url,
     )
-    user_id = cur.lastrowid
+
+    return {
+        "status": "pending_verification",
+        "email": email,
+        "mailSent": mail_res.get("success", False),
+        "mailMessage": mail_res.get("message", ""),
+        "message": f"Kode verifikasi OTP 6 digit telah dikirim dari admin@labschool.xyz ke {email}.",
+    }
+
+
+@app.post("/api/auth/verify-email")
+def verify_email_otp(req: VerifyEmailOtpRequest):
+    email = req.email.strip().lower()
+    code = req.otpCode.strip()
+
+    conn = get_conn()
+    row = conn.execute("SELECT * FROM users WHERE lower(email) = ?", (email,)).fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Akun tidak ditemukan")
+
+    if row["verification_code"] != code:
+        conn.close()
+        raise HTTPException(status_code=400, detail="Kode OTP verifikasi tidak sesuai. Silakan periksa kembali email Anda.")
+
+    conn.execute(
+        "UPDATE users SET email_verified = 1, verification_code = '', verify_token = '' WHERE id = ?",
+        (row["id"],),
+    )
     conn.commit()
     conn.close()
 
-    token = create_session(user_id)
+    token = create_session(row["id"])
     return {
         "status": "ok",
         "token": token,
         "user": {
-            "id": user_id,
-            "name": req.name.strip(),
-            "email": email,
-            "role": role,
-            "license_tier": default_tier,
-            "unit": req.unit.strip(),
-            "status": "active",
+            "id": row["id"],
+            "name": row["name"],
+            "email": row["email"],
+            "role": row["role"],
+            "license_tier": row["license_tier"],
+            "unit": row["unit"],
+            "status": row["status"],
+            "email_verified": 1,
         },
     }
+
+
+@app.post("/api/auth/resend-verification")
+def resend_verification_otp(req: ResendOtpRequest):
+    email = req.email.strip().lower()
+    conn = get_conn()
+    row = conn.execute("SELECT * FROM users WHERE lower(email) = ?", (email,)).fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Email tidak ditemukan")
+
+    otp_code = str(random.randint(100000, 999999))
+    verify_tok = secrets.token_urlsafe(24)
+    conn.execute(
+        "UPDATE users SET verification_code = ?, verify_token = ? WHERE id = ?",
+        (otp_code, verify_tok, row["id"]),
+    )
+    conn.commit()
+    conn.close()
+
+    verify_url = f"https://books.labschool.xyz/verify-email?token={verify_tok}"
+    mail_res = send_verification_email(
+        to_email=email,
+        full_name=row["name"],
+        otp_code=otp_code,
+        verify_url=verify_url,
+    )
+    return {
+        "status": "ok",
+        "mailSent": mail_res.get("success", False),
+        "message": f"Kode OTP baru telah dikirim ulang ke {email}.",
+    }
+
+
+@app.get("/verify-email")
+def verify_email_link(token: str = Query(...)):
+    conn = get_conn()
+    row = conn.execute("SELECT * FROM users WHERE verify_token = ?", (token.strip(),)).fetchone()
+    if not row:
+        conn.close()
+        return RedirectResponse(url="/#login")
+
+    conn.execute(
+        "UPDATE users SET email_verified = 1, verification_code = '', verify_token = '' WHERE id = ?",
+        (row["id"],),
+    )
+    conn.commit()
+    conn.close()
+    return RedirectResponse(url="/#verified")
 
 
 @app.post("/api/auth/logout")
@@ -277,7 +453,8 @@ def logout_endpoint(authorization: Optional[str] = Header(None)):
 
 @app.get("/api/auth/me")
 def me_endpoint(user: Dict[str, Any] = Depends(require_user)):
-    return {"status": "ok", "user": user}
+    owned = get_user_owned_books(user["email"])
+    return {"status": "ok", "user": user, "ownedBooks": owned}
 
 
 @app.put("/api/auth/profile")
@@ -299,14 +476,16 @@ def update_my_profile(req: ProfileUpdateRequest, user: Dict[str, Any] = Depends(
 
 
 # ============================================================================
-# BOOKS CATALOG & UPLOAD ENDPOINTS
+# BOOKS CATALOG, UPLOAD & MARKETPLACE ENDPOINTS
 # ============================================================================
 
 @app.get("/api/books")
 def list_books(authorization: Optional[str] = Header(None)):
     user = get_user_by_token(authorization)
     is_admin = bool(user and user.get("role") == "admin")
+    owned_ids = get_user_owned_books(user["email"]) if user else []
     stats_map = get_all_book_stats()
+
     books: List[Dict[str, Any]] = []
     if BOOKS_DIR.exists():
         for folder in sorted(BOOKS_DIR.iterdir()):
@@ -315,10 +494,18 @@ def list_books(authorization: Optional[str] = Header(None)):
                 try:
                     with open(cfg_file, "r", encoding="utf-8") as f:
                         b = json.load(f)
-                    st = stats_map.get(b.get("id", folder.name), {})
+                    bid = b.get("id", folder.name)
+                    st = stats_map.get(bid, {})
                     b["viewsCount"] = st.get("views_count", 0)
-                    b["ownerEmail"] = st.get("owner_email", "labsdul@gmail.com")
+                    b["ownerEmail"] = st.get("owner_email", "guru@labschool.xyz")
                     b["visibility"] = st.get("visibility", "public")
+                    b["isForSale"] = bool(st.get("is_for_sale", 0) and st.get("price", 0) > 0)
+                    b["price"] = int(st.get("price", 0))
+                    b["previewPages"] = int(st.get("preview_pages", 3))
+                    b["salesCount"] = int(st.get("sales_count", 0))
+                    b["description"] = st.get("description", b.get("subtitle", ""))
+                    b["isOwned"] = bool(not b["isForSale"] or is_admin or (bid in owned_ids))
+
                     sec = b.get("security", {})
                     has_pw = bool(sec.get("isPasswordProtected") and sec.get("password"))
                     b["isPasswordProtected"] = has_pw
@@ -343,6 +530,9 @@ async def upload_and_convert_pdf(
     subject: str = Form("Umum"),
     licenseTier: str = Form("enterprise"),
     bookPassword: str = Form(""),
+    price: int = Form(0),
+    previewPages: int = Form(3),
+    description: str = Form(""),
     authorization: Optional[str] = Header(None),
 ):
     if not file.filename or not file.filename.lower().endswith(".pdf"):
@@ -374,20 +564,145 @@ async def upload_and_convert_pdf(
             license_tier=licenseTier,
             password=bookPassword.strip(),
         )
+        clean_price = max(0, int(price))
+        is_sale = 1 if clean_price > 0 else 0
         conn = get_conn()
         conn.execute(
             """
-            INSERT INTO book_stats (book_id, owner_email, views_count, downloads_count, visibility)
-            VALUES (?, ?, 1, 0, 'public')
-            ON CONFLICT(book_id) DO UPDATE SET owner_email = excluded.owner_email
+            INSERT INTO book_stats
+            (book_id, owner_email, views_count, downloads_count, visibility, is_for_sale, price, preview_pages, sales_count, description)
+            VALUES (?, ?, 1, 0, 'public', ?, ?, ?, 0, ?)
+            ON CONFLICT(book_id) DO UPDATE SET
+              owner_email = excluded.owner_email,
+              is_for_sale = excluded.is_for_sale,
+              price = excluded.price,
+              preview_pages = excluded.preview_pages,
+              description = excluded.description
             """,
-            (book_slug, owner_email),
+            (book_slug, owner_email, is_sale, clean_price, max(1, int(previewPages)), description.strip()),
         )
         conn.commit()
         conn.close()
         return JSONResponse({"status": "success", "book": cfg})
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Gagal mengonversi PDF: {exc}")
+
+
+class BuyBookRequest(BaseModel):
+    paymentMethod: str = "QRIS"
+
+
+@app.post("/api/marketplace/buy/{book_id}")
+def buy_marketplace_book(
+    book_id: str,
+    req: BuyBookRequest,
+    user: Dict[str, Any] = Depends(require_user),
+):
+    stats_map = get_all_book_stats()
+    st = stats_map.get(book_id)
+    if not st:
+        raise HTTPException(status_code=404, detail="Buku tidak ditemukan di Marketplace")
+
+    price = int(st.get("price", 0))
+    seller_email = st.get("owner_email", "guru@labschool.xyz")
+    now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    invoice_id = f"INV-{datetime.datetime.now().strftime('%Y%m%d')}-{secrets.token_hex(3).upper()}"
+
+    conn = get_conn()
+    conn.execute(
+        """
+        INSERT INTO book_purchases (invoice_id, book_id, buyer_email, seller_email, amount, payment_method, purchased_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (invoice_id, book_id, user["email"], seller_email, price, req.paymentMethod, now),
+    )
+    conn.execute(
+        """
+        INSERT OR IGNORE INTO user_collections (user_email, book_id, source, added_at)
+        VALUES (?, ?, 'purchased', ?)
+        """,
+        (user["email"], book_id, now),
+    )
+    conn.execute(
+        "UPDATE book_stats SET sales_count = sales_count + 1 WHERE book_id = ?",
+        (book_id,),
+    )
+    conn.commit()
+    conn.close()
+
+    return {
+        "status": "ok",
+        "invoiceId": invoice_id,
+        "bookId": book_id,
+        "amount": price,
+        "paymentMethod": req.paymentMethod,
+        "message": f"Pembelian berhasil ({invoice_id})! Buku telah ditambahkan ke Koleksi Buku Anda.",
+    }
+
+
+@app.post("/api/marketplace/collect/{book_id}")
+def add_to_my_collection(book_id: str, user: Dict[str, Any] = Depends(require_user)):
+    stats_map = get_all_book_stats()
+    st = stats_map.get(book_id, {})
+    if st.get("is_for_sale") and int(st.get("price", 0)) > 0:
+        owned = get_user_owned_books(user["email"])
+        if book_id not in owned:
+            raise HTTPException(status_code=402, detail="Buku berbayar harus dibeli terlebih dahulu")
+
+    now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    conn = get_conn()
+    conn.execute(
+        """
+        INSERT OR IGNORE INTO user_collections (user_email, book_id, source, added_at)
+        VALUES (?, ?, 'saved', ?)
+        """,
+        (user["email"], book_id, now),
+    )
+    conn.commit()
+    conn.close()
+    return {"status": "ok", "message": "Buku berhasil disimpan ke Koleksi Buku Saya!"}
+
+
+@app.get("/api/marketplace/my-collection")
+def get_my_collection_and_sales(user: Dict[str, Any] = Depends(require_user)):
+    owned_ids = set(get_user_owned_books(user["email"]))
+    all_books = list_books(f"Bearer ")["books"]
+    for b in all_books:
+        if b["id"] in owned_ids:
+            b["isOwned"] = True
+
+    my_books = [b for b in all_books if b["id"] in owned_ids]
+
+    conn = get_conn()
+    purchases = [
+        dict(r)
+        for r in conn.execute(
+            "SELECT * FROM book_purchases WHERE lower(buyer_email) = lower(?) ORDER BY id DESC",
+            (user["email"],),
+        ).fetchall()
+    ]
+    if user["role"] == "admin":
+        sales = [
+            dict(r)
+            for r in conn.execute("SELECT * FROM book_purchases ORDER BY id DESC").fetchall()
+        ]
+    else:
+        sales = [
+            dict(r)
+            for r in conn.execute(
+                "SELECT * FROM book_purchases WHERE lower(seller_email) = lower(?) ORDER BY id DESC",
+                (user["email"],),
+            ).fetchall()
+        ]
+    conn.close()
+
+    total_revenue = sum(int(s.get("amount", 0)) for s in sales)
+    return {
+        "collection": my_books,
+        "purchases": purchases,
+        "sales": sales,
+        "totalRevenue": total_revenue,
+    }
 
 
 # ============================================================================
@@ -422,12 +737,17 @@ class AdminUpdateBookRequest(BaseModel):
     visibility: str = "public"
     isPasswordProtected: bool = False
     bookPassword: Optional[str] = None
+    isForSale: bool = False
+    price: int = 0
+    previewPages: int = 3
+    description: Optional[str] = ""
 
 
 @app.get("/api/admin/overview")
 def admin_overview(user: Dict[str, Any] = Depends(require_user)):
     conn = get_conn()
     users = [dict(r) for r in conn.execute("SELECT id, role, license_tier, status FROM users").fetchall()]
+    sales_rows = conn.execute("SELECT SUM(amount) AS rev, COUNT(*) AS cnt FROM book_purchases").fetchone()
     conn.close()
 
     books_resp = list_books(None)["books"]
@@ -449,6 +769,8 @@ def admin_overview(user: Dict[str, Any] = Depends(require_user)):
         "totalBooks": len(books_resp),
         "totalPagesRendered": total_pages,
         "totalBookViews": total_views,
+        "totalSalesCount": int(sales_rows["cnt"] or 0) if sales_rows else 0,
+        "totalSalesRevenue": int(sales_rows["rev"] or 0) if sales_rows else 0,
         "planDistribution": plan_counts,
         "roleDistribution": role_counts,
     }
@@ -459,7 +781,7 @@ def admin_list_users(admin: Dict[str, Any] = Depends(require_admin)):
     conn = get_conn()
     rows = conn.execute(
         """
-        SELECT id, name, email, role, license_tier, unit, status, created_at, last_login
+        SELECT id, name, email, role, license_tier, unit, status, email_verified, created_at, last_login
         FROM users
         ORDER BY CASE role WHEN 'admin' THEN 1 WHEN 'guru' THEN 2 ELSE 3 END, id ASC
         """
@@ -482,8 +804,8 @@ def admin_create_user(req: AdminCreateUserRequest, admin: Dict[str, Any] = Depen
 
     conn.execute(
         """
-        INSERT INTO users (name, email, password_hash, role, license_tier, unit, status, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO users (name, email, password_hash, role, license_tier, unit, status, email_verified, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)
         """,
         (
             req.name.strip(),
@@ -589,13 +911,22 @@ def admin_update_book(book_id: str, req: AdminUpdateBookRequest, user: Dict[str,
     with open(cfg_path, "w", encoding="utf-8") as f:
         json.dump(cfg, f, ensure_ascii=False, indent=2)
 
+    clean_price = max(0, int(req.price)) if req.isForSale else 0
+    is_sale_int = 1 if (req.isForSale and clean_price > 0) else 0
+
     conn = get_conn()
     conn.execute(
         """
-        INSERT INTO book_stats (book_id, visibility) VALUES (?, ?)
-        ON CONFLICT(book_id) DO UPDATE SET visibility = excluded.visibility
+        INSERT INTO book_stats (book_id, visibility, is_for_sale, price, preview_pages, description)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(book_id) DO UPDATE SET
+          visibility = excluded.visibility,
+          is_for_sale = excluded.is_for_sale,
+          price = excluded.price,
+          preview_pages = excluded.preview_pages,
+          description = excluded.description
         """,
-        (book_id, req.visibility),
+        (book_id, req.visibility, is_sale_int, clean_price, max(1, int(req.previewPages)), (req.description or "").strip()),
     )
     conn.commit()
     conn.close()
@@ -664,7 +995,7 @@ def ai_book_assistant(req: AIChatRequest):
     for _, page_num, txt in top_hits:
         parts.append(
             f"<div style='margin-bottom:8px;'>"
-            f"<b style='color:#38bdf8;cursor:pointer;' onclick='goToPage({page_num})'>📖 Halaman {page_num} (Klik untuk buka):</b><br>"
+            f"<b style='color:#0088ff;cursor:pointer;' onclick='goToPage({page_num})'>📖 Halaman {page_num} (Klik untuk buka):</b><br>"
             f"{txt[:320]}..."
             f"</div>"
         )

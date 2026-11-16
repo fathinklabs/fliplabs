@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Books Marketplace & Koleksi Buku Siswa | FlipLabs</title>
+  <style>
+    :root {
+      --text-dark: #0f172a;
+      --text-body: #334155;
+      --text-muted: #64748b;
+      --blue-primary: #0088ff;
+      --cyan-pro: #00bcd4;
+      --purple-ent: #6c47ff;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --border-light: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(180deg, #eef6ff 0%, #f8fbff 360px, #ffffff 760px);
+      color: var(--text-dark);
+      min-height: 100vh;
+    }
+
+    /* Unified Bright Top Header */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-light);
+      height: 68px;
+      padding: 0 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-left { display: flex; align-items: center; gap: 34px; }
+    .brand-link {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: #0f172a; font-weight: 900; font-size: 20px;
+    }
+    .brand-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, #0088ff, #1e40af);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 18px;
+    }
+    .nav-links { display: flex; align-items: center; gap: 24px; }
+    .nav-links a {
+      text-decoration: none; color: #334155; font-size: 14px; font-weight: 600;
+      transition: color 0.18s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--blue-primary); }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+
+    .btn {
+      padding: 9px 16px; border-radius: 8px; font-size: 13.5px; font-weight: 700;
+      border: 1px solid var(--border-light); background: #ffffff; color: var(--text-dark);
+      cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+      transition: all 0.18s;
+    }
+    .btn:hover { border-color: var(--blue-primary); color: var(--blue-primary); }
+    .btn-primary {
+      background: var(--blue-primary); color: #ffffff; border-color: var(--blue-primary);
+      box-shadow: 0 4px 14px rgba(0, 136, 255, 0.25);
+    }
+    .btn-primary:hover { background: #0070d6; color: #fff; }
+
+    /* Hero */
+    .market-hero {
+      max-width: 1200px; margin: 0 auto; padding: 52px 24px 32px; text-align: center;
+    }
+    .hero-pill {
+      display: inline-block; padding: 5px 14px; border-radius: 999px;
+      background: rgba(0, 136, 255, 0.1); color: var(--blue-primary);
+      font-size: 12px; font-weight: 800; letter-spacing: 0.7px; margin-bottom: 14px;
+    }
+    .market-hero h1 {
+      font-size: 40px; font-weight: 800; letter-spacing: -0.7px; margin-bottom: 12px;
+    }
+    .market-hero p {
+      font-size: 15.5px; color: var(--text-muted); max-width: 720px; margin: 0 auto 28px; line-height: 1.6;
+    }
+
+    /* Tabs & Search */
+    .market-controls {
+      max-width: 1240px; margin: 0 auto 28px; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+    }
+    .tab-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tab-pill {
+      padding: 10px 18px; border-radius: 10px; border: 1px solid var(--border-light);
+      background: #ffffff; color: var(--text-body); font-size: 13.5px; font-weight: 700;
+      cursor: pointer; transition: all 0.18s;
+    }
+    .tab-pill.active, .tab-pill:hover {
+      background: var(--blue-primary); color: #ffffff; border-color: var(--blue-primary);
+      box-shadow: 0 4px 12px rgba(0, 136, 255, 0.22);
+    }
+    .search-input {
+      min-width: 280px; padding: 10px 16px; border-radius: 10px;
+      border: 1px solid var(--border-light); background: #ffffff; font-size: 13.5px; outline: none;
+    }
+    .search-input:focus { border-color: var(--blue-primary); }
+
+    /* Cards Grid */
+    .market-container { max-width: 1240px; margin: 0 auto 72px; padding: 0 24px; }
+    .market-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;
+    }
+    .m-card {
+      background: #ffffff; border: 1px solid var(--border-light); border-radius: 16px;
+      overflow: hidden; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+      display: flex; flex-direction: column; transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+    .m-card:hover {
+      transform: translateY(-6px); box-shadow: 0 18px 42px rgba(15, 23, 42, 0.1);
+    }
+    .m-cover-stage {
+      height: 235px; background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+      position: relative; display: flex; align-items: center; justify-content: center; padding: 18px;
+    }
+    .m-cover-stage img {
+      width: 136px; height: 192px; object-fit: cover; border-radius: 3px 6px 6px 3px;
+      box-shadow: -8px 10px 22px rgba(15, 23, 42, 0.28); background: #fff;
+    }
+    .price-tag {
+      position: absolute; top: 14px; right: 14px;
+      padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 800;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    .price-tag.paid { background: #0088ff; color: #fff; }
+    .price-tag.free { background: #10b981; color: #fff; }
+    .owned-ribbon {
+      position: absolute; top: 14px; left: 14px;
+      background: #0f172a; color: #38bdf8; padding: 4px 10px; border-radius: 999px;
+      font-size: 11px; font-weight: 800;
+    }
+
+    .m-body { padding: 18px 20px; flex: 1; display: flex; flex-direction: column; }
+    .m-cat { font-size: 11.5px; font-weight: 700; color: var(--blue-primary); margin-bottom: 4px; }
+    .m-title { font-size: 16px; font-weight: 800; color: var(--text-dark); margin-bottom: 6px; line-height: 1.35; }
+    .m-desc { font-size: 12.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px; flex: 1; }
+    .m-meta {
+      display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);
+      padding-top: 10px; border-top: 1px solid #f1f5f9; margin-bottom: 14px;
+    }
+    .m-actions { display: flex; gap: 8px; }
+    .m-actions .btn { flex: 1; justify-content: center; padding: 10px; font-size: 13px; }
+
+    /* Teacher Revenue Box */
+    .seller-stats-box {
+      background: #ffffff; border: 1px solid var(--border-light); border-radius: 16px;
+      padding: 24px; margin-bottom: 28px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+      display: none;
+    }
+    .seller-stats-box.open { display: block; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(4px); z-index: 300; display: none;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-card {
+      background: #ffffff; border: 1px solid var(--border-light); border-radius: 18px;
+      width: 100%; max-width: 480px; padding: 26px;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
+    }
+    .form-row { margin-bottom: 14px; }
+    .form-row label { display: block; font-size: 12.5px; font-weight: 700; color: var(--text-body); margin-bottom: 6px; }
+    .form-control {
+      width: 100%; padding: 10px 12px; border-radius: 9px; border: 1px solid var(--border-light);
+      font-size: 13.5px; color: var(--text-dark); background: #f8fafc; outline: none;
+    }
+    .form-control:focus { border-color: var(--blue-primary); background: #fff; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="site-header">
+    <div class="header-left">
+      <a href="/" class="brand-link">
+        <div class="brand-icon">📖</div>
+        <span>FLIPLABS</span>
+      </a>
+      <nav class="nav-links">
+        <a href="/#features">Features ▾</a>
+        <a href="/#explore">Explore</a>
+        <a href="/marketplace" class="active">Marketplace 🛒</a>
+        <a href="/templates">Templates ▾</a>
+        <a href="/pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="header-right">
+      <a href="/admin" id="mktAdminBtn" class="btn" style="display:none;">⚙️ Panel Manajemen</a>
+      <a href="/#login" id="mktAuthBtn" class="btn">Sign in</a>
+      <a href="/#upload" class="btn btn-primary">👩‍🏫 Jual / Upload Buku</a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="market-hero">
+    <span class="hero-pill">🛒 LABSCHOOL DIGITAL BOOKSTORE & TEACHER MARKETPLACE</span>
+    <h1>Pasar Buku Digital Guru & Koleksi Siswa</h1>
+    <p>
+      Dapatkan modul pembelajaran interaktif, buku paket pembahasan lengkap karya Guru Labschool,
+      baca halaman sampel gratis (*Free Preview*), dan simpan ke dalam **Rak Koleksi Buku Saya**.
+    </p>
+  </section>
+
+  <!-- Filter & Collection Tabs -->
+  <section class="market-controls">
+    <div class="tab-pills">
+      <button class="tab-pill active" data-tab="all">🛒 Semua Katalog</button>
+      <button class="tab-pill" data-tab="paid">💎 Buku Premium Guru</button>
+      <button class="tab-pill" data-tab="free">🎁 Buku Gratis</button>
+      <button class="tab-pill" data-tab="collection">📚 Koleksi Buku Saya (<span id="myCollectionCount">0</span>)</button>
+      <button class="tab-pill" data-tab="seller" id="tabSellerBtn">👩‍🏫 Dashboard Penjualan Guru</button>
+    </div>
+    <input id="mktSearch" type="text" class="search-input" placeholder="🔍 Cari judul buku, guru penulis, atau mapel...">
+  </section>
+
+  <main class="market-container">
+    <!-- Teacher Sales Report Panel -->
+    <div id="sellerStatsBox" class="seller-stats-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+        <div>
+          <h3 style="font-size:18px;">👩‍🏫 Laporan Penjualan Buku Guru & Royalti Marketplace</h3>
+          <p style="font-size:13px;color:var(--text-muted);">Pantau pembelian modul oleh siswa dan unggah buku baru untuk dijual.</p>
+        </div>
+        <div style="display:flex;gap:14px;align-items:center;">
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;padding:10px 18px;border-radius:12px;text-align:right;">
+            <div style="font-size:11px;color:#64748b;font-weight:700;">TOTAL PENDAPATAN PENJUALAN</div>
+            <div id="sellerTotalRev" style="font-size:22px;font-weight:900;color:#0088ff;">Rp 0</div>
+          </div>
+          <a href="/#upload" class="btn btn-primary">➕ Terbitkan & Jual Buku Baru</a>
+        </div>
+      </div>
+      <div id="sellerSalesList" style="font-size:13px;color:var(--text-body);"></div>
+    </div>
+
+    <!-- Books Marketplace Grid -->
+    <div id="marketGrid" class="market-grid"></div>
+  </main>
+
+  <!-- Checkout & Buy Book Modal -->
+  <div id="buyModal" class="modal-overlay">
+    <div class="modal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h3 style="font-size:18px;">🛒 Checkout Pembelian Buku Digital</h3>
+        <button class="btn" style="padding:4px 10px;" onclick="document.getElementById('buyModal').classList.remove('open')">✕</button>
+      </div>
+      <div id="buyBookSummary" style="background:#f0f7ff;border:1px solid #bfdbfe;border-radius:12px;padding:14px;margin-bottom:16px;"></div>
+      <form id="buyForm">
+        <input type="hidden" id="buyBookId">
+        <div class="form-row">
+          <label>Pilih Metode Pembayaran</label>
+          <select id="buyPaymentMethod" class="form-control">
+            <option value="QRIS">📱 QRIS Instan (GoPay, OVO, Dana, M-Banking)</option>
+            <option value="VA Mandiri / BCA">🏦 Virtual Account Bank (Mandiri / BCA / BNI)</option>
+            <option value="Saldo Koperasi Labschool">🏫 Saldo Kartu Pelajar / Koperasi Labschool</option>
+          </select>
+        </div>
+        <div id="buyMsg" style="font-size:13px;color:#0088ff;margin-bottom:12px;"></div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;">
+          <button type="button" class="btn" onclick="document.getElementById('buyModal').classList.remove('open')">Batal</button>
+          <button id="btnConfirmBuy" type="submit" class="btn btn-primary">✅ Bayar & Buka Seluruh Halaman</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let allBooks = [];
+    let myCollectionIds = new Set();
+    let salesHistory = [];
+    let totalRevenue = 0;
+    let activeTab = 'all';
+    let currentUser = null;
+
+    function formatRupiah(num) {
+      return 'Rp ' + Number(num || 0).toLocaleString('id-ID');
+    }
+
+    function getToken() {
+      return localStorage.getItem('fliplabs_token') || '';
+    }
+
+    async function initMarketplace() {
+      try {
+        const rawUser = localStorage.getItem('fliplabs_user');
+        currentUser = rawUser ? JSON.parse(rawUser) : null;
+      } catch (e) { currentUser = null; }
+
+      const authBtn = document.getElementById('mktAuthBtn');
+      const adminBtn = document.getElementById('mktAdminBtn');
+      if (currentUser) {
+        authBtn.textContent = `👤 ${currentUser.name.split(' ')[0]} (${currentUser.role.toUpperCase()})`;
+        authBtn.href = '/admin';
+        adminBtn.style.display = 'inline-flex';
+      }
+
+      const token = getToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const [bkRes, colRes] = await Promise.all([
+        fetch('/api/books', { headers }),
+        token ? fetch('/api/marketplace/my-collection', { headers }) : Promise.resolve(null),
+      ]);
+
+      if (bkRes.ok) {
+        const data = await bkRes.json();
+        allBooks = data.books || [];
+      }
+
+      if (colRes && colRes.ok) {
+        const colData = await colRes.json();
+        (colData.collection || []).forEach((b) => myCollectionIds.add(b.id));
+        salesHistory = colData.sales || [];
+        totalRevenue = colData.totalRevenue || 0;
+      }
+
+      document.getElementById('myCollectionCount').textContent = myCollectionIds.size;
+      document.getElementById('sellerTotalRev').textContent = formatRupiah(totalRevenue);
+      renderSellerSales();
+      renderMarketGrid();
+    }
+
+    function renderSellerSales() {
+      const box = document.getElementById('sellerSalesList');
+      if (!salesHistory.length) {
+        box.innerHTML = '<div style="color:var(--text-muted);padding:8px 0;">Belum ada transaksi pembelian tercatat.</div>';
+        return;
+      }
+      box.innerHTML = salesHistory.slice(0, 8).map((s) => `
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;">
+          <span>🧾 <b>${s.invoice_id}</b> — Buku: <code>${s.book_id}</code> (Pembeli: ${s.buyer_email})</span>
+          <span style="font-weight:800;color:#10b981;">+ ${formatRupiah(s.amount)} (${s.payment_method})</span>
+        </div>
+      `).join('');
+    }
+
+    function renderMarketGrid() {
+      const q = (document.getElementById('mktSearch').value || '').toLowerCase();
+      const grid = document.getElementById('marketGrid');
+      const sellerBox = document.getElementById('sellerStatsBox');
+      sellerBox.classList.toggle('open', activeTab === 'seller');
+      grid.innerHTML = '';
+
+      const filtered = allBooks.filter((b) => {
+        const isPaid = b.isForSale && b.price > 0;
+        if (activeTab === 'paid' && !isPaid) return false;
+        if (activeTab === 'free' && isPaid) return false;
+        if (activeTab === 'collection' && !myCollectionIds.has(b.id) && !b.isOwned) return false;
+        if (q) {
+          const hay = `${b.title} ${b.author} ${b.subject} ${b.category}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+
+      if (!filtered.length) {
+        grid.innerHTML = `
+          <div style="grid-column:1/-1;text-align:center;padding:48px;background:#fff;border-radius:16px;border:1px solid var(--border-light);color:var(--text-muted);">
+            Belum ada buku pada kategori ini. Silakan pilih tab katalog lain atau tambahkan buku ke koleksi Anda.
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach((b) => {
+        const isPaid = b.isForSale && b.price > 0;
+        const isOwned = Boolean(b.isOwned || myCollectionIds.has(b.id));
+        const card = document.createElement('div');
+        card.className = 'm-card';
+        card.innerHTML = `
+          <div class="m-cover-stage">
+            ${isOwned ? '<span class="owned-ribbon">✓ MILIK SAYA</span>' : ''}
+            <span class="price-tag ${isPaid ? 'paid' : 'free'}">
+              ${isPaid ? formatRupiah(b.price) : 'GRATIS'}
+            </span>
+            <img src="/books/${b.id}/files/shot.jpg" onerror="this.src='/books/${b.id}/files/thumb/1.webp'" alt="${b.title}">
+          </div>
+          <div class="m-body">
+            <div class="m-cat">${b.category || 'Kurikulum Merdeka'} • ${b.subject || 'Umum'}</div>
+            <div class="m-title">${b.title}</div>
+            <div class="m-desc">${b.description || b.subtitle || 'Buku digital interaktif 3D Labschool.'}</div>
+            <div class="m-meta">
+              <span>👩‍🏫 ${b.author}</span>
+              <span>📖 <b>${b.totalPageCount} Hal</b> ${isPaid ? `(Preview ${b.previewPages} Hal)` : ''}</span>
+            </div>
+            <div class="m-actions">
+              <a href="/view/${b.id}#p=1" class="btn">
+                📖 ${isPaid && !isOwned ? `Preview (${b.previewPages} Hal)` : 'Baca Penuh 3D'}
+              </a>
+              ${
+                isPaid && !isOwned
+                  ? `<button class="btn btn-primary" onclick="openBuyModal('${b.id}')">🛒 Beli Buku</button>`
+                  : `<button class="btn btn-primary" onclick="saveToCollection('${b.id}')">📚 ${myCollectionIds.has(b.id) ? 'Tersimpan' : '+ Koleksi'}</button>`
+              }
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function openBuyModal(bookId) {
+      if (!currentUser) {
+        alert('Silakan masuk (Sign in) atau daftar akun terlebih dahulu untuk membeli buku.');
+        window.location.href = '/#login';
+        return;
+      }
+      const b = allBooks.find((x) => x.id === bookId);
+      if (!b) return;
+      document.getElementById('buyBookId').value = b.id;
+      document.getElementById('buyMsg').textContent = '';
+      document.getElementById('buyBookSummary').innerHTML = `
+        <div style="font-weight:800;font-size:15px;color:#0f172a;margin-bottom:4px;">${b.title}</div>
+        <div style="font-size:12.5px;color:#475569;margin-bottom:8px;">Penulis: ${b.author} • Total ${b.totalPageCount} Halaman</div>
+        <div style="font-size:20px;font-weight:900;color:#0088ff;">Harga: ${formatRupiah(b.price)}</div>
+      `;
+      document.getElementById('buyModal').classList.add('open');
+    }
+
+    async function saveToCollection(bookId) {
+      if (!currentUser) {
+        alert('Silakan masuk (Sign in) terlebih dahulu untuk menyimpan buku ke Koleksi Anda.');
+        window.location.href = '/#login';
+        return;
+      }
+      const res = await fetch(`/api/marketplace/collect/${bookId}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        myCollectionIds.add(bookId);
+        document.getElementById('myCollectionCount').textContent = myCollectionIds.size;
+        renderMarketGrid();
+        alert('📚 ' + data.message);
+      } else {
+        alert(data.detail || 'Gagal menyimpan ke koleksi');
+      }
+    }
+
+    document.getElementById('buyForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const bookId = document.getElementById('buyBookId').value;
+      const method = document.getElementById('buyPaymentMethod').value;
+      const msgEl = document.getElementById('buyMsg');
+      msgEl.textContent = '⏳ Memproses pembayaran & membuka akses buku...';
+
+      const res = await fetch(`/api/marketplace/buy/${bookId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({ paymentMethod: method }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        msgEl.textContent = '❌ ' + (data.detail || 'Pembayaran gagal');
+        return;
+      }
+      myCollectionIds.add(bookId);
+      msgEl.textContent = '✅ ' + data.message;
+      await initMarketplace();
+      setTimeout(() => {
+        document.getElementById('buyModal').classList.remove('open');
+        window.location.href = `/view/${bookId}#p=1`;
+      }, 900);
+    });
+
+    document.querySelectorAll('.tab-pill').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-pill').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeTab = btn.dataset.tab;
+        renderMarketGrid();
+      });
+    });
+
+    document.getElementById('mktSearch').addEventListener('input', renderMarketGrid);
+    initMarketplace();
+  </script>
+</body>
+</html>

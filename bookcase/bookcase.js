@@ -4,15 +4,24 @@ let activeTier = 'ALL';
 let searchKeyword = '';
 let currentUser = null;
 let pendingUploadAfterAuth = false;
+let currentCaptchaId = '';
+let pendingVerifyEmail = '';
+
+function formatRupiah(num) {
+  return 'Rp ' + Number(num || 0).toLocaleString('id-ID');
+}
 
 function triggerUploadBook() {
   if (!currentUser) {
     pendingUploadAfterAuth = true;
     openAuthModal(
       'register',
-      '🔒 Fitur Unggah Buku PDF hanya tersedia bagi pengguna yang sudah registrasi akun. Silakan daftar akun baru (atau masuk jika sudah punya akun) terlebih dahulu.'
+      '🔒 Fitur Unggah Buku PDF hanya tersedia bagi pengguna yang sudah registrasi dan verifikasi email. Silakan daftar akun baru (atau masuk jika sudah punya akun) terlebih dahulu.'
     );
     return;
+  }
+  if (currentUser.name) {
+    document.getElementById('upAuthor').value = currentUser.name;
   }
   document.getElementById('uploadModal').classList.add('open');
 }
@@ -38,12 +47,28 @@ function loadAuthSession() {
         }
       };
     } else {
-      authBtn.innerHTML = '👤 Masuk / Daftar';
+      authBtn.innerHTML = 'Sign in';
       authBtn.onclick = () => {
         pendingUploadAfterAuth = false;
         openAuthModal('login');
       };
     }
+  }
+}
+
+async function loadLoginCaptcha() {
+  try {
+    const res = await fetch('/api/auth/captcha');
+    if (res.ok) {
+      const data = await res.json();
+      currentCaptchaId = data.captchaId;
+      const qEl = document.getElementById('loginCaptchaQuestion');
+      if (qEl) qEl.textContent = data.question;
+      const ansEl = document.getElementById('loginCaptchaAnswer');
+      if (ansEl) ansEl.value = '';
+    }
+  } catch (e) {
+    console.error('Captcha error:', e);
   }
 }
 
@@ -62,14 +87,34 @@ function openAuthModal(tab, requirementNotice) {
 }
 
 function switchAuthTab(tab) {
+  const loginForm = document.getElementById('loginForm');
+  const regForm = document.getElementById('registerForm');
+  const verifyForm = document.getElementById('verifyEmailForm');
+  const tabsWrap = document.getElementById('authTabsWrap');
+
+  if (tab === 'verify') {
+    loginForm.style.display = 'none';
+    regForm.style.display = 'none';
+    verifyForm.style.display = 'block';
+    tabsWrap.style.display = 'none';
+    document.getElementById('authModalTitle').textContent = '📧 Verifikasi Alamat Email';
+    return;
+  }
+
+  tabsWrap.style.display = 'grid';
+  verifyForm.style.display = 'none';
   const isLogin = tab === 'login';
-  document.getElementById('loginForm').style.display = isLogin ? 'block' : 'none';
-  document.getElementById('registerForm').style.display = isLogin ? 'none' : 'block';
+  loginForm.style.display = isLogin ? 'block' : 'none';
+  regForm.style.display = isLogin ? 'none' : 'block';
   document.getElementById('tabBtnLogin').className = isLogin ? 'btn btn-primary' : 'btn';
   document.getElementById('tabBtnRegister').className = isLogin ? 'btn' : 'btn btn-primary';
   document.getElementById('authModalTitle').textContent = isLogin
     ? '👤 Masuk Akun FlipLabs'
     : '✨ Registrasi Pengguna Baru';
+
+  if (isLogin) {
+    loadLoginCaptcha();
+  }
 }
 
 async function handleLogin(e) {
@@ -84,10 +129,23 @@ async function handleLogin(e) {
       body: JSON.stringify({
         email: document.getElementById('loginEmail').value,
         password: document.getElementById('loginPassword').value,
+        captchaId: currentCaptchaId,
+        captchaAnswer: document.getElementById('loginCaptchaAnswer').value,
       }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Gagal login');
+    if (!res.ok) {
+      loadLoginCaptcha();
+      const detail = data.detail || 'Gagal login';
+      if (detail.startsWith('UNVERIFIED_EMAIL:')) {
+        const parts = detail.split(':');
+        pendingVerifyEmail = parts[1];
+        document.getElementById('verifyTargetEmail').textContent = pendingVerifyEmail;
+        switchAuthTab('verify');
+        return;
+      }
+      throw new Error(detail);
+    }
 
     localStorage.setItem('fliplabs_token', data.token);
     localStorage.setItem('fliplabs_user', JSON.stringify(data.user));
@@ -96,7 +154,7 @@ async function handleLogin(e) {
     fetchBooks();
     if (pendingUploadAfterAuth) {
       pendingUploadAfterAuth = false;
-      document.getElementById('uploadModal').classList.add('open');
+      triggerUploadBook();
     }
   } catch (err) {
     statusEl.textContent = '❌ ' + err.message;
@@ -106,7 +164,10 @@ async function handleLogin(e) {
 async function handleRegister(e) {
   e.preventDefault();
   const statusEl = document.getElementById('regStatus');
+  const btn = document.getElementById('btnSubmitRegister');
   statusEl.textContent = '';
+  btn.disabled = true;
+  btn.textContent = '⏳ Mengirim Kode OTP ke Email Anda...';
 
   try {
     const res = await fetch('/api/auth/register', {
@@ -123,6 +184,37 @@ async function handleRegister(e) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Gagal mendaftar');
 
+    pendingVerifyEmail = data.email;
+    document.getElementById('verifyTargetEmail').textContent = pendingVerifyEmail;
+    document.getElementById('verifyStatus').style.color = '#0088ff';
+    document.getElementById('verifyStatus').textContent = '✅ ' + (data.message || 'Kode OTP terkirim ke email Anda.');
+    switchAuthTab('verify');
+  } catch (err) {
+    statusEl.textContent = '❌ ' + err.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📧 Daftar & Kirim Kode Verifikasi Email';
+  }
+}
+
+async function handleVerifyEmail(e) {
+  e.preventDefault();
+  const statusEl = document.getElementById('verifyStatus');
+  statusEl.style.color = '#dc2626';
+  statusEl.textContent = '';
+
+  try {
+    const res = await fetch('/api/auth/verify-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: pendingVerifyEmail,
+        otpCode: document.getElementById('verifyOtpInput').value,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Kode OTP salah');
+
     localStorage.setItem('fliplabs_token', data.token);
     localStorage.setItem('fliplabs_user', JSON.stringify(data.user));
     loadAuthSession();
@@ -130,10 +222,29 @@ async function handleRegister(e) {
     fetchBooks();
     if (pendingUploadAfterAuth) {
       pendingUploadAfterAuth = false;
-      document.getElementById('uploadModal').classList.add('open');
+      triggerUploadBook();
     }
   } catch (err) {
     statusEl.textContent = '❌ ' + err.message;
+  }
+}
+
+async function resendEmailOtp() {
+  if (!pendingVerifyEmail) return;
+  const statusEl = document.getElementById('verifyStatus');
+  statusEl.style.color = '#0088ff';
+  statusEl.textContent = '⏳ Mengirim ulang kode OTP...';
+  try {
+    const res = await fetch('/api/auth/resend-verification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: pendingVerifyEmail }),
+    });
+    const data = await res.json();
+    statusEl.textContent = '✅ ' + (data.message || 'Kode OTP baru telah dikirim.');
+  } catch (e) {
+    statusEl.style.color = '#dc2626';
+    statusEl.textContent = '❌ Gagal mengirim ulang kode OTP.';
   }
 }
 
@@ -194,8 +305,12 @@ function renderBookshelf() {
   filtered.forEach((book) => {
     const tier = (book.licenseTier || 'enterprise').toLowerCase();
     const isLocked = Boolean(book.isPasswordProtected || (book.security && book.security.isPasswordProtected));
+    const isPaid = Boolean(book.isForSale && book.price > 0);
+    const priceBadgeHtml = isPaid
+      ? `<span style="position:absolute;bottom:10px;right:10px;background:#0088ff;color:#fff;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:999px;z-index:6;box-shadow:0 2px 8px rgba(0,0,0,0.35);">🛒 ${formatRupiah(book.price)}</span>`
+      : `<span style="position:absolute;bottom:10px;right:10px;background:#10b981;color:#fff;font-size:10px;font-weight:800;padding:3px 9px;border-radius:999px;z-index:6;">GRATIS</span>`;
     const lockBadgeHtml = isLocked
-      ? `<span style="position:absolute;top:10px;left:10px;background:rgba(15,23,42,0.88);border:1px solid #eab308;color:#fde047;font-size:10px;font-weight:700;padding:3px 7px;border-radius:999px;z-index:6;">🔒 Sandi</span>`
+      ? `<span style="position:absolute;top:10px;left:10px;background:#fefce8;border:1px solid #eab308;color:#854d0e;font-size:10px;font-weight:800;padding:3px 7px;border-radius:999px;z-index:6;">🔒 Sandi</span>`
       : '';
 
     const item = document.createElement('div');
@@ -205,6 +320,7 @@ function renderBookshelf() {
         <div class="book-3d-cover">
           ${lockBadgeHtml}
           <span class="tier-pill ${tier}">${tier}</span>
+          ${priceBadgeHtml}
           <img src="/books/${book.id}/files/shot.jpg" onerror="this.src='/books/${book.id}/files/thumb/1.webp'" alt="${book.title}">
         </div>
       </div>
@@ -212,8 +328,12 @@ function renderBookshelf() {
         <h3 title="${book.title}">${book.title}</h3>
         <p>${book.author} • <b>${book.totalPageCount} Hal</b> • 👁 ${book.viewsCount || 1}</p>
         <div class="book-card-btns">
-          <a href="/view/${book.id}#p=1" class="mini-btn read">${isLocked ? '🔒 Buka' : '📖 Baca 3D'}</a>
-          <button class="mini-btn" onclick="openEmbedBook('${book.id}', '${book.title.replace(/'/g, "\\'")}')">🔗 Embed</button>
+          <a href="/view/${book.id}#p=1" class="mini-btn read">${isPaid && !book.isOwned ? '📖 Preview' : '📖 Baca 3D'}</a>
+          ${
+            isPaid && !book.isOwned
+              ? `<a href="/marketplace" class="mini-btn" style="border-color:#0088ff;color:#0088ff;">🛒 Beli</a>`
+              : `<button class="mini-btn" onclick="openEmbedBook('${book.id}', '${book.title.replace(/'/g, "\\'")}')">🔗 Embed</button>`
+          }
         </div>
       </div>
     `;
@@ -253,6 +373,8 @@ async function handleUploadSubmit(e) {
   formData.append('subject', document.getElementById('upSubject').value);
   formData.append('licenseTier', document.getElementById('upTier').value);
   formData.append('bookPassword', document.getElementById('upPassword').value || '');
+  formData.append('price', document.getElementById('upPrice').value || '0');
+  formData.append('previewPages', document.getElementById('upPreviewPages').value || '3');
 
   btn.disabled = true;
   btn.textContent = '⏳ Mengonversi PDF ke Multi-Tier WebP...';
@@ -287,7 +409,6 @@ document.addEventListener('DOMContentLoaded', () => {
   loadAuthSession();
   fetchBooks();
 
-  // Check URL hash triggers from /pricing or /templates
   const h = window.location.hash.toLowerCase();
   if (h === '#login') {
     openAuthModal('login');
@@ -295,6 +416,8 @@ document.addEventListener('DOMContentLoaded', () => {
     openAuthModal('register');
   } else if (h === '#upload') {
     triggerUploadBook();
+  } else if (h === '#verified') {
+    openAuthModal('login', '✅ Alamat email Anda telah berhasil diverifikasi! Silakan masuk menggunakan akun Anda.');
   }
 
   document.querySelectorAll('.pill[data-cat]').forEach((btn) => {
@@ -323,4 +446,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('uploadForm').addEventListener('submit', handleUploadSubmit);
   document.getElementById('loginForm').addEventListener('submit', handleLogin);
   document.getElementById('registerForm').addEventListener('submit', handleRegister);
+  document.getElementById('verifyEmailForm').addEventListener('submit', handleVerifyEmail);
 });

@@ -460,3 +460,69 @@ FLIP-HTML/
 1. **Inisialisasi Git & GitHub:** Jalankan inisialisasi git di folder ini, siapkan `.gitignore`, dan koneksikan dengan GitHub.
 2. **Siapkan Containerfile & Podman Local:** Buat lingkungan container lokal untuk pengujian konversi PDF dan penyajian web.
 3. **Mulai Pembuatan Prototype Viewer (Fase 1):** Bangun viewer mandiri dengan efek 3D flip dan audio sound efek kertas berbalik.
+
+---
+
+## 11. Spesifikasi Update Fitur Terbaru (v3.0 — Enterprise Upgrade)
+
+Berdasarkan kebutuhan pengembangan lanjutan ekosistem **FlipLabs (`https://books.labschool.xyz`)**, berikut adalah spesifikasi modul terbaru yang diintegrasikan:
+
+### 11.1. Verifikasi Email Registrasi via Google Workspace XOAUTH2 (`admin@labschool.xyz`)
+Mengadopsi standar pengiriman email yang sama dengan portal `s.labschool.xyz` (Ref Conversation: `725b2baa-ee58-4ab5-b251-0f60c64a6530`):
+- **Mekanisme Autentikasi Email**:
+  - Menggunakan **Google Cloud Service Account Domain-Wide Delegation (DwD)** (`gam-project-5w1vq@gam-project-5w1vq.iam.gserviceaccount.com`) dengan scope `https://mail.google.com/`.
+  - Impersonasi pengirim resmi: **`admin@labschool.xyz`** (`FlipLabs — Perpustakaan Digital Labschool`).
+  - Pengiriman melalui endpoint REST `https://gmail.googleapis.com/gmail/v1/users/admin%40labschool.xyz/messages/send` dengan payload RFC 2822 MIME (`multipart/alternative` HTML + Plain Text).
+- **Alur Verifikasi Registrasi (`server/mailer.py` & `server/app.py`)**:
+  1. Saat pengguna mendaftar di `POST /api/auth/register`, sistem membuat akun dengan status `email_verified = 0`, menghasilkan **Kode OTP 6 Digit** serta **Token Tautan Verifikasi** (`verify_token`).
+  2. Sistem mengirimkan email verifikasi resmi berlogo Labschool ke alamat email pengguna berisi Kode OTP 6 Digit dan tombol **Verifikasi Email Saya**.
+  3. Pengguna dapat memverifikasi akun dengan memasukkan Kode OTP 6 Digit langsung pada modal verifikasi (`POST /api/auth/verify-email`) atau mengklik tautan di dalam email (`GET /verify-email?token=...`).
+  4. Sebelum email terverifikasi (`email_verified = 1`), akun baru belum dapat login atau mengunggah buku PDF.
+
+### 11.2. Login Captcha Matematika Penjumlahan 2 Digit (Simple 2-Digit Addition Captcha)
+Untuk mencegah serangan *brute-force* dan bot otomatis pada form login:
+- **Generator Tantangan (`GET /api/auth/captcha`)**:
+  - Menghasilkan dua bilangan bulat 2 digit acak (`A ∈ [10..49]` dan `B ∈ [10..49]`, contoh: `27 + 34 = ?`).
+  - Menyimpan jawaban di memori/database sesi dengan `captcha_id` berumur 10 menit.
+- **Validasi Server-Side (`POST /api/auth/login`)**:
+  - Setiap percobaan login wajib menyertakan `captcha_id` dan `captcha_answer`.
+  - Jika jawaban penjumlahan salah atau kedaluwarsa, login langsung ditolak (`HTTP 400 Bad Request`) dan captcha di-refresh otomatis.
+
+### 11.3. Revisi Tema Seluruh Halaman Menjadi Cerah (Bright Light Studio Theme)
+Seluruh halaman aplikasi diseragamkan menggunakan tema cerah (*Light Studio Theme*) seperti halaman `https://books.labschool.xyz/pricing`:
+- **Palet Warna Utama**:
+  - **Background Halaman**: `linear-gradient(180deg, #eef6ff 0%, #f8fbff 340px, #ffffff 700px)`
+  - **Permukaan Kartu & Navbar**: `#ffffff` dengan border `#e2e8f0` dan *box-shadow* halus `0 12px 36px rgba(15, 23, 42, 0.06)`
+  - **Teks Utama & Subteks**: `#0f172a` (Slate 900) dan `#475569` (Slate 600)
+  - **Warna Aksen**: Biru Utama `#0088ff`, Cyan Pro `#00bcd4`, Ungu Enterprise `#6c47ff`, dan Merah muda Recommended `#ff4769`
+- **Cakupan Halaman yang Direvisi**:
+  1. **Landing Page Utama (`/`)**
+  2. **Pricing Page (`/pricing`)**
+  3. **Templates Gallery (`/templates`)**
+  4. **Books Marketplace & Koleksi Buku (`/marketplace`)**
+  5. **Portal Manajemen & Admin (`/admin`)**
+  6. **3D FlipBook Viewer (`/view/{book_id}`)**
+
+### 11.4. Modul Khusus Books Marketplace & Koleksi Buku (`/marketplace`)
+Memfasilitasi ekosistem jual-beli dan koleksi buku digital di lingkungan sekolah antara **Guru (Penjual/Penulis)** dan **Siswa (Pembeli/Pembaca)**:
+
+```mermaid
+flowchart LR
+    G["👩‍🏫 Guru / Penulis"] -->|"Set Harga (Rp) & Halaman Preview"| M["🛒 Books Marketplace (/marketplace)"]
+    S["🎓 Siswa / Pembaca"] -->|"Baca Sample Gratis (Hal 1..N)"| V["📖 3D Viewer + Paywall"]
+    V -->|"Checkout QRIS / VA / Koperasi"| P["✅ Lunas (Invoice INV-...)"]
+    P -->|"Otomatis Masuk Rak"| C["📚 Koleksi Buku Siswa (My Collection)"]
+```
+
+1. **Fitur untuk Guru (Sell Books)**:
+   - Saat mengunggah PDF baru atau mengedit buku di Portal Manajemen (`/admin`) maupun halaman Marketplace (`/marketplace`), Guru dapat mengatur:
+     - **Tipe Distribusi**: `Gratis (Rp 0)` atau `Berbayar / Dijual (Paid Book)`.
+     - **Harga Buku (IDR)**: Contoh `Rp 35.000`, `Rp 45.000`, `Rp 65.000`.
+     - **Batas Halaman Pratinjau Gratis (`preview_pages`)**: Jumlah halaman awal yang dapat dibaca gratis oleh siswa sebelum membeli (default: `3 halaman`).
+   - **Laporan Penjualan Guru**: Menampilkan jumlah buku terjual, total pendapatan (Rp), dan riwayat transaksi siswa.
+2. **Fitur untuk Siswa (Buy Books & My Book Collection)**:
+   - **Katalog Marketplace (`/marketplace`)**: Menampilkan buku berbayar & buku gratis dengan filter mata pelajaran, harga, serta tab khusus **`📚 Koleksi Buku Saya`**.
+   - **Free Preview & Smart Paywall di 3D Viewer**: Siswa dapat membaca halaman `1` s/d `preview_pages` secara gratis. Saat membalik ke halaman `preview_pages + 1`, viewer menampilkan modal pembelian buku bila siswa belum membeli buku tersebut.
+   - **Checkout Pembayaran Instan (`POST /api/marketplace/buy/{book_id}`)**: Simulasi/integrasi pembayaran via QRIS, Virtual Account, atau Saldo Koperasi Labschool yang menerbitkan kode invoice (`INV-2026-...`) dan membuka kunci seluruh halaman buku secara permanen untuk akun siswa tersebut.
+   - **Simpan ke Koleksi (`POST /api/marketplace/collect/{book_id}`)**: Siswa juga dapat menambahkan buku gratis ke dalam rak **Koleksi Buku Saya** agar mudah diakses kapan saja.
+
