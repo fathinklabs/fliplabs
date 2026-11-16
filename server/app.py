@@ -413,7 +413,7 @@ def admin_overview(user: Dict[str, Any] = Depends(require_user)):
     users = [dict(r) for r in conn.execute("SELECT id, role, license_tier, status FROM users").fetchall()]
     conn.close()
 
-    books_resp = list_books()["books"]
+    books_resp = list_books(None)["books"]
     total_views = sum(b.get("viewsCount", 0) for b in books_resp)
     total_pages = sum(b.get("totalPageCount", 0) for b in books_resp)
 

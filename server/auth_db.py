@@ -178,7 +178,7 @@ def create_session(user_id: int) -> str:
 
 
 def get_user_by_token(token: Optional[str]) -> Optional[Dict[str, Any]]:
-    if not token:
+    if not token or not isinstance(token, str):
         return None
     clean_tok = token.replace("Bearer ", "").strip()
     conn = get_conn()
