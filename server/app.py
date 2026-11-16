@@ -56,18 +56,18 @@ app.mount("/bookcase", StaticFiles(directory=str(BOOKCASE_DIR), html=True), name
 app.mount("/books", StaticFiles(directory=str(BOOKS_DIR)), name="books")
 
 
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 def health_check():
     return {"status": "ok", "service": "fliplabs", "domain": "books.labschool.xyz"}
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
 def serve_bookcase_home():
     index_file = BOOKCASE_DIR / "index.html"
     return FileResponse(str(index_file))
 
 
-@app.get("/view/{book_id}", response_class=HTMLResponse)
+@app.api_route("/view/{book_id}", methods=["GET", "HEAD"], response_class=HTMLResponse)
 def serve_book_viewer(book_id: str):
     cfg_path = BOOKS_DIR / book_id / "book-config.json"
     if not cfg_path.exists():
