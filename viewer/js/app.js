@@ -373,10 +373,11 @@ function renderStaticSpread(targetPage) {
     loadAnnotationForCanvas('rightAnnoCanvas', spreadInfo.right);
   }
 
-  for (let d = 1; d <= 2; d++) {
-    if (state.currentPage + d <= state.totalPages) {
+  for (let d = -2; d <= 4; d++) {
+    const targetPre = state.currentPage + d;
+    if (targetPre >= 1 && targetPre <= state.totalPages) {
       const pre = new Image();
-      pre.src = getPageImageUrl(state.currentPage + d);
+      pre.src = getPageImageUrl(targetPre);
     }
   }
 
