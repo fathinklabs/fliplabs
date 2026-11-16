@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>FlipLabs — Labschool Interactive PDF Book Viewer</title>
+  <title>FlipLabs — Labschool Interactive 3D E-Book Viewer</title>
   <link rel="stylesheet" href="/viewer/css/viewer.css">
 </head>
 <body>
@@ -21,6 +21,12 @@
     </div>
 
     <div class="top-actions">
+      <span id="lockStatusBadge" class="top-btn" style="display:none;background:rgba(234,179,8,0.16);border-color:#eab308;color:#fde047;cursor:default;">
+        🔒 Terproteksi Sandi
+      </span>
+      <button id="btnQuickPassword" class="top-btn" style="display:none;" title="Atur Proteksi Kata Sandi Buku Ini">
+        🔐 Sandi Buku
+      </button>
       <!-- Live License Tier Switcher -->
       <select id="tierSwitcher" class="top-btn" title="Uji Mode Lisensi Fitur (Basic / Pro / Enterprise)" style="background:#0f172a;">
         <option value="basic">Simulasi: BASIC</option>
@@ -28,9 +34,8 @@
         <option value="enterprise" selected>Simulasi: ENTERPRISE</option>
       </select>
       <span id="licenseBadge" class="license-badge enterprise">PLAN: ENTERPRISE</span>
-      <a href="/" class="top-btn" title="Buka Lemari Rak Buku">
-        📚 Rak Buku
-      </a>
+      <a href="/admin" class="top-btn" title="Panel Manajemen & Pengguna">⚙️ Admin</a>
+      <a href="/" class="top-btn" title="Buka Lemari Rak Buku">📚 Rak Buku</a>
     </div>
   </header>
 
@@ -112,7 +117,7 @@
           <div id="leftHighlightLayer" class="highlight-layer"></div>
           <canvas id="leftAnnoCanvas" class="annotation-canvas"></canvas>
           <div class="watermark-overlay"><span class="watermark-text">LABSCHOOL DIGITAL LIBRARY</span></div>
-          <div id="cornerLeft" class="corner-peel left" title="Klik untuk balik ke halaman sebelumnya"></div>
+          <div id="cornerLeft" class="corner-peel left" title="Tarik atau klik untuk membalik ke halaman sebelumnya"></div>
         </div>
 
         <!-- Center Spine 3D Crease Shadow -->
@@ -124,7 +129,22 @@
           <div id="rightHighlightLayer" class="highlight-layer"></div>
           <canvas id="rightAnnoCanvas" class="annotation-canvas"></canvas>
           <div class="watermark-overlay"><span class="watermark-text">LABSCHOOL DIGITAL LIBRARY</span></div>
-          <div id="cornerRight" class="corner-peel right" title="Klik untuk balik ke halaman berikutnya"></div>
+          <div id="cornerRight" class="corner-peel right" title="Tarik atau klik untuk membalik ke halaman berikutnya"></div>
+        </div>
+
+        <!-- Cast Shadow Thrown onto Underlying Page During 3D Turn -->
+        <div id="flipCastShadow" class="flip-cast-shadow"></div>
+
+        <!-- Dual-Sided 3D Turning Leaf (Front & Back Faces with Curl Specular Shading) -->
+        <div id="turningLeaf" class="turning-leaf">
+          <div class="leaf-face leaf-front">
+            <img id="turningFrontImg" class="page-img" src="" alt="Turning Front">
+            <div id="turningFrontCurl" class="leaf-curl-gradient"></div>
+          </div>
+          <div class="leaf-face leaf-back">
+            <img id="turningBackImg" class="page-img" src="" alt="Turning Back">
+            <div id="turningBackCurl" class="leaf-curl-gradient"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -218,6 +238,51 @@
       <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
     </button>
   </footer>
+
+  <!-- Password Protected Book Gate Modal -->
+  <div id="passwordGateModal" class="modal-backdrop">
+    <div class="modal-card" style="max-width:420px;text-align:center;">
+      <div style="font-size:38px;margin-bottom:8px;">🔒</div>
+      <h3 style="font-size:18px;margin-bottom:6px;">Buku Terproteksi Kata Sandi</h3>
+      <p id="pwGateBookTitle" style="font-size:13px;color:var(--text-muted);margin-bottom:14px;"></p>
+      <img id="pwGateCover" src="" alt="Cover" style="width:110px;height:155px;object-fit:cover;border-radius:6px;margin-bottom:16px;box-shadow:0 10px 25px rgba(0,0,0,0.5);">
+      <form id="pwGateForm">
+        <input id="pwGateInput" type="password" class="drawer-input" placeholder="Masukkan kata sandi buku..." style="width:100%;margin-bottom:10px;text-align:center;" required>
+        <div id="pwGateError" style="color:#f87171;font-size:12px;margin-bottom:10px;"></div>
+        <button type="submit" class="top-btn" style="width:100%;justify-content:center;padding:10px;background:var(--accent);border:none;font-size:13px;">
+          🔓 Buka Akses Buku
+        </button>
+      </form>
+      <button id="btnAdminBypassPw" class="top-btn" style="display:none;width:100%;justify-content:center;padding:8px;margin-top:8px;background:rgba(139,92,246,0.25);border-color:#8b5cf6;">
+        ⚡ Buka Langsung (Akses Super Admin)
+      </button>
+      <div style="margin-top:14px;">
+        <a href="/" style="color:var(--text-muted);font-size:12px;text-decoration:none;">← Kembali ke Rak Buku Digital</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Password Protection Config Modal (Admin/Guru) -->
+  <div id="quickPwModal" class="modal-backdrop">
+    <div class="modal-card" style="max-width:420px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h3 style="font-size:16px;">🔐 Pengaturan Kata Sandi Buku</h3>
+        <button class="drawer-close" onclick="document.getElementById('quickPwModal').classList.remove('open')">✕</button>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:14px;cursor:pointer;">
+        <input id="cfgPwEnable" type="checkbox" style="width:16px;height:16px;">
+        <span>Aktifkan Proteksi Kata Sandi pada Buku Ini</span>
+      </label>
+      <div style="margin-bottom:16px;">
+        <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:6px;">Kata Sandi Akses Buku:</label>
+        <input id="cfgPwValue" type="text" class="drawer-input" placeholder="Masukkan sandi baru (misal: LABS2026)" style="width:100%;">
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button class="top-btn" onclick="document.getElementById('quickPwModal').classList.remove('open')">Batal</button>
+        <button class="top-btn" style="background:var(--accent);border:none;" onclick="saveBookPasswordConfig()">💾 Simpan Pengaturan</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Share & Iframe Embed Modal -->
   <div id="shareModal" class="modal-backdrop">

@@ -1,9 +1,12 @@
 /**
- * FlipLabs HTML5 3D FlipBook Viewer Controller
- * Supports Double-Page Spread (Desktop) & Single-Page (Mobile),
- * Multi-tier WebP loading, Full-Text Search with yellow coordinate highlights,
- * Hierarchical TOC, Thumbnail Tray, Annotations/Highlighter, Bookmarks,
- * FlipShot export, Share/Iframe Embed, AI Assistant, and License Tier enforcement.
+ * FlipLabs 3D Interactive Book Viewer Engine
+ * ------------------------------------------
+ * Features:
+ * - True Dual-Sided 3D Page Turn Physics (60 FPS requestAnimationFrame + Interactive Drag Peel)
+ * - Dynamic Curl Specular Highlight & Cast Shadow on Underlying Page
+ * - Password Protected Book Gate + Server-side Verification + Admin Quick-Lock Config
+ * - Multi-tier WebP loading, Full-Text Search with yellow coordinate highlights
+ * - Hierarchical TOC, Thumbnail Tray, Annotations/Highlighter, Bookmarks, FlipShot, AI Tutor
  */
 
 const state = {
@@ -23,9 +26,13 @@ const state = {
   autoPlayTimer: null,
   searchQuery: '',
   annoActive: false,
-  annoTool: 'highlighter', // 'highlighter' | 'pen' | 'eraser'
-  annoColor: 'rgba(250, 204, 21, 0.42)',
+  annoTool: 'highlighter',
   bookmarks: [],
+  isFlipping: false,
+  isUnlocked: true,
+  currentUser: null,
+  pageW: 480,
+  pageH: 678,
 };
 
 function getBookIdFromUrl() {
@@ -54,9 +61,24 @@ function showToast(msg) {
   window.__toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
 }
 
+function loadUserSession() {
+  try {
+    const raw = localStorage.getItem('fliplabs_user');
+    state.currentUser = raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    state.currentUser = null;
+  }
+  const btnLockCfg = document.getElementById('btnQuickPassword');
+  if (btnLockCfg) {
+    const canManage = state.currentUser && ['admin', 'guru'].includes(state.currentUser.role);
+    btnLockCfg.style.display = canManage ? 'inline-flex' : 'none';
+  }
+}
+
 async function initViewer() {
   state.bookId = getBookIdFromUrl();
   state.currentPage = getPageFromHash();
+  loadUserSession();
 
   try {
     const base = `/books/${state.bookId}`;
@@ -80,7 +102,8 @@ async function initViewer() {
     renderThumbnails();
     renderBookmarks();
     layoutSpread();
-    renderCurrentPages(false);
+    checkPasswordProtectionGate();
+    renderStaticSpread(state.currentPage);
     bindEvents();
   } catch (err) {
     console.error(err);
@@ -88,9 +111,107 @@ async function initViewer() {
   }
 }
 
+function checkPasswordProtectionGate() {
+  const sec = (state.config && state.config.security) || {};
+  const sessionKey = `fliplabs_unlocked_${state.bookId}`;
+  const alreadyUnlocked = sessionStorage.getItem(sessionKey) === 'true';
+
+  const lockIndicator = document.getElementById('lockStatusBadge');
+  if (sec.isPasswordProtected) {
+    if (lockIndicator) lockIndicator.style.display = 'inline-flex';
+  } else {
+    if (lockIndicator) lockIndicator.style.display = 'none';
+  }
+
+  if (sec.isPasswordProtected && !alreadyUnlocked) {
+    state.isUnlocked = false;
+    document.getElementById('stageViewport').classList.add('locked-blur');
+    document.getElementById('pwGateBookTitle').textContent = state.config.title;
+    document.getElementById('pwGateCover').src = `/books/${state.bookId}/files/shot.jpg`;
+    const adminBypassBtn = document.getElementById('btnAdminBypassPw');
+    if (adminBypassBtn) {
+      adminBypassBtn.style.display =
+        state.currentUser && state.currentUser.role === 'admin' ? 'inline-flex' : 'none';
+    }
+    document.getElementById('passwordGateModal').classList.add('open');
+  } else {
+    state.isUnlocked = true;
+    document.getElementById('stageViewport').classList.remove('locked-blur');
+    document.getElementById('passwordGateModal').classList.remove('open');
+  }
+}
+
+async function submitBookPassword(passwordValue) {
+  const errEl = document.getElementById('pwGateError');
+  errEl.textContent = '';
+  const token = localStorage.getItem('fliplabs_token') || '';
+
+  try {
+    const res = await fetch(`/api/books/${state.bookId}/verify-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ password: passwordValue }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Kata sandi salah');
+
+    sessionStorage.setItem(`fliplabs_unlocked_${state.bookId}`, 'true');
+    state.isUnlocked = true;
+    document.getElementById('stageViewport').classList.remove('locked-blur');
+    document.getElementById('passwordGateModal').classList.remove('open');
+    showToast('🔓 Akses buku berhasil dibuka!');
+  } catch (err) {
+    errEl.textContent = '❌ ' + err.message;
+  }
+}
+
+async function saveBookPasswordConfig() {
+  const enabled = document.getElementById('cfgPwEnable').checked;
+  const newPw = document.getElementById('cfgPwValue').value.trim();
+  const token = localStorage.getItem('fliplabs_token') || '';
+
+  if (enabled && !newPw) {
+    showToast('Masukkan kata sandi baru untuk mengaktifkan proteksi');
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/admin/books/${state.bookId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        title: state.config.title,
+        author: state.config.author,
+        category: state.config.category || 'SMP Kelas 8',
+        subject: state.config.subject || 'Umum',
+        licenseTier: state.config.licenseTier || 'enterprise',
+        visibility: 'public',
+        isPasswordProtected: enabled,
+        bookPassword: enabled ? newPw : '',
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Gagal menyimpan proteksi sandi');
+
+    state.config.security.isPasswordProtected = enabled;
+    sessionStorage.setItem(`fliplabs_unlocked_${state.bookId}`, 'true');
+    document.getElementById('quickPwModal').classList.remove('open');
+    checkPasswordProtectionGate();
+    showToast(enabled ? '🔒 Proteksi kata sandi buku diaktifkan!' : '🔓 Proteksi kata sandi buku dinonaktifkan');
+  } catch (err) {
+    showToast('❌ ' + err.message);
+  }
+}
+
 function applyBrandingAndTheme() {
   const cfg = state.config;
-  document.title = `${cfg.title} — FlipLabs Viewer`;
+  document.title = `${cfg.title} — FlipLabs 3D Viewer`;
   document.getElementById('bookTitle').textContent = cfg.title;
   document.getElementById('bookSubtitle').textContent = `${cfg.author} • ${cfg.category || ''}`;
   document.getElementById('totalPageLabel').textContent = `/ ${state.totalPages}`;
@@ -111,7 +232,6 @@ function applyLicenseTier(tier) {
   const tierSelect = document.getElementById('tierSwitcher');
   if (tierSelect) tierSelect.value = tier;
 
-  // Enforce feature matrix per tier
   const rules = {
     basic: {
       download: false,
@@ -144,7 +264,7 @@ function applyLicenseTier(tier) {
   setButtonLock('btnAnnotate', !rules.annotations, 'Fitur Stabilo & Anotasi memerlukan lisensi PRO / ENTERPRISE');
   setButtonLock('btnBookmark', !rules.bookmarks, 'Fitur Penanda Halaman memerlukan lisensi PRO / ENTERPRISE');
   setButtonLock('btnFlipShot', !rules.flipshot, 'Fitur FlipShot Screenshot memerlukan lisensi PRO / ENTERPRISE');
-  setButtonLock('btnAIChat', !rules.ai, 'Fitur AI Book Assistant khusus lisensi ENTERPRISE');
+  setButtonLock('btnAIChat', !rules.ai, 'Fitur AI Book Tutor khusus lisensi ENTERPRISE');
 }
 
 function setButtonLock(btnId, isLocked, lockReason) {
@@ -164,9 +284,6 @@ function checkLock(btnId) {
   return false;
 }
 
-/**
- * Compute which pages are shown on left and right slots
- */
 function getSpreadPages(page) {
   const isMobile = window.innerWidth <= 860;
   const doubleMode = state.doublePageMode && !isMobile;
@@ -174,7 +291,6 @@ function getSpreadPages(page) {
   if (!doubleMode || page === 1 || (page === state.totalPages && state.totalPages % 2 === 0)) {
     return { mode: 'single', left: null, right: page };
   }
-  // Spread pairs: (2,3), (4,5), (6,7)...
   const leftPage = page % 2 === 0 ? page : page - 1;
   const rightPage = leftPage + 1 <= state.totalPages ? leftPage + 1 : null;
   if (!rightPage) {
@@ -190,8 +306,8 @@ function layoutSpread() {
   const rightSlot = document.getElementById('rightPageSlot');
   const spine = document.getElementById('spineShadow');
 
-  const availW = stage.clientWidth - 96;
-  const availH = stage.clientHeight - 36;
+  const availW = stage.clientWidth - 104;
+  const availH = stage.clientHeight - 40;
   const ratio = state.config ? state.config.pageRatio || 1.4142 : 1.4142;
 
   const spreadInfo = getSpreadPages(state.currentPage);
@@ -224,6 +340,9 @@ function layoutSpread() {
     spread.style.height = `${pageH}px`;
     spine.style.display = 'none';
   }
+
+  state.pageW = pageW;
+  state.pageH = pageH;
 }
 
 function getPageImageUrl(pageNum) {
@@ -231,17 +350,10 @@ function getPageImageUrl(pageNum) {
   return `/books/${state.bookId}/files/${tierFolder}/${pageNum}.webp`;
 }
 
-function renderCurrentPages(direction) {
+function renderStaticSpread(targetPage) {
+  state.currentPage = targetPage;
   layoutSpread();
-  const spread = document.getElementById('bookSpread');
-  const spreadInfo = getSpreadPages(state.currentPage);
-
-  if (direction) {
-    spread.classList.remove('flipping-next', 'flipping-prev');
-    void spread.offsetWidth; // force reflow
-    spread.classList.add(direction === 'next' ? 'flipping-next' : 'flipping-prev');
-    window.flipSound.playFlip();
-  }
+  const spreadInfo = getSpreadPages(targetPage);
 
   const leftImg = document.getElementById('leftPageImg');
   const rightImg = document.getElementById('rightPageImg');
@@ -261,7 +373,6 @@ function renderCurrentPages(direction) {
     loadAnnotationForCanvas('rightAnnoCanvas', spreadInfo.right);
   }
 
-  // Preload adjacent pages
   for (let d = 1; d <= 2; d++) {
     if (state.currentPage + d <= state.totalPages) {
       const pre = new Image();
@@ -269,19 +380,138 @@ function renderCurrentPages(direction) {
     }
   }
 
-  // Update buttons & active states
   document.getElementById('btnPrevStage').disabled = state.currentPage <= 1;
   document.getElementById('btnNextStage').disabled = state.currentPage >= state.totalPages;
   setHashPage(state.currentPage);
   highlightActiveTOCAndThumb();
 }
 
+/**
+ * REALISTIC 60-FPS 3D PAGE-TURN & CURL PHYSICS ANIMATION
+ * Uses dual-sided #turningLeaf with specular curl gradient & cast shadow
+ */
+function animateRealisticFlip(targetPage, direction) {
+  if (state.isFlipping) return;
+  if (!state.isUnlocked) {
+    checkPasswordProtectionGate();
+    return;
+  }
+
+  const oldInfo = getSpreadPages(state.currentPage);
+  const newInfo = getSpreadPages(targetPage);
+
+  // If spread layout mode changes (e.g. cover page 1 -> spread 2-3), still animate smoothly
+  const leaf = document.getElementById('turningLeaf');
+  const frontImg = document.getElementById('turningFrontImg');
+  const backImg = document.getElementById('turningBackImg');
+  const frontCurl = document.getElementById('turningFrontCurl');
+  const backCurl = document.getElementById('turningBackCurl');
+  const castShadow = document.getElementById('flipCastShadow');
+
+  state.isFlipping = true;
+  window.flipSound.playFlip();
+
+  const w = state.pageW;
+  const h = state.pageH;
+  const isDouble = oldInfo.mode === 'double' && newInfo.mode === 'double';
+
+  leaf.style.width = `${w}px`;
+  leaf.style.height = `${h}px`;
+  castShadow.style.width = `${w}px`;
+
+  if (direction === 'next') {
+    const outgoingRight = oldInfo.right;
+    const incomingLeft = newInfo.mode === 'double' ? newInfo.left : newInfo.right;
+    const incomingRight = newInfo.right;
+
+    frontImg.src = getPageImageUrl(outgoingRight);
+    backImg.src = getPageImageUrl(incomingLeft);
+
+    // Update underlying right slot immediately to show the destination page underneath the turning leaf
+    document.getElementById('rightPageImg').src = getPageImageUrl(incomingRight);
+
+    if (isDouble) {
+      leaf.style.left = `${w}px`;
+      leaf.style.transformOrigin = 'left center';
+      castShadow.style.left = `${w}px`;
+    } else {
+      leaf.style.left = `0px`;
+      leaf.style.transformOrigin = 'left center';
+      castShadow.style.left = `0px`;
+    }
+  } else {
+    const outgoingLeft = oldInfo.mode === 'double' ? oldInfo.left : oldInfo.right;
+    const incomingRight = newInfo.right;
+    const incomingLeft = newInfo.mode === 'double' ? newInfo.left : newInfo.right;
+
+    frontImg.src = getPageImageUrl(outgoingLeft);
+    backImg.src = getPageImageUrl(incomingRight);
+
+    if (isDouble) {
+      document.getElementById('leftPageImg').src = getPageImageUrl(incomingLeft);
+      leaf.style.left = `0px`;
+      leaf.style.transformOrigin = 'right center';
+      castShadow.style.left = `0px`;
+    } else {
+      document.getElementById('rightPageImg').src = getPageImageUrl(incomingLeft);
+      leaf.style.left = `0px`;
+      leaf.style.transformOrigin = 'left center';
+      castShadow.style.left = `0px`;
+    }
+  }
+
+  leaf.classList.add('active');
+  const duration = 560;
+  const startTime = performance.now();
+
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  function stepFrame(now) {
+    const rawT = Math.min(1, (now - startTime) / duration);
+    const p = easeInOutCubic(rawT);
+    const sinArc = Math.sin(p * Math.PI); // peaks at 90 degrees (mid-turn)
+
+    let angleDeg = 0;
+    let tiltZ = 0;
+    if (direction === 'next') {
+      angleDeg = -180 * p;
+      tiltZ = sinArc * -2.2;
+    } else if (isDouble) {
+      angleDeg = 180 * p;
+      tiltZ = sinArc * 2.2;
+    } else {
+      angleDeg = -180 * (1 - p);
+      tiltZ = sinArc * 2.2;
+    }
+
+    leaf.style.transform = `rotateY(${angleDeg.toFixed(2)}deg) skewY(${tiltZ.toFixed(2)}deg)`;
+    leaf.style.boxShadow = `${direction === 'next' ? -18 : 18}px 0 ${Math.round(38 * sinArc + 8)}px rgba(0,0,0,${(0.55 * sinArc).toFixed(2)})`;
+
+    if (frontCurl) frontCurl.style.opacity = (0.25 + 0.75 * sinArc).toFixed(2);
+    if (backCurl) backCurl.style.opacity = (0.25 + 0.75 * sinArc).toFixed(2);
+    castShadow.style.opacity = (0.65 * sinArc).toFixed(2);
+
+    if (rawT < 1) {
+      requestAnimationFrame(stepFrame);
+    } else {
+      leaf.classList.remove('active');
+      leaf.style.transform = '';
+      castShadow.style.opacity = '0';
+      state.isFlipping = false;
+      renderStaticSpread(targetPage);
+    }
+  }
+
+  requestAnimationFrame(stepFrame);
+}
+
 function goToPage(targetPage, dir) {
   targetPage = Math.max(1, Math.min(state.totalPages, targetPage));
-  if (targetPage === state.currentPage) return;
+  if (targetPage === state.currentPage || state.isFlipping) return;
   const direction = dir || (targetPage > state.currentPage ? 'next' : 'prev');
-  state.currentPage = targetPage;
-  renderCurrentPages(direction);
+  animateRealisticFlip(targetPage, direction);
 }
 
 function stepNext() {
@@ -365,7 +595,7 @@ function performSearch(query) {
   const resContainer = document.getElementById('searchResults');
   resContainer.innerHTML = '';
 
-  renderCurrentPages(false);
+  renderStaticSpread(state.currentPage);
 
   if (state.searchQuery.length < 2) {
     resContainer.innerHTML = '<div style="color:var(--text-muted);font-size:12.5px;padding:8px;">Ketik minimal 2 huruf untuk mencari rumus, bab, atau konsep di dalam buku...</div>';
@@ -396,9 +626,7 @@ function performSearch(query) {
         </div>
         <div class="search-snippet">...${snippet}...</div>
       `;
-      card.addEventListener('click', () => {
-        goToPage(pObj.page);
-      });
+      card.addEventListener('click', () => goToPage(pObj.page));
       resContainer.appendChild(card);
     }
   });
@@ -583,7 +811,6 @@ function captureFlipShot() {
   const ctx = canvas.getContext('2d');
   ctx.drawImage(img, 0, 0);
 
-  // Add Labschool attribution footer
   ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
   ctx.fillRect(0, canvas.height - 46, canvas.width, 46);
   ctx.fillStyle = '#38bdf8';
@@ -633,7 +860,6 @@ async function sendAIChatQuestion() {
       throw new Error('Fallback local search');
     }
   } catch (e) {
-    // Client-side smart textbook context responder fallback
     const pages = (state.searchIndex && state.searchIndex.pages) || [];
     const curPageObj = pages.find((p) => p.page === state.currentPage) || pages[0];
     aiDiv.innerHTML = `<b>Referensi Halaman ${state.currentPage}:</b><br>${(curPageObj && curPageObj.text.slice(0, 320)) || 'Silakan gunakan fitur pencarian untuk menemukan topik terkait.'}...`;
@@ -655,9 +881,8 @@ function toggleDrawer(drawerId, forceState) {
 }
 
 function bindEvents() {
-  window.addEventListener('resize', () => renderCurrentPages(false));
+  window.addEventListener('resize', () => renderStaticSpread(state.currentPage));
 
-  // Navigation buttons
   document.getElementById('btnPrevStage').addEventListener('click', stepPrev);
   document.getElementById('btnNextStage').addEventListener('click', stepNext);
   document.getElementById('btnFirstPage').addEventListener('click', () => goToPage(1, 'prev'));
@@ -668,7 +893,6 @@ function bindEvents() {
   document.getElementById('cornerLeft').addEventListener('click', stepPrev);
   document.getElementById('cornerRight').addEventListener('click', stepNext);
 
-  // Page direct input
   document.getElementById('pageInput').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       const val = parseInt(e.target.value, 10);
@@ -676,8 +900,8 @@ function bindEvents() {
     }
   });
 
-  // Keyboard shortcuts
   window.addEventListener('keydown', (e) => {
+    if (!state.isUnlocked) return;
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
     if (e.key === 'ArrowRight') stepNext();
     else if (e.key === 'ArrowLeft') stepPrev();
@@ -686,21 +910,25 @@ function bindEvents() {
     else if (e.key === '0') setZoom(1);
   });
 
-  // Touch swipe on mobile/tablet
-  let touchStartX = 0;
-  const stage = document.getElementById('stageViewport');
-  stage.addEventListener('touchstart', (e) => {
-    if (state.annoActive || state.zoom > 1.05) return;
-    touchStartX = e.changedTouches[0].screenX;
-  }, { passive: true });
-  stage.addEventListener('touchend', (e) => {
-    if (state.annoActive || state.zoom > 1.05) return;
-    const dx = e.changedTouches[0].screenX - touchStartX;
-    if (dx < -45) stepNext();
-    else if (dx > 45) stepPrev();
-  }, { passive: true });
+  // Touch & Mouse Drag-to-Flip Gesture on Book Spread
+  let dragPageStartX = null;
+  const spreadEl = document.getElementById('bookSpread');
+
+  spreadEl.addEventListener('pointerdown', (e) => {
+    if (state.annoActive || state.zoom > 1.05 || !state.isUnlocked) return;
+    dragPageStartX = e.clientX;
+  });
+
+  window.addEventListener('pointerup', (e) => {
+    if (dragPageStartX === null) return;
+    const dx = e.clientX - dragPageStartX;
+    dragPageStartX = null;
+    if (dx < -55) stepNext();
+    else if (dx > 55) stepPrev();
+  });
 
   // Mouse pan when zoomed
+  const stage = document.getElementById('stageViewport');
   const zoomLayer = document.getElementById('bookZoomLayer');
   stage.addEventListener('mousedown', (e) => {
     if (state.zoom <= 1.02 || state.annoActive) return;
@@ -720,7 +948,6 @@ function bindEvents() {
     zoomLayer.classList.remove('dragging');
   });
 
-  // Toolbar triggers
   document.getElementById('btnTOC').addEventListener('click', () => toggleDrawer('tocDrawer'));
   document.getElementById('btnSearch').addEventListener('click', () => {
     toggleDrawer('searchDrawer');
@@ -732,7 +959,7 @@ function bindEvents() {
   document.getElementById('btnPageMode').addEventListener('click', () => {
     state.doublePageMode = !state.doublePageMode;
     showToast(state.doublePageMode ? '📖 Mode Dua Halaman (Double Spread)' : '📄 Mode Satu Halaman (Single Page)');
-    renderCurrentPages(false);
+    renderStaticSpread(state.currentPage);
   });
   document.getElementById('btnZoomIn').addEventListener('click', () => setZoom(state.zoom + 0.3));
   document.getElementById('btnZoomOut').addEventListener('click', () => setZoom(state.zoom - 0.3));
@@ -788,7 +1015,7 @@ function bindEvents() {
     [info.left, info.right].forEach((p) => {
       if (p) localStorage.removeItem(`fliplabs_anno_${state.bookId}_p${p}`);
     });
-    renderCurrentPages(false);
+    renderStaticSpread(state.currentPage);
     showToast('Coretan pada halaman ini dibersihkan');
   });
 
@@ -833,12 +1060,34 @@ function bindEvents() {
     performSearch(e.target.value);
   });
 
-  // Live License Tier Switcher for Demo/Testing
   const tierSwitcher = document.getElementById('tierSwitcher');
   if (tierSwitcher) {
     tierSwitcher.addEventListener('change', (e) => {
       applyLicenseTier(e.target.value);
       showToast(`Simulasi Lisensi Diubah ke: ${e.target.value.toUpperCase()}`);
+    });
+  }
+
+  // Password Gate Form
+  const pwForm = document.getElementById('pwGateForm');
+  if (pwForm) {
+    pwForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      submitBookPassword(document.getElementById('pwGateInput').value);
+    });
+  }
+  const btnBypass = document.getElementById('btnAdminBypassPw');
+  if (btnBypass) {
+    btnBypass.addEventListener('click', () => submitBookPassword('__ADMIN_BYPASS__'));
+  }
+
+  // Quick Password Configuration Modal (for Admin/Guru)
+  const btnQuickPw = document.getElementById('btnQuickPassword');
+  if (btnQuickPw) {
+    btnQuickPw.addEventListener('click', () => {
+      const isProtected = Boolean(state.config && state.config.security && state.config.security.isPasswordProtected);
+      document.getElementById('cfgPwEnable').checked = isProtected;
+      document.getElementById('quickPwModal').classList.add('open');
     });
   }
 }

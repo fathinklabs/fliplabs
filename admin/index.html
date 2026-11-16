@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlipLabs — Portal Manajemen, Pengguna & Administrasi</title>
+  <link rel="stylesheet" href="/admin-assets/admin.css">
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <a href="/"><img src="/viewer/assets/branding/labschool-logo.svg" alt="FlipLabs" style="height:38px;"></a>
+      <span style="font-size:13px;font-weight:700;color:#38bdf8;border-left:1px solid var(--border-subtle);padding-left:12px;">
+        PORTAL MANAJEMEN & ADMINISTRASI
+      </span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span id="topUserSummary" style="font-size:12.5px;color:var(--text-dim);">Belum Masuk</span>
+      <a href="/" class="btn">📚 Rak Buku Digital</a>
+      <button id="btnTopLogout" class="btn btn-danger" style="display:none;" onclick="logoutAdmin()">Keluar</button>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Login & Registration Gate -->
+    <section id="authGateSection" style="max-width:860px;margin:24px auto;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(340px, 1fr));gap:24px;">
+        <!-- Login Card -->
+        <div class="panel-box">
+          <h3 style="margin-bottom:6px;">🔐 Masuk Akun (Login)</h3>
+          <p style="font-size:12.5px;color:var(--text-dim);margin-bottom:16px;">
+            Masuk sebagai Admin, Guru, atau Siswa untuk mengelola katalog buku dan profil.
+          </p>
+          <form id="gateLoginForm">
+            <div class="form-row">
+              <label>Alamat Email</label>
+              <input id="gateLoginEmail" type="email" class="form-control" value="labsdul@gmail.com" required>
+            </div>
+            <div class="form-row">
+              <label>Kata Sandi</label>
+              <input id="gateLoginPassword" type="password" class="form-control" value="LLA!kcolnu@2026" required>
+            </div>
+            <div id="gateAuthMsg" style="font-size:12px;color:#f87171;margin-bottom:10px;"></div>
+            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;">
+              Masuk ke Portal Manajemen
+            </button>
+          </form>
+
+          <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border-subtle);">
+            <div style="font-size:11.5px;color:var(--text-dim);margin-bottom:8px;">⚡ Pintasan Login Akun Default:</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="btn" style="font-size:11px;padding:5px 10px;" onclick="quickLogin('labsdul@gmail.com', 'LLA!kcolnu@2026')">
+                👑 Super Admin (labsdul)
+              </button>
+              <button class="btn" style="font-size:11px;padding:5px 10px;" onclick="quickLogin('guru@labschool.xyz', 'GuruLabs2026!')">
+                👩‍🏫 Guru (Plan Pro)
+              </button>
+              <button class="btn" style="font-size:11px;padding:5px 10px;" onclick="quickLogin('siswa@labschool.xyz', 'SiswaLabs2026!')">
+                🎓 Siswa (Plan Basic)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Registration Card -->
+        <div class="panel-box">
+          <h3 style="margin-bottom:6px;">✨ Registrasi Akun Baru</h3>
+          <p style="font-size:12.5px;color:var(--text-dim);margin-bottom:16px;">
+            Daftarkan akun Guru atau Siswa Labschool untuk mengakses fitur perpustakaan digital.
+          </p>
+          <form id="gateRegForm">
+            <div class="form-row">
+              <label>Nama Lengkap</label>
+              <input id="gateRegName" type="text" class="form-control" placeholder="Nama Lengkap Guru / Siswa" required>
+            </div>
+            <div class="form-row">
+              <label>Email</label>
+              <input id="gateRegEmail" type="email" class="form-control" placeholder="nama@labschool.sch.id" required>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div class="form-row">
+                <label>Peran (Role)</label>
+                <select id="gateRegRole" class="form-control">
+                  <option value="siswa">Siswa (Basic)</option>
+                  <option value="guru">Guru (Pro)</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label>Unit Sekolah</label>
+                <input id="gateRegUnit" type="text" class="form-control" value="SMP Labschool Jakarta">
+              </div>
+            </div>
+            <div class="form-row">
+              <label>Kata Sandi Baru</label>
+              <input id="gateRegPassword" type="password" class="form-control" placeholder="Minimal 6 karakter" required>
+            </div>
+            <div id="gateRegMsg" style="font-size:12px;color:#f87171;margin-bottom:10px;"></div>
+            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;">
+              Daftar & Buat Akun
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Authenticated Management Dashboard -->
+    <section id="dashboardSection" style="display:none;">
+      <!-- Executive KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Total Katalog Buku Digital</div>
+          <div id="kpiTotalBooks" class="kpi-val">3</div>
+          <div id="kpiTotalPages" class="kpi-sub">18 Halaman WebP</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Total Pembacaan Buku (Views)</div>
+          <div id="kpiTotalViews" class="kpi-val">298</div>
+          <div class="kpi-sub">Pembaca Aktif Ekosistem LMS</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Total Pengguna Terdaftar</div>
+          <div id="kpiTotalUsers" class="kpi-val">4</div>
+          <div id="kpiPlanSummary" class="kpi-sub">Enterprise • Pro • Basic</div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="tabs-nav">
+        <button class="tab-btn active" data-tab="books" onclick="switchDashTab('books')">
+          📚 Manajemen Buku & Kata Sandi
+        </button>
+        <button id="tabBtnUsers" class="tab-btn" data-tab="users" onclick="switchDashTab('users')">
+          👥 Manajemen Pengguna & Lisensi (Admin)
+        </button>
+        <button class="tab-btn" data-tab="profile" onclick="switchDashTab('profile')">
+          👤 Profil & Akun Saya
+        </button>
+      </div>
+
+      <!-- TAB 1: BOOK & PASSWORD PROTECTION MANAGEMENT -->
+      <div id="panel-books" class="panel-box">
+        <div class="panel-head">
+          <div>
+            <h3>📚 Katalog Buku Digital, Lisensi & Proteksi Kata Sandi</h3>
+            <p style="font-size:12px;color:var(--text-dim);margin-top:2px;">
+              Atur judul, tingkat lisensi (Basic/Pro/Enterprise), dan aktifkan proteksi kata sandi pada buku tertentu.
+            </p>
+          </div>
+          <a href="/" class="btn btn-primary">➕ Unggah PDF Baru di Rak Buku</a>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Buku Digital</th>
+                <th>Kategori & Mapel</th>
+                <th>Halaman</th>
+                <th>Plan Lisensi</th>
+                <th>Status Sandi</th>
+                <th>Dibaca</th>
+                <th>Aksi Manajemen</th>
+              </tr>
+            </thead>
+            <tbody id="booksTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 2: USER, ROLE & LICENSE MANAGEMENT (ADMIN) -->
+      <div id="panel-users" class="panel-box" style="display:none;">
+        <div class="panel-head">
+          <div>
+            <h3>👥 Manajemen Pengguna, Peran & Paket Lisensi</h3>
+            <p style="font-size:12px;color:var(--text-dim);margin-top:2px;">
+              Kelola akun Admin, Guru, dan Siswa serta tingkatkan paket lisensi pengguna (Basic, Pro, Enterprise).
+            </p>
+          </div>
+          <button class="btn btn-primary" onclick="openCreateUserModal()">➕ Tambah Pengguna Baru</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Nama & Email</th>
+                <th>Unit Sekolah</th>
+                <th>Role</th>
+                <th>Plan Lisensi</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 3: MY PROFILE -->
+      <div id="panel-profile" class="panel-box" style="display:none;max-width:560px;">
+        <h3 style="margin-bottom:14px;">👤 Profil & Pengaturan Akun Saya</h3>
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <span class="badge" style="background:rgba(14,165,233,0.2);color:#38bdf8;">ROLE: <b id="myRoleBadge">ADMIN</b></span>
+          <span class="badge enterprise">PLAN: <b id="myTierBadge">ENTERPRISE</b></span>
+        </div>
+        <form id="myProfileForm">
+          <div class="form-row">
+            <label>Alamat Email (Tidak dapat diubah)</label>
+            <input id="myEmail" type="email" class="form-control" readonly style="opacity:0.65;">
+          </div>
+          <div class="form-row">
+            <label>Nama Lengkap</label>
+            <input id="myName" type="text" class="form-control" required>
+          </div>
+          <div class="form-row">
+            <label>Unit Labschool / Instansi</label>
+            <input id="myUnit" type="text" class="form-control" required>
+          </div>
+          <div class="form-row">
+            <label>Ganti Kata Sandi Baru (Kosongkan jika tidak ingin mengubah)</label>
+            <input id="myNewPassword" type="password" class="form-control" placeholder="Minimal 6 karakter">
+          </div>
+          <div id="myProfileMsg" style="font-size:12.5px;color:#38bdf8;margin-bottom:10px;"></div>
+          <button type="submit" class="btn btn-primary">💾 Simpan Perubahan Profil</button>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal: Edit Book & Password Protection -->
+  <div id="editBookModal" class="modal-overlay">
+    <div class="modal-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h3>✏️ Edit Buku & Proteksi Kata Sandi</h3>
+        <button class="btn" style="padding:4px 10px;" onclick="document.getElementById('editBookModal').classList.remove('open')">✕</button>
+      </div>
+      <form id="editBookForm">
+        <input id="ebId" type="hidden">
+        <div class="form-row">
+          <label>Judul Buku Digital</label>
+          <input id="ebTitle" type="text" class="form-control" required>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-row">
+            <label>Penulis / Penyusun</label>
+            <input id="ebAuthor" type="text" class="form-control" required>
+          </div>
+          <div class="form-row">
+            <label>Kategori / Kelas</label>
+            <input id="ebCategory" type="text" class="form-control" required>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-row">
+            <label>Mata Pelajaran</label>
+            <input id="ebSubject" type="text" class="form-control" required>
+          </div>
+          <div class="form-row">
+            <label>Paket Lisensi Buku (Plan)</label>
+            <select id="ebTier" class="form-control">
+              <option value="enterprise">ENTERPRISE</option>
+              <option value="pro">PRO</option>
+              <option value="basic">BASIC</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin:14px 0;padding:12px;background:rgba(234,179,8,0.08);border:1px solid rgba(234,179,8,0.3);border-radius:10px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#fde047;cursor:pointer;margin-bottom:8px;">
+            <input id="ebPwProtected" type="checkbox" style="width:16px;height:16px;">
+            <span>🔒 Aktifkan Proteksi Kata Sandi (Password Protected Book)</span>
+          </label>
+          <input id="ebPassword" type="text" class="form-control" placeholder="Masukkan kata sandi buku (misal: LABS2026)">
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:8px;">
+          <button type="button" class="btn" onclick="document.getElementById('editBookModal').classList.remove('open')">Batal</button>
+          <button type="submit" class="btn btn-primary">💾 Simpan Pengaturan Buku</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Create New User (Admin) -->
+  <div id="createUserModal" class="modal-overlay">
+    <div class="modal-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h3>➕ Tambah Pengguna Baru</h3>
+        <button class="btn" style="padding:4px 10px;" onclick="document.getElementById('createUserModal').classList.remove('open')">✕</button>
+      </div>
+      <form id="cuForm">
+        <div class="form-row">
+          <label>Nama Lengkap</label>
+          <input id="cuName" type="text" class="form-control" required>
+        </div>
+        <div class="form-row">
+          <label>Email</label>
+          <input id="cuEmail" type="email" class="form-control" required>
+        </div>
+        <div class="form-row">
+          <label>Kata Sandi Awal</label>
+          <input id="cuPassword" type="text" class="form-control" placeholder="Minimal 6 karakter" required>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="form-row">
+            <label>Peran (Role)</label>
+            <select id="cuRole" class="form-control">
+              <option value="siswa">Siswa</option>
+              <option value="guru">Guru / Pengajar</option>
+              <option value="admin">Administrator</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Paket Lisensi (Plan)</label>
+            <select id="cuTier" class="form-control">
+              <option value="basic">BASIC</option>
+              <option value="pro">PRO</option>
+              <option value="enterprise">ENTERPRISE</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Unit Sekolah</label>
+          <input id="cuUnit" type="text" class="form-control" value="SMP Labschool Jakarta">
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px;">
+          <button type="button" class="btn" onclick="document.getElementById('createUserModal').classList.remove('open')">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan Pengguna</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Edit User (Admin) -->
+  <div id="editUserModal" class="modal-overlay">
+    <div class="modal-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h3>✏️ Kelola Pengguna & Paket Lisensi</h3>
+        <button class="btn" style="padding:4px 10px;" onclick="document.getElementById('editUserModal').classList.remove('open')">✕</button>
+      </div>
+      <form id="euForm">
+        <input id="euId" type="hidden">
+        <div class="form-row">
+          <label>Email</label>
+          <input id="euEmail" type="email" class="form-control" readonly style="opacity:0.65;">
+        </div>
+        <div class="form-row">
+          <label>Nama Lengkap</label>
+          <input id="euName" type="text" class="form-control" required>
+        </div>
+        <div class="form-row">
+          <label>Unit Sekolah</label>
+          <input id="euUnit" type="text" class="form-control" required>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+          <div class="form-row">
+            <label>Role</label>
+            <select id="euRole" class="form-control">
+              <option value="siswa">Siswa</option>
+              <option value="guru">Guru</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Plan Lisensi</label>
+            <select id="euTier" class="form-control">
+              <option value="basic">BASIC</option>
+              <option value="pro">PRO</option>
+              <option value="enterprise">ENTERPRISE</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Status Akun</label>
+            <select id="euStatus" class="form-control">
+              <option value="active">Active</option>
+              <option value="suspended">Suspended</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Reset Kata Sandi (Kosongkan bila tidak direset)</label>
+          <input id="euPassword" type="text" class="form-control" placeholder="Ketik kata sandi baru...">
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px;">
+          <button type="button" class="btn" onclick="document.getElementById('editUserModal').classList.remove('open')">Batal</button>
+          <button type="submit" class="btn btn-primary">💾 Simpan Perubahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/admin-assets/admin.js"></script>
+</body>
+</html>

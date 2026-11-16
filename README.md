@@ -1,6 +1,6 @@
-# FlipLabs — Custom Self-Hosted FlipHTML5 PDF Book Viewer (`books.labschool.xyz`)
+# FlipLabs — Labschool Interactive 3D E-Book Platform (`books.labschool.xyz`)
 
-Platform e-book interaktif **FlipLabs** adalah sistem viewer buku 3D (*Flipbook*) dan etalase rak buku digital (*Virtual Bookcase*) mandiri (*self-hosted*) untuk ekosistem **Labschool**. Dirancang untuk menggantikan ketergantungan pada layanan berbayar pihak ketiga seperti FlipHTML5 dengan performa tinggi, hemat RAM, dan privasi data 100% lokal.
+Platform e-book interaktif **FlipLabs** adalah sistem viewer buku 3D (*Flipbook*) dan etalase rak buku digital (*Virtual Bookcase*) mandiri (*self-hosted*) untuk ekosistem **Labschool**. Dirancang dengan performa tinggi, hemat RAM, proteksi kata sandi dokumen, manajemen pengguna multi-role, dan privasi data 100% lokal.
 
 ## ✨ Fitur Utama
 - **3D Page Flip & Curl Engine**: Efek membalik halaman buku 3D realistis (Double-page spread otomatis di desktop & Single-page di smartphone).

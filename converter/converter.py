@@ -2,7 +2,7 @@
 """
 FlipLabs Automated PDF Ingestion & Multi-Tier WebP Converter Pipeline
 ---------------------------------------------------------------------
-Converts any PDF into a FlipHTML5-compatible self-hosted book folder:
+Converts any PDF into a FlipLabs 3D interactive book folder:
 - files/large/{page}.webp  (Desktop & High-Res Zoom, max 2000px, q=82)
 - files/mobile/{page}.webp (Mobile & Tablet, max 1000px, q=75)
 - files/thumb/{page}.webp  (Thumbnail Drawer & Grid, max 260px, q=65)
