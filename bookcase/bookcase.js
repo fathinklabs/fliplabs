@@ -25,9 +25,13 @@ function loadAuthSession() {
     currentUser = null;
   }
   const authBtn = document.getElementById('navAuthBtn');
+  const adminBtn = document.getElementById('navAdminBtn');
+  if (adminBtn) {
+    adminBtn.style.display = currentUser ? 'inline-flex' : 'none';
+  }
   if (authBtn) {
     if (currentUser) {
-      authBtn.innerHTML = `👤 ${currentUser.name.split(' ')[0]} <small style="opacity:0.75">(${currentUser.role.toUpperCase()})</small>`;
+      authBtn.innerHTML = `👤 ${currentUser.name.split(' ')[0]} <small style="opacity:0.75">(${currentUser.role.toUpperCase()})</small> • Keluar`;
       authBtn.onclick = () => {
         if (confirm(`Anda masuk sebagai ${currentUser.name} (${currentUser.email}). Ingin keluar (Logout)?`)) {
           logoutUser();

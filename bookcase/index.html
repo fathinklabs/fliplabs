@@ -23,8 +23,8 @@
       <button class="btn btn-primary" onclick="triggerUploadBook()">
         ➕ Unggah PDF Baru
       </button>
-      <a href="/admin" class="btn" id="navAdminBtn">
-        ⚙️ Manajemen & Admin
+      <a href="/admin" class="btn" id="navAdminBtn" style="display:none;">
+        ⚙️ Panel Manajemen
       </a>
       <button id="navAuthBtn" class="btn" onclick="openAuthModal('login')">
         👤 Masuk / Daftar
@@ -87,7 +87,7 @@
       <form id="loginForm">
         <div class="form-row">
           <label>Alamat Email</label>
-          <input id="loginEmail" type="email" class="form-control" placeholder="labsdul@gmail.com" required>
+          <input id="loginEmail" type="email" class="form-control" placeholder="Masukkan email terdaftar..." required>
         </div>
         <div class="form-row">
           <label>Kata Sandi</label>
@@ -241,6 +241,6 @@
     </div>
   </div>
 
-  <script src="/bookcase/bookcase.js?v=2.2"></script>
+  <script src="/bookcase/bookcase.js?v=2.5"></script>
 </body>
 </html>

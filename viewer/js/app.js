@@ -73,6 +73,10 @@ function loadUserSession() {
     const canManage = state.currentUser && ['admin', 'guru'].includes(state.currentUser.role);
     btnLockCfg.style.display = canManage ? 'inline-flex' : 'none';
   }
+  const viewerAdminBtn = document.getElementById('viewerAdminBtn');
+  if (viewerAdminBtn) {
+    viewerAdminBtn.style.display = state.currentUser ? 'inline-flex' : 'none';
+  }
 }
 
 async function initViewer() {

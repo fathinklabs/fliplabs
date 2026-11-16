@@ -51,12 +51,6 @@ function showGate(locked) {
   }
 }
 
-async function quickLogin(email, password) {
-  document.getElementById('gateLoginEmail').value = email;
-  document.getElementById('gateLoginPassword').value = password;
-  await submitGateLogin(new Event('submit'));
-}
-
 async function submitGateLogin(e) {
   if (e && e.preventDefault) e.preventDefault();
   const msgEl = document.getElementById('gateAuthMsg');

@@ -9,10 +9,13 @@ env/
 # Node
 node_modules/
 
-# Environment & Secrets
+# Environment & Secrets (Local Only)
 .env
 *.pem
 *.key
+CREDENTIALS-ADMIN.md
+credentials*.txt
+credentials*.md
 
 # Temporary conversion files
 raw_pages/
