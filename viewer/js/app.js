@@ -456,14 +456,6 @@ async function animateRealisticFlip(targetPage, direction) {
     flapImg.src = getPageImageUrl(incomingRight);
   }
 
-  // Decode images before frame 1 to prevent any blank frame flicker
-  try {
-    await Promise.all([
-      revealImg.decode ? revealImg.decode().catch(() => {}) : Promise.resolve(),
-      flapImg.decode ? flapImg.decode().catch(() => {}) : Promise.resolve(),
-    ]);
-  } catch (e) {}
-
   window.flipSound.playFlip();
 
   revealLayer.style.width = `${w}px`;
@@ -474,24 +466,24 @@ async function animateRealisticFlip(targetPage, direction) {
   flap.style.height = `${h}px`;
   flapWrap.style.filter =
     direction === 'next'
-      ? 'drop-shadow(-14px 8px 20px rgba(0, 0, 0, 0.46))'
-      : 'drop-shadow(14px 8px 20px rgba(0, 0, 0, 0.46))';
+      ? 'drop-shadow(-16px 8px 22px rgba(0, 0, 0, 0.52))'
+      : 'drop-shadow(16px 8px 22px rgba(0, 0, 0, 0.52))';
 
   revealLayer.classList.add('active');
   flapWrap.classList.add('active');
 
-  const duration = 600;
+  const duration = 680;
   const startTime = performance.now();
 
-  function easeInOutCubic(t) {
-    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  function easeCosine(t) {
+    return 0.5 - 0.5 * Math.cos(t * Math.PI);
   }
 
   function stepFrame(now) {
     const rawT = Math.min(1, (now - startTime) / duration);
-    const p = easeInOutCubic(rawT);
+    const p = easeCosine(rawT);
     const sinArc = Math.sin(p * Math.PI);
-    const slant = sinArc * (w * 0.13);
+    const slant = sinArc * (w * 0.14);
 
     if (direction === 'next') {
       const revealLocalX = w * (1 - p);
