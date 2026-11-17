@@ -199,9 +199,10 @@
       </nav>
     </div>
     <div class="header-right">
-      <a href="/admin" id="mktAdminBtn" class="btn" style="display:none;">⚙️ Panel Manajemen</a>
-      <a href="/#login" id="mktAuthBtn" class="btn">Sign in</a>
-      <a href="/#upload" class="btn btn-primary">👩‍🏫 Jual / Upload Buku</a>
+      <a href="/dashboard" id="mktAdminBtn" class="btn" style="display:none;">👤 User Panel</a>
+      <a href="/admin" id="mktSuperAdminBtn" class="btn" style="display:none;background:#fef3c7;color:#92400e;border-color:#fde68a;">🛡️ Super Admin</a>
+      <a href="/dashboard" id="mktAuthBtn" class="btn">Sign in</a>
+      <a href="/dashboard" class="btn btn-primary">👩‍🏫 Jual / Upload Buku</a>
     </div>
   </header>
 
@@ -301,10 +302,14 @@
 
       const authBtn = document.getElementById('mktAuthBtn');
       const adminBtn = document.getElementById('mktAdminBtn');
+      const superAdminBtn = document.getElementById('mktSuperAdminBtn');
       if (currentUser) {
         authBtn.textContent = `👤 ${currentUser.name.split(' ')[0]} (${currentUser.role.toUpperCase()})`;
-        authBtn.href = '/admin';
+        authBtn.href = '/dashboard';
         adminBtn.style.display = 'inline-flex';
+        if (superAdminBtn) {
+          superAdminBtn.style.display = currentUser.role === 'admin' ? 'inline-flex' : 'none';
+        }
       }
 
       const token = getToken();

@@ -526,3 +526,17 @@ flowchart LR
    - **Checkout Pembayaran Instan (`POST /api/marketplace/buy/{book_id}`)**: Simulasi/integrasi pembayaran via QRIS, Virtual Account, atau Saldo Koperasi Labschool yang menerbitkan kode invoice (`INV-2026-...`) dan membuka kunci seluruh halaman buku secara permanen untuk akun siswa tersebut.
    - **Simpan ke Koleksi (`POST /api/marketplace/collect/{book_id}`)**: Siswa juga dapat menambahkan buku gratis ke dalam rak **Koleksi Buku Saya** agar mudah diakses kapan saja.
 
+### 11.5. Pemisahan Hak Akses Super Admin Panel (`/admin`) & User Panel (`/dashboard`)
+1. **Super Admin Panel (`/admin`) — Khusus Super Admin (`role = 'admin'`)**:
+   - Hanya dapat diakses oleh akun **Super Administrator** (`labsdul@gmail.com` / `admin@labschool.xyz`).
+   - Jika pengguna biasa (`guru` atau `siswa`) mencoba mengakses `/admin`, sistem menolak akses dan mengalihkan otomatis ke **User Panel (`/dashboard`)**.
+   - Menyediakan manajemen katalog global seluruh buku, statistik eksekutif seluruh sistem, serta manajemen seluruh akun pengguna (`GET/POST/PUT/DELETE /api/admin/users`).
+2. **User Panel (`/dashboard`) — Panel Mandiri Guru & Siswa**:
+   - Setiap pengguna baru yang mendaftar (contoh: `fathink@labschool.xyz`) memulai dengan daftar **Buku Unggahan Saya = 0 buku** dan **Koleksi & Pembelian Saya = 0 buku** (tidak tercampur dengan buku sampel/template bawaan sistem).
+   - Menyediakan 4 modul mandiri:
+     - **📚 Buku Unggahan Saya**: Unggah buku PDF baru, atur harga jual Marketplace, atur proteksi sandi buku, edit metadata, atau hapus buku milik sendiri.
+     - **🎒 Koleksi & Pembelian Saya**: Daftar buku yang telah dibeli atau disimpan dari Marketplace (`DELETE /api/marketplace/collect/{book_id}` untuk menghapus dari koleksi).
+     - **💰 Laporan Penjualan Buku**: Riwayat invoice pembelian dan total pendapatan dari buku yang dijual pengguna tersebut.
+     - **👤 Manajemen Profil & Kata Sandi**: Pembaruan nama lengkap, unit sekolah/kelas, dan penggantian kata sandi (`PUT /api/auth/profile`).
+
+

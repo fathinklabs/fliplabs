@@ -36,7 +36,18 @@ function loadAuthSession() {
   const authBtn = document.getElementById('navAuthBtn');
   const adminBtn = document.getElementById('navAdminBtn');
   if (adminBtn) {
-    adminBtn.style.display = currentUser ? 'inline-flex' : 'none';
+    if (currentUser) {
+      adminBtn.style.display = 'inline-flex';
+      if (currentUser.role === 'admin') {
+        adminBtn.href = '/admin';
+        adminBtn.innerHTML = '🛡️ Super Admin';
+      } else {
+        adminBtn.href = '/dashboard';
+        adminBtn.innerHTML = '👤 User Panel';
+      }
+    } else {
+      adminBtn.style.display = 'none';
+    }
   }
   if (authBtn) {
     if (currentUser) {

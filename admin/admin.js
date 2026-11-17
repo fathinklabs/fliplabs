@@ -45,6 +45,17 @@ async function checkAuthState() {
     const data = await res.json();
     currentUser = data.user;
     localStorage.setItem('fliplabs_user', JSON.stringify(currentUser));
+    if (currentUser.role !== 'admin') {
+      showGate(true);
+      const msgEl = document.getElementById('gateAuthMsg');
+      if (msgEl) {
+        msgEl.textContent = '🔒 Akses Ditolak: Portal /admin hanya untuk Super Administrator. Mengalihkan ke User Panel (/dashboard)...';
+      }
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 1200);
+      return;
+    }
     showGate(false);
     populateMyProfile();
     await loadDashboardData();
@@ -103,6 +114,13 @@ async function submitGateLogin(e) {
     }
     localStorage.setItem('fliplabs_token', data.token);
     localStorage.setItem('fliplabs_user', JSON.stringify(data.user));
+    if (data.user && data.user.role !== 'admin') {
+      msgEl.textContent = '🔒 Akun ini bukan Super Admin. Mengalihkan ke User Panel (/dashboard)...';
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 1000);
+      return;
+    }
     await checkAuthState();
   } catch (err) {
     msgEl.textContent = '❌ ' + err.message;
@@ -161,6 +179,13 @@ async function submitGateVerifyOtp(e) {
     if (!res.ok) throw new Error(data.detail || 'Kode OTP tidak sesuai');
     localStorage.setItem('fliplabs_token', data.token);
     localStorage.setItem('fliplabs_user', JSON.stringify(data.user));
+    if (data.user && data.user.role !== 'admin') {
+      msgEl.textContent = '🔒 Akun ini bukan Super Admin. Mengalihkan ke User Panel (/dashboard)...';
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 1000);
+      return;
+    }
     await checkAuthState();
   } catch (err) {
     msgEl.textContent = '❌ ' + err.message;
@@ -513,9 +538,12 @@ function switchDashTab(tabName) {
 
 document.addEventListener('DOMContentLoaded', () => {
   checkAuthState();
-  document.getElementById('gateLoginForm').addEventListener('submit', submitGateLogin);
-  document.getElementById('gateRegForm').addEventListener('submit', submitGateRegister);
-  document.getElementById('gateVerifyForm').addEventListener('submit', submitGateVerifyOtp);
+  const glf = document.getElementById('gateLoginForm');
+  if (glf) glf.addEventListener('submit', submitGateLogin);
+  const grf = document.getElementById('gateRegForm');
+  if (grf) grf.addEventListener('submit', submitGateRegister);
+  const gvf = document.getElementById('gateVerifyForm');
+  if (gvf) gvf.addEventListener('submit', submitGateVerifyOtp);
   document.getElementById('editBookForm').addEventListener('submit', submitEditBook);
   document.getElementById('cuForm').addEventListener('submit', submitCreateUser);
   document.getElementById('euForm').addEventListener('submit', submitEditUser);

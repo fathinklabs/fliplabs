@@ -75,7 +75,13 @@ function loadUserSession() {
   }
   const viewerAdminBtn = document.getElementById('viewerAdminBtn');
   if (viewerAdminBtn) {
-    viewerAdminBtn.style.display = state.currentUser ? 'inline-flex' : 'none';
+    if (state.currentUser) {
+      viewerAdminBtn.style.display = 'inline-flex';
+      viewerAdminBtn.href = state.currentUser.role === 'admin' ? '/admin' : '/dashboard';
+      viewerAdminBtn.textContent = state.currentUser.role === 'admin' ? '🛡️ Super Admin' : '👤 User Panel';
+    } else {
+      viewerAdminBtn.style.display = 'none';
+    }
   }
 }
 

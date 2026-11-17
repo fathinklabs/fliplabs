@@ -199,6 +199,12 @@ def serve_marketplace_page():
     return FileResponse(str(BOOKCASE_DIR / "marketplace.html"))
 
 
+@app.api_route("/dashboard", methods=["GET", "HEAD"], response_class=HTMLResponse)
+@app.api_route("/user", methods=["GET", "HEAD"], response_class=HTMLResponse)
+def serve_user_dashboard():
+    return FileResponse(str(BOOKCASE_DIR / "dashboard.html"))
+
+
 @app.api_route("/admin", methods=["GET", "HEAD"], response_class=HTMLResponse)
 def serve_admin_portal():
     return FileResponse(str(ADMIN_DIR / "index.html"))
@@ -504,7 +510,7 @@ def list_books(authorization: Optional[str] = Header(None)):
                     b["previewPages"] = int(st.get("preview_pages", 3))
                     b["salesCount"] = int(st.get("sales_count", 0))
                     b["description"] = st.get("description", b.get("subtitle", ""))
-                    b["isOwned"] = bool(not b["isForSale"] or is_admin or (bid in owned_ids))
+                    b["isOwned"] = bool(is_admin or (bid in owned_ids))
 
                     sec = b.get("security", {})
                     has_pw = bool(sec.get("isPasswordProtected") and sec.get("password"))
@@ -663,17 +669,43 @@ def add_to_my_collection(book_id: str, user: Dict[str, Any] = Depends(require_us
     return {"status": "ok", "message": "Buku berhasil disimpan ke Koleksi Buku Saya!"}
 
 
+@app.delete("/api/marketplace/collect/{book_id}")
+def remove_from_my_collection(book_id: str, user: Dict[str, Any] = Depends(require_user)):
+    conn = get_conn()
+    conn.execute(
+        "DELETE FROM user_collections WHERE lower(user_email) = lower(?) AND book_id = ?",
+        (user["email"], book_id),
+    )
+    conn.commit()
+    conn.close()
+    return {"status": "ok", "message": "Buku dihapus dari Koleksi Buku Saya"}
+
+
 @app.get("/api/marketplace/my-collection")
 def get_my_collection_and_sales(user: Dict[str, Any] = Depends(require_user)):
-    owned_ids = set(get_user_owned_books(user["email"]))
-    all_books = list_books(f"Bearer ")["books"]
-    for b in all_books:
-        if b["id"] in owned_ids:
-            b["isOwned"] = True
-
-    my_books = [b for b in all_books if b["id"] in owned_ids]
-
     conn = get_conn()
+    col_rows = conn.execute(
+        """
+        SELECT book_id FROM user_collections WHERE lower(user_email) = lower(?)
+        UNION
+        SELECT book_id FROM book_purchases WHERE lower(buyer_email) = lower(?)
+        """,
+        (user["email"], user["email"]),
+    ).fetchall()
+    collected_ids = {r["book_id"] for r in col_rows}
+
+    all_books = list_books("Bearer ")["books"]
+    my_uploaded_books = []
+    my_collected_books = []
+    for b in all_books:
+        is_mine = str(b.get("ownerEmail", "")).lower() == user["email"].lower()
+        if is_mine:
+            b["isOwned"] = True
+            my_uploaded_books.append(b)
+        if b["id"] in collected_ids:
+            b["isOwned"] = True
+            my_collected_books.append(b)
+
     purchases = [
         dict(r)
         for r in conn.execute(
@@ -698,7 +730,8 @@ def get_my_collection_and_sales(user: Dict[str, Any] = Depends(require_user)):
 
     total_revenue = sum(int(s.get("amount", 0)) for s in sales)
     return {
-        "collection": my_books,
+        "uploadedBooks": my_uploaded_books,
+        "collection": my_collected_books,
         "purchases": purchases,
         "sales": sales,
         "totalRevenue": total_revenue,
@@ -744,7 +777,7 @@ class AdminUpdateBookRequest(BaseModel):
 
 
 @app.get("/api/admin/overview")
-def admin_overview(user: Dict[str, Any] = Depends(require_user)):
+def admin_overview(admin: Dict[str, Any] = Depends(require_admin)):
     conn = get_conn()
     users = [dict(r) for r in conn.execute("SELECT id, role, license_tier, status FROM users").fetchall()]
     sales_rows = conn.execute("SELECT SUM(amount) AS rev, COUNT(*) AS cnt FROM book_purchases").fetchone()
@@ -882,8 +915,11 @@ def admin_delete_user(user_id: int, admin: Dict[str, Any] = Depends(require_admi
 
 @app.put("/api/admin/books/{book_id}")
 def admin_update_book(book_id: str, req: AdminUpdateBookRequest, user: Dict[str, Any] = Depends(require_user)):
-    if user["role"] not in ("admin", "guru"):
-        raise HTTPException(status_code=403, detail="Hanya Admin atau Guru yang dapat mengubah pengaturan buku")
+    stats_map = get_all_book_stats()
+    st = stats_map.get(book_id, {})
+    owner_email = str(st.get("owner_email", "guru@labschool.xyz")).lower()
+    if user["role"] != "admin" and owner_email != user["email"].lower():
+        raise HTTPException(status_code=403, detail="Anda hanya dapat mengubah buku milik Anda sendiri")
 
     cfg_path = BOOKS_DIR / book_id / "book-config.json"
     if not cfg_path.exists():
@@ -934,7 +970,13 @@ def admin_update_book(book_id: str, req: AdminUpdateBookRequest, user: Dict[str,
 
 
 @app.delete("/api/admin/books/{book_id}")
-def admin_delete_book(book_id: str, admin: Dict[str, Any] = Depends(require_admin)):
+def admin_delete_book(book_id: str, user: Dict[str, Any] = Depends(require_user)):
+    stats_map = get_all_book_stats()
+    st = stats_map.get(book_id, {})
+    owner_email = str(st.get("owner_email", "guru@labschool.xyz")).lower()
+    if user["role"] != "admin" and owner_email != user["email"].lower():
+        raise HTTPException(status_code=403, detail="Hanya Super Admin atau pemilik buku yang dapat menghapus buku ini")
+
     book_folder = BOOKS_DIR / book_id
     if not book_folder.exists():
         raise HTTPException(status_code=404, detail="Buku tidak ditemukan")

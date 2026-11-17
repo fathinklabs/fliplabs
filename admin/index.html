@@ -21,6 +21,7 @@
     </div>
     <div style="display:flex;align-items:center;gap:10px;">
       <span id="topUserSummary" style="font-size:12.5px;font-weight:600;color:var(--text-dim);">Belum Masuk</span>
+      <a href="/dashboard" class="btn">👤 User Panel</a>
       <a href="/marketplace" class="btn">🛒 Marketplace</a>
       <a href="/" class="btn">📚 Rak Buku Digital</a>
       <button id="btnTopLogout" class="btn btn-danger" style="display:none;" onclick="logoutAdmin()">Keluar</button>
@@ -29,94 +30,40 @@
 
   <main class="container">
 
-    <!-- Login & Registration Gate -->
-    <section id="authGateSection" style="max-width:860px;margin:24px auto;">
-      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(340px, 1fr));gap:24px;">
-        <!-- Login Card -->
-        <div class="panel-box">
-          <h3 style="margin-bottom:6px;">🔐 Masuk Akun (Login)</h3>
-          <p style="font-size:12.5px;color:var(--text-dim);margin-bottom:16px;">
-            Masuk sebagai Admin, Guru, atau Siswa untuk mengelola katalog buku, penjualan, dan profil.
-          </p>
-          <form id="gateLoginForm">
-            <div class="form-row">
-              <label>Alamat Email</label>
-              <input id="gateLoginEmail" type="email" class="form-control" placeholder="Masukkan email akun Anda..." required>
-            </div>
-            <div class="form-row">
-              <label>Kata Sandi</label>
-              <input id="gateLoginPassword" type="password" class="form-control" placeholder="Masukkan kata sandi..." required>
-            </div>
-            <div class="form-row">
-              <label>Verifikasi Keamanan (Penjumlahan 2 Digit)</label>
-              <div style="display:flex;gap:8px;align-items:center;">
-                <div id="gateCaptchaQuestion" class="captcha-badge">.. + .. = ?</div>
-                <input id="gateCaptchaAnswer" type="number" class="form-control" placeholder="Jawaban" required>
-                <button type="button" class="btn" onclick="loadGateCaptcha()">🔄</button>
-              </div>
-            </div>
-            <div id="gateAuthMsg" style="font-size:12.5px;color:#dc2626;font-weight:600;margin-bottom:10px;"></div>
-            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;">
-              Masuk ke Portal Manajemen
-            </button>
-          </form>
+    <!-- Super Admin Login Gate -->
+    <section id="authGateSection" style="max-width:480px;margin:40px auto;">
+      <div class="panel-box">
+        <div style="display:inline-flex;align-items:center;gap:6px;background:#fef3c7;color:#92400e;border:1px solid #fde68a;padding:4px 10px;border-radius:99px;font-size:11.5px;font-weight:800;margin-bottom:10px;">
+          🛡️ RESTRICTED ACCESS • SUPER ADMIN ONLY
         </div>
-
-        <!-- Registration & OTP Verification Card -->
-        <div class="panel-box">
-          <div id="gateRegWrap">
-            <h3 style="margin-bottom:6px;">✨ Registrasi Akun Baru</h3>
-            <p style="font-size:12.5px;color:var(--text-dim);margin-bottom:16px;">
-              Daftarkan akun Guru atau Siswa Labschool. Kode verifikasi OTP akan dikirim ke email Anda.
-            </p>
-            <form id="gateRegForm">
-              <div class="form-row">
-                <label>Nama Lengkap</label>
-                <input id="gateRegName" type="text" class="form-control" placeholder="Nama Lengkap Guru / Siswa" required>
-              </div>
-              <div class="form-row">
-                <label>Email Aktif</label>
-                <input id="gateRegEmail" type="email" class="form-control" placeholder="nama@labschool.sch.id" required>
-              </div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                <div class="form-row">
-                  <label>Peran (Role)</label>
-                  <select id="gateRegRole" class="form-control">
-                    <option value="siswa">Siswa (Basic)</option>
-                    <option value="guru">Guru / Penulis (Pro)</option>
-                  </select>
-                </div>
-                <div class="form-row">
-                  <label>Unit Sekolah</label>
-                  <input id="gateRegUnit" type="text" class="form-control" value="SMP Labschool Jakarta">
-                </div>
-              </div>
-              <div class="form-row">
-                <label>Kata Sandi Baru</label>
-                <input id="gateRegPassword" type="password" class="form-control" placeholder="Minimal 6 karakter" required>
-              </div>
-              <div id="gateRegMsg" style="font-size:12.5px;color:#dc2626;font-weight:600;margin-bottom:10px;"></div>
-              <button id="btnGateRegSubmit" type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;">
-                📧 Daftar & Kirim Kode OTP Email
-              </button>
-            </form>
+        <h3 style="margin-bottom:6px;">🔐 Portal Super Administrator</h3>
+        <p style="font-size:12.5px;color:var(--text-dim);margin-bottom:16px;">
+          Halaman ini khusus untuk <b>Super Administrator</b> FlipLabs. Bagi Guru dan Siswa, silakan gunakan <a href="/dashboard" style="color:#0088ff;font-weight:700;">User Panel (/dashboard)</a>.
+        </p>
+        <form id="gateLoginForm">
+          <div class="form-row">
+            <label>Email Super Admin</label>
+            <input id="gateLoginEmail" type="email" class="form-control" placeholder="Masukkan email Super Admin..." required>
           </div>
-
-          <div id="gateVerifyWrap" style="display:none;">
-            <h3 style="margin-bottom:6px;">📧 Verifikasi Kode OTP Email</h3>
-            <p style="font-size:12.5px;color:var(--text-dim);margin-bottom:14px;">
-              Masukkan kode OTP 6 digit yang telah dikirim melalui <b>admin@labschool.xyz</b> ke <b id="gateVerifyEmailLabel" style="color:#0088ff;"></b>:
-            </p>
-            <form id="gateVerifyForm">
-              <div class="form-row">
-                <input id="gateVerifyOtp" type="text" maxlength="6" class="form-control" placeholder="6 Digit OTP" style="font-size:20px;font-weight:900;letter-spacing:6px;text-align:center;" required>
-              </div>
-              <div id="gateVerifyMsg" style="font-size:12.5px;color:#dc2626;font-weight:600;margin-bottom:10px;"></div>
-              <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;">
-                ✅ Verifikasi & Aktifkan Akun
-              </button>
-            </form>
+          <div class="form-row">
+            <label>Kata Sandi</label>
+            <input id="gateLoginPassword" type="password" class="form-control" placeholder="Masukkan kata sandi..." required>
           </div>
+          <div class="form-row">
+            <label>Verifikasi Keamanan (Penjumlahan 2 Digit)</label>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <div id="gateCaptchaQuestion" class="captcha-badge">.. + .. = ?</div>
+              <input id="gateCaptchaAnswer" type="number" class="form-control" placeholder="Jawaban" required>
+              <button type="button" class="btn" onclick="loadGateCaptcha()">🔄</button>
+            </div>
+          </div>
+          <div id="gateAuthMsg" style="font-size:12.5px;color:#dc2626;font-weight:600;margin-bottom:10px;"></div>
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;">
+            🛡️ Masuk sebagai Super Admin
+          </button>
+        </form>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border-subtle);text-align:center;font-size:12.5px;color:var(--text-dim);">
+          Masuk sebagai Guru atau Siswa? <a href="/dashboard" style="color:#0088ff;font-weight:800;">Buka User Panel →</a>
         </div>
       </div>
     </section>
