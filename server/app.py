@@ -57,9 +57,9 @@ UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 ADMIN_DIR.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(
-    title="FlipLabs — Labschool Interactive 3D E-Book & Marketplace Platform",
-    description="Perpustakaan Digital 3D, Konversi E-Book, Marketplace Buku Guru-Siswa & Manajemen Lisensi (books.labschool.xyz)",
-    version="3.0.0",
+    title="EBOOK LABS — Labschool Interactive 3D E-Book Marketplace Platform",
+    description="Marketplace Pembelian Buku Digital 3D Siswa, Panel Modul Guru (/guru) & Super Admin (/admin) — books.labschool.xyz",
+    version="3.4.0",
 )
 
 
@@ -173,12 +173,18 @@ def require_admin(authorization: Optional[str] = Header(None)) -> Dict[str, Any]
 
 @app.api_route("/health", methods=["GET", "HEAD"])
 def health_check():
-    return {"status": "ok", "service": "fliplabs", "domain": "books.labschool.xyz", "version": "3.0.0"}
+    return {"status": "ok", "service": "ebook-labs", "domain": "books.labschool.xyz", "version": "3.4.0"}
 
 
 @app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
 def serve_bookcase_home():
     return FileResponse(str(BOOKCASE_DIR / "index.html"))
+
+
+@app.api_route("/guru", methods=["GET", "HEAD"], response_class=HTMLResponse)
+@app.api_route("/guru/", methods=["GET", "HEAD"], response_class=HTMLResponse)
+def serve_guru_panel():
+    return FileResponse(str(BOOKCASE_DIR / "guru.html"))
 
 
 @app.api_route("/pricing", methods=["GET", "HEAD"], response_class=HTMLResponse)
@@ -196,7 +202,7 @@ def serve_templates_page():
 @app.api_route("/marketplace", methods=["GET", "HEAD"], response_class=HTMLResponse)
 @app.api_route("/marketplace/", methods=["GET", "HEAD"], response_class=HTMLResponse)
 def serve_marketplace_page():
-    return FileResponse(str(BOOKCASE_DIR / "marketplace.html"))
+    return FileResponse(str(BOOKCASE_DIR / "index.html"))
 
 
 @app.api_route("/dashboard", methods=["GET", "HEAD"], response_class=HTMLResponse)
@@ -308,8 +314,14 @@ def register_endpoint(req: RegisterRequest):
     if "@" not in email or len(req.password) < 6:
         raise HTTPException(status_code=400, detail="Email harus valid dan password minimal 6 karakter")
 
-    role = req.role.lower() if req.role.lower() in ("siswa", "guru") else "siswa"
-    default_tier = "pro" if role == "guru" else "basic"
+    if req.role and req.role.strip().lower() not in ("siswa", ""):
+        raise HTTPException(
+            status_code=403,
+            detail="Pendaftaran sebagai Guru dinonaktifkan. Akun Guru ditentukan dan didaftarkan oleh Administrator. Pendaftaran di web utama hanya sebagai Siswa.",
+        )
+
+    role = "siswa"
+    default_tier = "basic"
     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
     otp_code = str(random.randint(100000, 999999))
     verify_tok = secrets.token_urlsafe(24)
@@ -548,7 +560,12 @@ async def upload_and_convert_pdf(
     if not current_user:
         raise HTTPException(
             status_code=401,
-            detail="Akses ditolak: Hanya pengguna yang sudah registrasi dan masuk akun yang dapat mengunggah buku PDF.",
+            detail="Akses ditolak: Silakan masuk ke akun Guru Anda terlebih dahulu.",
+        )
+    if current_user.get("role") not in ("guru", "admin"):
+        raise HTTPException(
+            status_code=403,
+            detail="Akses ditolak: Fitur Upload PDF dan membuat Flipbook hanya tersedia untuk Guru melalui panel books.labschool.xyz/guru.",
         )
     owner_email = current_user["email"]
 
@@ -987,58 +1004,3 @@ def admin_delete_book(book_id: str, user: Dict[str, Any] = Depends(require_user)
     conn.close()
     return {"status": "ok", "message": f"Buku {book_id} berhasil dihapus"}
 
-
-# ============================================================================
-# AI BOOK TUTOR ENDPOINT
-# ============================================================================
-
-class AIChatRequest(BaseModel):
-    bookId: str
-    currentPage: int = 1
-    question: str
-
-
-@app.post("/api/ai-chat")
-def ai_book_assistant(req: AIChatRequest):
-    idx_file = BOOKS_DIR / req.bookId / "search-index.json"
-    if not idx_file.exists():
-        raise HTTPException(status_code=404, detail="Indeks buku tidak ditemukan")
-
-    with open(idx_file, "r", encoding="utf-8") as f:
-        idx_data = json.load(f)
-
-    pages = idx_data.get("pages", [])
-    tokens = [w.lower() for w in re.findall(r"[a-zA-Z0-9]{3,}", req.question)]
-
-    scored_pages = []
-    for p in pages:
-        txt = p.get("text", "")
-        txt_lower = txt.lower()
-        score = sum(3 for t in tokens if t in txt_lower)
-        if p.get("page") == req.currentPage:
-            score += 1
-        if score > 0:
-            scored_pages.append((score, p["page"], txt))
-
-    scored_pages.sort(key=lambda x: (-x[0], x[1]))
-
-    if not scored_pages:
-        cur_p = next((p for p in pages if p["page"] == req.currentPage), pages[0] if pages else {"page": 1, "text": ""})
-        return {
-            "answer": (
-                f"Berdasarkan <b>Halaman {cur_p['page']}</b> yang sedang dibuka:<br>"
-                f"{cur_p['text'][:360]}...<br><br>"
-                f"<small>💡 Tip: Gunakan kata kunci spesifik seperti <i>Pythagoras</i>, <i>gradien</i>, <i>pola bilangan</i>, atau <i>lingkaran</i>.</small>"
-            )
-        }
-
-    top_hits = scored_pages[:2]
-    parts = []
-    for _, page_num, txt in top_hits:
-        parts.append(
-            f"<div style='margin-bottom:8px;'>"
-            f"<b style='color:#0088ff;cursor:pointer;' onclick='goToPage({page_num})'>📖 Halaman {page_num} (Klik untuk buka):</b><br>"
-            f"{txt[:320]}..."
-            f"</div>"
-        )
-    return {"answer": "".join(parts)}

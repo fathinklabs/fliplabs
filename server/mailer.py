@@ -131,7 +131,7 @@ def send_mail_xoauth2(
     subject: str,
     html_body: str,
     plain_text: str = "",
-    from_name: str = "FlipLabs — Perpustakaan Digital Labschool",
+    from_name: str = "EBOOK LABS — Perpustakaan Digital Labschool",
     from_email: str = "admin@labschool.xyz",
 ) -> Dict[str, Any]:
     try:
@@ -193,16 +193,16 @@ def send_mail_xoauth2(
 
 
 def send_verification_email(to_email: str, full_name: str, otp_code: str, verify_url: str) -> Dict[str, Any]:
-    subject = f"[{otp_code}] Kode Verifikasi Pendaftaran Akun FlipLabs (books.labschool.xyz)"
+    subject = f"[{otp_code}] Kode Verifikasi Pendaftaran Akun EBOOK LABS (books.labschool.xyz)"
     html_body = f"""
     <div style="font-family:'Segoe UI',Roboto,Arial,sans-serif;max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;">
       <div style="background:linear-gradient(135deg,#0088ff,#1e40af);padding:24px 28px;color:#ffffff;">
-        <h2 style="margin:0;font-size:20px;">FlipLabs — Perpustakaan & Buku Digital 3D</h2>
+        <h2 style="margin:0;font-size:20px;">EBOOK LABS — Marketplace &amp; Buku Digital 3D</h2>
         <p style="margin:4px 0 0;font-size:13px;opacity:0.9;">books.labschool.xyz • Ekosistem Digital Labschool</p>
       </div>
       <div style="padding:28px;color:#1e293b;line-height:1.6;">
         <p style="margin-top:0;">Halo <strong>{full_name}</strong>,</p>
-        <p>Terima kasih telah mendaftar di <strong>FlipLabs (books.labschool.xyz)</strong>. Gunakan Kode OTP 6 digit di bawah ini atau klik tombol aktivasi untuk memverifikasi alamat email Anda:</p>
+        <p>Terima kasih telah mendaftar akun Siswa di <strong>EBOOK LABS (books.labschool.xyz)</strong>. Gunakan Kode OTP 6 digit di bawah ini atau klik tombol aktivasi untuk memverifikasi alamat email Anda:</p>
         <div style="background:#f0f7ff;border:2px dashed #0088ff;border-radius:12px;padding:18px;text-align:center;margin:22px 0;">
           <div style="font-size:12px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Kode Verifikasi OTP Anda</div>
           <div style="font-size:34px;font-weight:900;letter-spacing:8px;color:#0088ff;margin-top:6px;">{otp_code}</div>

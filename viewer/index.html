@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>FlipLabs — Labschool Interactive 3D E-Book Viewer</title>
-  <link rel="stylesheet" href="/viewer/css/viewer.css?v=3.2">
+  <title>EBOOK LABS — Labschool Interactive 3D E-Book Viewer</title>
+  <link rel="stylesheet" href="/viewer/css/viewer.css?v=3.4">
 </head>
 <body>
 
   <!-- Top Header Bar -->
   <header class="top-bar">
     <div class="brand-group">
-      <a href="/" title="Kembali ke Rak Buku Digital">
-        <img src="/viewer/assets/branding/labschool-logo.svg" alt="FlipLabs" class="brand-logo">
+      <a href="/" title="Kembali ke Marketplace EBOOK LABS">
+        <img src="/viewer/assets/branding/labschool-logo.svg" alt="EBOOK LABS" class="brand-logo">
       </a>
       <div class="book-title-wrap">
         <div id="bookTitle" class="book-title">Memuat Buku Digital...</div>
-        <div id="bookSubtitle" class="book-subtitle">Labschool Digital Library</div>
+        <div id="bookSubtitle" class="book-subtitle">EBOOK LABS Digital Library</div>
       </div>
     </div>
 
@@ -87,23 +87,6 @@
         + Tandai / Hapus Halaman Aktif
       </button>
       <div id="bookmarkList"></div>
-    </div>
-  </aside>
-
-  <!-- Right Drawer: AI Book Assistant -->
-  <aside id="aiDrawer" class="side-drawer right-side">
-    <div class="drawer-header">
-      <span>🤖 AI Tutor Buku (Enterprise)</span>
-      <button class="drawer-close" onclick="toggleDrawer('aiDrawer', false)">✕</button>
-    </div>
-    <div id="aiChatMessages" class="chat-messages">
-      <div class="chat-bubble ai">
-        Halo! Saya asisten pintar FlipLabs. Tanyakan rumus, rangkuman bab, atau konsep dari buku ini dan saya akan mencarikan jawabannya beserta nomor halaman!
-      </div>
-    </div>
-    <div style="padding:10px;border-top:1px solid var(--border-color);display:flex;gap:6px;">
-      <input id="aiChatInput" type="text" class="drawer-input" placeholder="Tanya isi buku ini...">
-      <button id="btnSendAI" class="top-btn" style="background:var(--accent);border:none;">Kirim</button>
     </div>
   </aside>
 
@@ -233,9 +216,6 @@
     </button>
     <button id="btnShare" class="tool-btn" title="Bagikan Link & Embed Iframe Moodle">
       <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
-    </button>
-    <button id="btnAIChat" class="tool-btn" title="Tanya AI Tutor Buku (Enterprise)">
-      <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 1 4 4v2h2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2V6a4 4 0 0 1 4-4z"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/></svg>
     </button>
     <button id="btnFullscreen" class="tool-btn" title="Layar Penuh (Fullscreen)">
       <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>

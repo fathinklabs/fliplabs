@@ -77,8 +77,16 @@ function loadUserSession() {
   if (viewerAdminBtn) {
     if (state.currentUser) {
       viewerAdminBtn.style.display = 'inline-flex';
-      viewerAdminBtn.href = state.currentUser.role === 'admin' ? '/admin' : '/dashboard';
-      viewerAdminBtn.textContent = state.currentUser.role === 'admin' ? '🛡️ Super Admin' : '👤 User Panel';
+      if (state.currentUser.role === 'admin') {
+        viewerAdminBtn.href = '/admin';
+        viewerAdminBtn.textContent = '🛡️ Super Admin';
+      } else if (state.currentUser.role === 'guru') {
+        viewerAdminBtn.href = '/guru';
+        viewerAdminBtn.textContent = '👩‍🏫 Panel Guru';
+      } else {
+        viewerAdminBtn.href = '/dashboard';
+        viewerAdminBtn.textContent = '🎒 Koleksi Saya';
+      }
     } else {
       viewerAdminBtn.style.display = 'none';
     }
@@ -238,7 +246,7 @@ async function saveBookPasswordConfig() {
 
 function applyBrandingAndTheme() {
   const cfg = state.config;
-  document.title = `${cfg.title} — FlipLabs 3D Viewer`;
+  document.title = `${cfg.title} — EBOOK LABS 3D Viewer`;
   document.getElementById('bookTitle').textContent = cfg.title;
   document.getElementById('bookSubtitle').textContent = `${cfg.author} • ${cfg.category || ''}`;
   document.getElementById('totalPageLabel').textContent = `/ ${state.totalPages}`;
@@ -291,7 +299,6 @@ function applyLicenseTier(tier) {
   setButtonLock('btnAnnotate', !rules.annotations, 'Fitur Stabilo & Anotasi memerlukan lisensi PRO / ENTERPRISE');
   setButtonLock('btnBookmark', !rules.bookmarks, 'Fitur Penanda Halaman memerlukan lisensi PRO / ENTERPRISE');
   setButtonLock('btnFlipShot', !rules.flipshot, 'Fitur FlipShot Screenshot memerlukan lisensi PRO / ENTERPRISE');
-  setButtonLock('btnAIChat', !rules.ai, 'Fitur AI Book Tutor khusus lisensi ENTERPRISE');
 }
 
 function setButtonLock(btnId, isLocked, lockReason) {
@@ -950,51 +957,8 @@ function captureFlipShot() {
   showToast('📸 FlipShot halaman berhasil diunduh sebagai PNG!');
 }
 
-/* AI Book Assistant */
-async function sendAIChatQuestion() {
-  const input = document.getElementById('aiChatInput');
-  const msgBox = document.getElementById('aiChatMessages');
-  const q = (input.value || '').trim();
-  if (!q) return;
-  input.value = '';
-
-  const userDiv = document.createElement('div');
-  userDiv.className = 'chat-bubble user';
-  userDiv.textContent = q;
-  msgBox.appendChild(userDiv);
-  msgBox.scrollTop = msgBox.scrollHeight;
-
-  const aiDiv = document.createElement('div');
-  aiDiv.className = 'chat-bubble ai';
-  aiDiv.textContent = 'Menganalisis isi halaman buku...';
-  msgBox.appendChild(aiDiv);
-
-  try {
-    const res = await fetch('/api/ai-chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        bookId: state.bookId,
-        currentPage: state.currentPage,
-        question: q,
-      }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      aiDiv.innerHTML = data.answer;
-    } else {
-      throw new Error('Fallback local search');
-    }
-  } catch (e) {
-    const pages = (state.searchIndex && state.searchIndex.pages) || [];
-    const curPageObj = pages.find((p) => p.page === state.currentPage) || pages[0];
-    aiDiv.innerHTML = `<b>Referensi Halaman ${state.currentPage}:</b><br>${(curPageObj && curPageObj.text.slice(0, 320)) || 'Silakan gunakan fitur pencarian untuk menemukan topik terkait.'}...`;
-  }
-  msgBox.scrollTop = msgBox.scrollHeight;
-}
-
 function toggleDrawer(drawerId, forceState) {
-  ['tocDrawer', 'searchDrawer', 'bookmarkDrawer', 'aiDrawer'].forEach((id) => {
+  ['tocDrawer', 'searchDrawer', 'bookmarkDrawer'].forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
     if (id === drawerId) {
@@ -1170,16 +1134,6 @@ function bindEvents() {
   document.getElementById('btnFullscreen').addEventListener('click', () => {
     if (!document.fullscreenElement) document.documentElement.requestFullscreen();
     else document.exitFullscreen();
-  });
-
-  document.getElementById('btnAIChat').addEventListener('click', () => {
-    if (checkLock('btnAIChat')) return;
-    toggleDrawer('aiDrawer');
-  });
-
-  document.getElementById('btnSendAI').addEventListener('click', sendAIChatQuestion);
-  document.getElementById('aiChatInput').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') sendAIChatQuestion();
   });
 
   document.getElementById('searchInput').addEventListener('input', (e) => {

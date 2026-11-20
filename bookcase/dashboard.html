@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Panel & Studio Saya — FlipLabs Digital Publishing</title>
+  <title>Panel Koleksi & Profil Siswa — EBOOK LABS</title>
   <link rel="icon" href="/viewer/assets/branding/labschool-logo.svg">
-  <link rel="stylesheet" href="/bookcase/bookcase.css?v=3.3">
+  <link rel="stylesheet" href="/bookcase/bookcase.css?v=3.4">
   <style>
     .dash-wrap {
-      max-width: 1320px;
+      max-width: 1240px;
       margin: 0 auto;
       padding: 32px 28px 80px;
     }
@@ -45,7 +45,7 @@
     }
     .dash-kpi-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 18px;
       margin-bottom: 26px;
     }
@@ -143,10 +143,7 @@
       font-size: 11.5px;
       font-weight: 800;
     }
-    @media (max-width: 960px) {
-      .dash-kpi-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 600px) {
+    @media (max-width: 860px) {
       .dash-kpi-grid { grid-template-columns: 1fr; }
     }
   </style>
@@ -156,24 +153,22 @@
   <nav class="landing-navbar">
     <div style="display:flex;align-items:center;gap:32px;">
       <a href="/" class="brand-logo" style="text-decoration:none;color:inherit;">
-        <img src="/viewer/assets/branding/labschool-logo.svg" alt="FlipLabs">
-        <span>FLIPLABS</span>
+        <img src="/viewer/assets/branding/labschool-logo.svg" alt="EBOOK LABS">
+        <span>EBOOK LABS</span>
       </a>
       <div class="nav-links">
-        <a href="/">Beranda & Rak Buku</a>
-        <a href="/marketplace">Marketplace 🛒</a>
-        <a href="/templates">Templates</a>
-        <a href="/pricing">Pricing</a>
-        <a href="/dashboard" style="color:var(--accent);font-weight:800;">User Panel</a>
+        <a href="/">🛒 Katalog Marketplace</a>
+        <a href="/dashboard" style="color:var(--accent);font-weight:800;">🎒 Koleksi &amp; Profil Saya</a>
       </div>
     </div>
     <div class="nav-cta-group">
+      <a href="/guru" id="btnGuruNav" class="btn" style="display:none;background:#eff6ff;color:#0088ff;border-color:#bfdbfe;">
+        👩‍🏫 Panel Modul Guru (/guru)
+      </a>
       <a href="/admin" id="btnSuperAdminNav" class="btn" style="display:none;background:#fef3c7;color:#92400e;border-color:#fde68a;">
         🛡️ Super Admin Panel
       </a>
-      <button class="btn btn-primary" onclick="openUploadModal()">
-        📤 Upload Buku PDF
-      </button>
+      <a href="/" class="btn btn-primary">🛒 Beli Buku di Marketplace</a>
       <button class="btn" id="btnLogoutDash" onclick="logoutUserPanel()" style="display:none;">
         🚪 Keluar
       </button>
@@ -183,9 +178,9 @@
   <!-- Gate if not logged in -->
   <div id="dashLoginGate" class="dash-wrap" style="display:none;max-width:520px;padding-top:64px;">
     <div style="background:#ffffff;border:1px solid var(--border-subtle);border-radius:20px;padding:32px;box-shadow:var(--shadow-card);">
-      <h2 style="font-size:22px;font-weight:900;margin-bottom:6px;">👤 Masuk ke User Panel</h2>
+      <h2 style="font-size:22px;font-weight:900;margin-bottom:6px;">🎓 Masuk ke Panel Siswa EBOOK LABS</h2>
       <p style="font-size:13.5px;color:var(--text-muted);margin-bottom:20px;">
-        Kelola buku unggahan Anda, koleksi buku yang dibeli, penjualan Marketplace, serta pengaturan profil akun Anda.
+        Akses koleksi buku yang telah Anda beli, lihat riwayat invoice pembelian, dan kelola pengaturan profil akun Anda.
       </p>
       <form id="dashLoginForm">
         <div class="form-row">
@@ -208,50 +203,43 @@
         </div>
         <div id="dlError" style="color:#ef4444;font-size:12.5px;margin-bottom:12px;"></div>
         <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;">
-          🔐 Masuk ke User Panel
+          🔐 Masuk ke Panel Siswa
         </button>
       </form>
     </div>
   </div>
 
-  <!-- Authenticated User Panel -->
+  <!-- Authenticated Student Panel -->
   <main id="dashMainContent" class="dash-wrap" style="display:none;">
     <div class="dash-header">
       <div class="dash-user-meta">
-        <div class="dash-avatar" id="dashAvatar">U</div>
+        <div class="dash-avatar" id="dashAvatar">S</div>
         <div>
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <h1 id="dashUserName" style="font-size:22px;font-weight:900;color:#0f172a;">Nama Pengguna</h1>
+            <h1 id="dashUserName" style="font-size:22px;font-weight:900;color:#0f172a;">Nama Siswa</h1>
             <span id="dashRoleBadge" class="badge-pill" style="background:#eff6ff;color:#0088ff;border:1px solid #bfdbfe;">SISWA</span>
-            <span id="dashTierBadge" class="badge-pill" style="background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;">PLAN: BASIC</span>
           </div>
           <div id="dashUserSub" style="font-size:13.5px;color:var(--text-muted);margin-top:4px;">
-            email@labschool.xyz • SMP Labschool Jakarta
+            siswa@labschool.xyz • SMP Labschool Jakarta
           </div>
         </div>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <a href="/marketplace" class="btn">🛒 Buka Marketplace</a>
-        <button class="btn btn-primary" onclick="openUploadModal()">+ Upload Buku PDF Baru</button>
+        <a href="/" class="btn btn-primary">🛒 Cari &amp; Beli Buku di Marketplace</a>
       </div>
     </div>
 
     <!-- KPI Cards -->
     <div class="dash-kpi-grid">
       <div class="dash-kpi-card">
-        <div class="lbl">📚 Buku Unggahan Saya</div>
-        <div class="val" id="kpiMyUploaded">0</div>
-        <div class="sub">Buku PDF yang Anda terbitkan sendiri</div>
-      </div>
-      <div class="dash-kpi-card">
-        <div class="lbl">🎒 Koleksi & Pembelian</div>
+        <div class="lbl">🎒 Koleksi Buku Saya</div>
         <div class="val" id="kpiMyCollection">0</div>
-        <div class="sub">Buku yang Anda beli / simpan dari katalog</div>
+        <div class="sub">Buku yang telah Anda beli atau simpan</div>
       </div>
       <div class="dash-kpi-card">
-        <div class="lbl">💰 Pendapatan Penjualan</div>
-        <div class="val" id="kpiMyRevenue" style="color:#059669;">Rp 0</div>
-        <div class="sub" id="kpiMySalesCount">0 Transaksi Pembelian</div>
+        <div class="lbl">🧾 Riwayat Pembelian</div>
+        <div class="val" id="kpiMyPurchases">0</div>
+        <div class="sub">Total transaksi buku terbayar</div>
       </div>
       <div class="dash-kpi-card">
         <div class="lbl">🛡️ Status Akun</div>
@@ -262,50 +250,37 @@
 
     <!-- Navigation Tabs -->
     <div class="dash-tabs">
-      <button class="dash-tab active" onclick="switchDashTab('uploaded', this)">📚 Buku Unggahan Saya (<span id="tabCntUploaded">0</span>)</button>
-      <button class="dash-tab" onclick="switchDashTab('collection', this)">🎒 Koleksi & Pembelian Saya (<span id="tabCntCollection">0</span>)</button>
-      <button class="dash-tab" onclick="switchDashTab('sales', this)">💰 Laporan Penjualan Buku</button>
-      <button class="dash-tab" onclick="switchDashTab('profile', this)">👤 Manajemen Profil & Sandi</button>
+      <button class="dash-tab active" onclick="switchDashTab('collection', this)">🎒 Koleksi Buku Saya (<span id="tabCntCollection">0</span>)</button>
+      <button class="dash-tab" onclick="switchDashTab('purchases', this)">🧾 Riwayat Invoice Pembelian (<span id="tabCntPurchases">0</span>)</button>
+      <button class="dash-tab" onclick="switchDashTab('profile', this)">👤 Manajemen Profil &amp; Sandi</button>
     </div>
 
-    <!-- TAB 1: BUKU UNGGAHAN SAYA -->
-    <section id="panel-uploaded" class="dash-panel active">
+    <!-- TAB 1: KOLEKSI & PEMBELIAN SAYA -->
+    <section id="panel-collection" class="dash-panel active">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
         <div>
-          <h3 style="font-size:18px;font-weight:800;">📚 Daftar Buku yang Saya Unggah</h3>
-          <p style="font-size:13px;color:var(--text-muted);">Hanya menampilkan buku PDF yang Anda unggah sendiri (tidak mencampur buku sampel sistem).</p>
+          <h3 style="font-size:18px;font-weight:800;">🎒 Rak Koleksi Buku Digital Saya</h3>
+          <p style="font-size:13px;color:var(--text-muted);">Buku yang telah Anda beli atau simpan dari halaman EBOOK LABS Marketplace.</p>
         </div>
-        <button class="btn btn-primary" onclick="openUploadModal()">📤 Upload Buku PDF</button>
-      </div>
-      <div id="myUploadedContainer"></div>
-    </section>
-
-    <!-- TAB 2: KOLEKSI & PEMBELIAN SAYA -->
-    <section id="panel-collection" class="dash-panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
-        <div>
-          <h3 style="font-size:18px;font-weight:800;">🎒 Koleksi Buku & Riwayat Pembelian Saya</h3>
-          <p style="font-size:13px;color:var(--text-muted);">Buku yang telah Anda beli atau simpan dari halaman Books Marketplace.</p>
-        </div>
-        <a href="/marketplace" class="btn btn-primary">🛒 Cari Buku di Marketplace</a>
+        <a href="/" class="btn btn-primary">🛒 Tambah Buku dari Marketplace</a>
       </div>
       <div id="myCollectionContainer"></div>
     </section>
 
-    <!-- TAB 3: LAPORAN PENJUALAN BUKU -->
-    <section id="panel-sales" class="dash-panel">
+    <!-- TAB 2: RIWAYAT INVOICE PEMBELIAN -->
+    <section id="panel-purchases" class="dash-panel">
       <div style="margin-bottom:18px;">
-        <h3 style="font-size:18px;font-weight:800;">💰 Riwayat Penjualan Buku Anda di Marketplace</h3>
-        <p style="font-size:13px;color:var(--text-muted);">Daftar transaksi pembelian oleh siswa/pengguna atas buku berbayar yang Anda terbitkan.</p>
+        <h3 style="font-size:18px;font-weight:800;">🧾 Riwayat Invoice Pembelian Buku Saya</h3>
+        <p style="font-size:13px;color:var(--text-muted);">Bukti pembayaran pembelian buku digital Anda di EBOOK LABS Marketplace.</p>
       </div>
-      <div id="mySalesContainer"></div>
+      <div id="myPurchasesContainer"></div>
     </section>
 
-    <!-- TAB 4: MANAJEMEN PROFIL & SANDI -->
+    <!-- TAB 3: MANAJEMEN PROFIL & SANDI -->
     <section id="panel-profile" class="dash-panel">
       <div style="max-width:600px;">
-        <h3 style="font-size:18px;font-weight:800;margin-bottom:6px;">👤 Pengaturan Profil & Keamanan Akun</h3>
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">Perbarui identitas nama lengkap, unit sekolah/kelas, atau ganti kata sandi akun Anda.</p>
+        <h3 style="font-size:18px;font-weight:800;margin-bottom:6px;">👤 Pengaturan Profil &amp; Keamanan Akun</h3>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">Perbarui nama lengkap, unit sekolah/kelas, atau ganti kata sandi akun Anda.</p>
         <form id="profileForm">
           <div class="form-row">
             <label>Alamat Email (Terverifikasi)</label>
@@ -316,7 +291,7 @@
             <input type="text" id="profName" required>
           </div>
           <div class="form-row">
-            <label>Unit Sekolah / Kelas / Instansi</label>
+            <label>Unit Sekolah / Kelas</label>
             <input type="text" id="profUnit" required>
           </div>
           <div class="form-row">
@@ -330,126 +305,10 @@
     </section>
   </main>
 
-  <!-- Modal Upload PDF -->
-  <div id="uploadModal" class="modal-backdrop">
-    <div class="modal-card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-        <h3>📤 Unggah & Konversi Buku PDF Baru</h3>
-        <button class="btn" onclick="closeUploadModal()" style="padding:4px 10px;">✕</button>
-      </div>
-      <form id="uploadForm">
-        <div class="form-row">
-          <label>Judul Buku / Modul</label>
-          <input type="text" name="title" required placeholder="Contoh: Modul Fisika SMP Kelas 8">
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div class="form-row">
-            <label>Penulis / Penyusun</label>
-            <input type="text" name="author" id="upAuthorInput" required>
-          </div>
-          <div class="form-row">
-            <label>Jenjang / Kategori</label>
-            <select name="category">
-              <option value="SMP Kelas 7">SMP Kelas 7</option>
-              <option value="SMP Kelas 8" selected>SMP Kelas 8</option>
-              <option value="SMP Kelas 9">SMP Kelas 9</option>
-              <option value="SMA">SMA</option>
-              <option value="Panduan Umum">Panduan Umum</option>
-            </select>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div class="form-row">
-            <label>Mata Pelajaran</label>
-            <input type="text" name="subject" value="Matematika" required>
-          </div>
-          <div class="form-row">
-            <label>Kata Sandi Buku (Opsional)</label>
-            <input type="text" name="bookPassword" placeholder="Kosongkan jika publik">
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;background:#f0f7ff;padding:12px;border-radius:10px;border:1px solid #bfdbfe;margin-bottom:14px;">
-          <div class="form-row" style="margin-bottom:0;">
-            <label style="color:#0066cc;font-weight:700;">🛒 Harga Jual Marketplace (Rp)</label>
-            <input type="number" name="price" value="0" min="0" step="1000">
-            <small style="color:var(--text-dim);font-size:11px;">Isi 0 untuk Buku Gratis</small>
-          </div>
-          <div class="form-row" style="margin-bottom:0;">
-            <label style="color:#0066cc;font-weight:700;">📄 Batas Halaman Preview</label>
-            <input type="number" name="previewPages" value="3" min="1" max="50">
-          </div>
-        </div>
-        <div class="form-row">
-          <label>Pilih File PDF</label>
-          <input type="file" name="file" accept="application/pdf" required>
-        </div>
-        <div id="uploadStatusText" style="font-size:12.5px;color:#0088ff;margin-bottom:12px;"></div>
-        <div style="display:flex;justify-content:flex-end;gap:10px;">
-          <button type="button" class="btn" onclick="closeUploadModal()">Batal</button>
-          <button type="submit" id="btnSubmitUpload" class="btn btn-primary">⚡ Konversi ke 3D Flipbook</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal Edit Buku Saya -->
-  <div id="editBookModal" class="modal-backdrop">
-    <div class="modal-card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-        <h3>✏️ Edit Buku & Pengaturan Marketplace</h3>
-        <button class="btn" onclick="document.getElementById('editBookModal').classList.remove('open')" style="padding:4px 10px;">✕</button>
-      </div>
-      <form id="editBookForm">
-        <input type="hidden" id="ebId">
-        <div class="form-row">
-          <label>Judul Buku</label>
-          <input type="text" id="ebTitle" required>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div class="form-row">
-            <label>Penulis</label>
-            <input type="text" id="ebAuthor" required>
-          </div>
-          <div class="form-row">
-            <label>Kategori</label>
-            <input type="text" id="ebCategory" required>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div class="form-row">
-            <label>Mata Pelajaran</label>
-            <input type="text" id="ebSubject" required>
-          </div>
-          <div class="form-row">
-            <label>Harga Jual Marketplace (Rp)</label>
-            <input type="number" id="ebPrice" min="0" step="1000" value="0">
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div class="form-row">
-            <label>Batas Halaman Preview</label>
-            <input type="number" id="ebPreviewPages" min="1" max="50" value="3">
-          </div>
-          <div class="form-row">
-            <label>Kata Sandi Buku (Kosongkan jika publik)</label>
-            <input type="text" id="ebPassword" placeholder="Tanpa sandi">
-          </div>
-        </div>
-        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px;">
-          <button type="button" class="btn" onclick="document.getElementById('editBookModal').classList.remove('open')">Batal</button>
-          <button type="submit" class="btn btn-primary">💾 Simpan Perubahan</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
   <script>
     let currentUser = null;
-    let myUploadedBooks = [];
     let myCollectionBooks = [];
     let myPurchases = [];
-    let mySales = [];
-    let myRevenue = 0;
     let dashCaptchaId = '';
 
     function getToken() {
@@ -494,7 +353,7 @@
         currentUser = data.user;
         localStorage.setItem('fliplabs_user', JSON.stringify(currentUser));
         renderUserHeader();
-        await loadUserBooksAndSales();
+        await loadUserCollection();
       } catch (err) {
         showLoginGate();
       }
@@ -512,111 +371,40 @@
       document.getElementById('dashMainContent').style.display = 'block';
       document.getElementById('btnLogoutDash').style.display = 'inline-flex';
 
-      document.getElementById('dashAvatar').textContent = (currentUser.name || 'U').charAt(0).toUpperCase();
+      document.getElementById('dashAvatar').textContent = (currentUser.name || 'S').charAt(0).toUpperCase();
       document.getElementById('dashUserName').textContent = currentUser.name;
       document.getElementById('dashRoleBadge').textContent = (currentUser.role || 'siswa').toUpperCase();
-      document.getElementById('dashTierBadge').textContent = `PLAN: ${(currentUser.license_tier || 'basic').toUpperCase()}`;
       document.getElementById('dashUserSub').textContent = `${currentUser.email} • ${currentUser.unit || 'Labschool'}`;
 
       document.getElementById('profEmail').value = currentUser.email;
       document.getElementById('profName').value = currentUser.name;
       document.getElementById('profUnit').value = currentUser.unit || '';
-      document.getElementById('upAuthorInput').value = currentUser.name;
 
+      const guruBtn = document.getElementById('btnGuruNav');
+      if (guruBtn) {
+        guruBtn.style.display = ['guru', 'admin'].includes(currentUser.role) ? 'inline-flex' : 'none';
+      }
       const superBtn = document.getElementById('btnSuperAdminNav');
       if (superBtn) {
         superBtn.style.display = currentUser.role === 'admin' ? 'inline-flex' : 'none';
       }
     }
 
-    async function loadUserBooksAndSales() {
+    async function loadUserCollection() {
       const res = await fetch('/api/marketplace/my-collection', { headers: authHeaders() });
       if (!res.ok) return;
       const data = await res.json();
 
-      myUploadedBooks = data.uploadedBooks || [];
       myCollectionBooks = data.collection || [];
       myPurchases = data.purchases || [];
-      mySales = data.sales || [];
-      myRevenue = data.totalRevenue || 0;
 
-      document.getElementById('kpiMyUploaded').textContent = myUploadedBooks.length;
       document.getElementById('kpiMyCollection').textContent = myCollectionBooks.length;
-      document.getElementById('kpiMyRevenue').textContent = formatRupiah(myRevenue);
-      document.getElementById('kpiMySalesCount').textContent = `${mySales.length} Transaksi Terjual`;
-
-      document.getElementById('tabCntUploaded').textContent = myUploadedBooks.length;
+      document.getElementById('kpiMyPurchases').textContent = myPurchases.length;
       document.getElementById('tabCntCollection').textContent = myCollectionBooks.length;
+      document.getElementById('tabCntPurchases').textContent = myPurchases.length;
 
-      renderMyUploadedTable();
       renderMyCollectionTable();
-      renderMySalesTable();
-    }
-
-    function renderMyUploadedTable() {
-      const box = document.getElementById('myUploadedContainer');
-      if (!myUploadedBooks.length) {
-        box.innerHTML = `
-          <div class="empty-box">
-            <div style="font-size:36px;margin-bottom:10px;">📚</div>
-            <h4 style="font-size:16px;font-weight:800;margin-bottom:6px;">Belum Ada Buku yang Anda Unggah</h4>
-            <p style="font-size:13.5px;color:var(--text-muted);max-width:460px;margin:0 auto 18px;">
-              Akun Anda masih bersih (0 buku). Unggah dokumen PDF pertama Anda untuk dikonversi menjadi Flipbook 3D interaktif.
-            </p>
-            <button class="btn btn-primary" onclick="openUploadModal()">+ Upload Buku PDF Pertama Saya</button>
-          </div>
-        `;
-        return;
-      }
-
-      box.innerHTML = `
-        <table class="dash-table">
-          <thead>
-            <tr>
-              <th>Buku / Modul</th>
-              <th>Kategori</th>
-              <th>Halaman</th>
-              <th>Status Marketplace</th>
-              <th>Proteksi Sandi</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${myUploadedBooks.map((b) => `
-              <tr>
-                <td>
-                  <div style="display:flex;align-items:center;gap:12px;">
-                    <img src="/books/${b.id}/files/shot.jpg" onerror="this.src='/books/${b.id}/files/thumb/1.webp'" style="width:38px;height:52px;object-fit:cover;border-radius:6px;border:1px solid #e2e8f0;">
-                    <div>
-                      <div style="font-weight:800;color:#0f172a;">${b.title}</div>
-                      <div style="font-size:12px;color:var(--text-dim);">👁 ${b.viewsCount || 1} dibaca • Terjual: ${b.salesCount || 0}x</div>
-                    </div>
-                  </div>
-                </td>
-                <td>${b.category || '-'}<br><small style="color:var(--text-dim);">${b.subject || ''}</small></td>
-                <td><b>${b.totalPageCount}</b> Hal</td>
-                <td>
-                  ${b.isForSale && b.price > 0
-                    ? `<span class="badge-pill" style="background:#eff6ff;color:#0088ff;">🛒 ${formatRupiah(b.price)}</span><br><small style="color:var(--text-dim);">Preview: ${b.previewPages} Hal</small>`
-                    : `<span class="badge-pill" style="background:#f1f5f9;color:#475569;">Gratis</span>`}
-                </td>
-                <td>
-                  ${b.isPasswordProtected
-                    ? `<span class="badge-pill" style="background:#fefce8;color:#854d0e;">🔒 Terkunci Sandi</span>`
-                    : `<span class="badge-pill" style="background:#ecfdf5;color:#047857;">🔓 Publik</span>`}
-                </td>
-                <td>
-                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                    <a href="/view/${b.id}#p=1" class="btn" style="padding:6px 10px;font-size:12px;">📖 Buka</a>
-                    <button class="btn" style="padding:6px 10px;font-size:12px;" onclick="openEditMyBook('${b.id}')">✏️ Edit</button>
-                    <button class="btn" style="padding:6px 10px;font-size:12px;color:#ef4444;border-color:#fecaca;" onclick="deleteMyBook('${b.id}', '${b.title.replace(/'/g, "\\'")}')">🗑 Hapus</button>
-                  </div>
-                </td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      `;
+      renderMyPurchasesTable();
     }
 
     function renderMyCollectionTable() {
@@ -627,9 +415,9 @@
             <div style="font-size:36px;margin-bottom:10px;">🎒</div>
             <h4 style="font-size:16px;font-weight:800;margin-bottom:6px;">Koleksi Buku Anda Masih Kosong (0 Buku)</h4>
             <p style="font-size:13.5px;color:var(--text-muted);max-width:460px;margin:0 auto 18px;">
-              Anda belum membeli atau menyimpan buku dari Marketplace. Kunjungi Books Marketplace untuk membeli buku premium guru atau mengoleksi buku gratis.
+              Anda belum membeli atau menyimpan buku dari Marketplace. Kunjungi EBOOK LABS Marketplace untuk membeli buku modul guru atau mengoleksi buku gratis.
             </p>
-            <a href="/marketplace" class="btn btn-primary">🛒 Jelajahi Books Marketplace</a>
+            <a href="/" class="btn btn-primary">🛒 Jelajahi EBOOK LABS Marketplace</a>
           </div>
         `;
         return;
@@ -660,7 +448,7 @@
                 <td><b>${b.totalPageCount}</b> Hal</td>
                 <td>
                   <div style="display:flex;gap:8px;">
-                    <a href="/view/${b.id}#p=1" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">📖 Baca Full</a>
+                    <a href="/view/${b.id}#p=1" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">📖 Baca Full 3D</a>
                     <button class="btn" style="padding:6px 10px;font-size:12px;" onclick="removeSavedBook('${b.id}')">✕ Hapus dari Koleksi</button>
                   </div>
                 </td>
@@ -671,15 +459,15 @@
       `;
     }
 
-    function renderMySalesTable() {
-      const box = document.getElementById('mySalesContainer');
-      if (!mySales.length) {
+    function renderMyPurchasesTable() {
+      const box = document.getElementById('myPurchasesContainer');
+      if (!myPurchases.length) {
         box.innerHTML = `
           <div class="empty-box">
-            <div style="font-size:36px;margin-bottom:10px;">💰</div>
-            <h4 style="font-size:16px;font-weight:800;margin-bottom:6px;">Belum Ada Transaksi Penjualan</h4>
+            <div style="font-size:36px;margin-bottom:10px;">🧾</div>
+            <h4 style="font-size:16px;font-weight:800;margin-bottom:6px;">Belum Ada Transaksi Pembelian</h4>
             <p style="font-size:13.5px;color:var(--text-muted);max-width:460px;margin:0 auto;">
-              Tetapkan harga jual pada buku yang Anda unggah agar siswa dapat membeli buku Anda di halaman Marketplace.
+              Riwayat invoice pembelian buku berbayar Anda di EBOOK LABS Marketplace akan tampil di sini.
             </p>
           </div>
         `;
@@ -692,19 +480,19 @@
             <tr>
               <th>No. Invoice</th>
               <th>ID Buku</th>
-              <th>Pembeli</th>
               <th>Metode Pembayaran</th>
-              <th>Nominal</th>
+              <th>Total Bayar</th>
+              <th>Aksi</th>
             </tr>
           </thead>
           <tbody>
-            ${mySales.map((s) => `
+            ${myPurchases.map((p) => `
               <tr>
-                <td><b>${s.invoice_id}</b></td>
-                <td><code>${s.book_id}</code></td>
-                <td>${s.buyer_email}</td>
-                <td>${s.payment_method}</td>
-                <td style="font-weight:800;color:#059669;">+ ${formatRupiah(s.amount)}</td>
+                <td><b>${p.invoice_id}</b></td>
+                <td><code>${p.book_id}</code></td>
+                <td>${p.payment_method}</td>
+                <td style="font-weight:800;color:#0088ff;">${formatRupiah(p.amount)}</td>
+                <td><a href="/view/${p.book_id}#p=1" class="btn" style="padding:5px 10px;font-size:12px;">📖 Baca Buku</a></td>
               </tr>
             `).join('')}
           </tbody>
@@ -719,47 +507,12 @@
       document.getElementById(`panel-${tabName}`).classList.add('active');
     }
 
-    function openUploadModal() {
-      document.getElementById('uploadModal').classList.add('open');
-    }
-    function closeUploadModal() {
-      document.getElementById('uploadModal').classList.remove('open');
-    }
-
-    function openEditMyBook(bookId) {
-      const b = myUploadedBooks.find((x) => x.id === bookId);
-      if (!b) return;
-      document.getElementById('ebId').value = b.id;
-      document.getElementById('ebTitle').value = b.title;
-      document.getElementById('ebAuthor').value = b.author || '';
-      document.getElementById('ebCategory').value = b.category || '';
-      document.getElementById('ebSubject').value = b.subject || '';
-      document.getElementById('ebPrice').value = b.price || 0;
-      document.getElementById('ebPreviewPages').value = b.previewPages || 3;
-      document.getElementById('ebPassword').value = '';
-      document.getElementById('editBookModal').classList.add('open');
-    }
-
-    async function deleteMyBook(bookId, title) {
-      if (!confirm(`Hapus buku "${title}" milik Anda secara permanen?`)) return;
-      const res = await fetch(`/api/admin/books/${bookId}`, {
-        method: 'DELETE',
-        headers: authHeaders(),
-      });
-      if (res.ok) {
-        await loadUserBooksAndSales();
-      } else {
-        const d = await res.json();
-        alert(d.detail || 'Gagal menghapus buku');
-      }
-    }
-
     async function removeSavedBook(bookId) {
       await fetch(`/api/marketplace/collect/${bookId}`, {
         method: 'DELETE',
         headers: authHeaders(),
       });
-      await loadUserBooksAndSales();
+      await loadUserCollection();
     }
 
     async function logoutUserPanel() {
@@ -793,66 +546,10 @@
           localStorage.setItem('fliplabs_user', JSON.stringify(data.user));
           currentUser = data.user;
           renderUserHeader();
-          await loadUserBooksAndSales();
+          await loadUserCollection();
         } catch (err) {
           errEl.textContent = '❌ ' + err.message;
           loadDashCaptcha();
-        }
-      });
-
-      document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const statusEl = document.getElementById('uploadStatusText');
-        const btn = document.getElementById('btnSubmitUpload');
-        statusEl.textContent = '⏳ Mengunggah dan mengonversi halaman PDF ke WebP...';
-        btn.disabled = true;
-        try {
-          const fd = new FormData(e.target);
-          const res = await fetch('/api/upload', {
-            method: 'POST',
-            headers: authHeaders(),
-            body: fd,
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.detail || 'Gagal mengunggah PDF');
-          closeUploadModal();
-          e.target.reset();
-          await loadUserBooksAndSales();
-        } catch (err) {
-          statusEl.textContent = '❌ ' + err.message;
-        } finally {
-          btn.disabled = false;
-        }
-      });
-
-      document.getElementById('editBookForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const bookId = document.getElementById('ebId').value;
-        const priceVal = parseInt(document.getElementById('ebPrice').value || '0', 10);
-        const pwVal = document.getElementById('ebPassword').value.trim();
-        const res = await fetch(`/api/admin/books/${bookId}`, {
-          method: 'PUT',
-          headers: authHeaders({ 'Content-Type': 'application/json' }),
-          body: JSON.stringify({
-            title: document.getElementById('ebTitle').value,
-            author: document.getElementById('ebAuthor').value,
-            category: document.getElementById('ebCategory').value,
-            subject: document.getElementById('ebSubject').value,
-            licenseTier: currentUser.license_tier || 'pro',
-            visibility: 'public',
-            isPasswordProtected: Boolean(pwVal),
-            bookPassword: pwVal,
-            isForSale: priceVal > 0,
-            price: priceVal,
-            previewPages: parseInt(document.getElementById('ebPreviewPages').value || '3', 10),
-          }),
-        });
-        if (res.ok) {
-          document.getElementById('editBookModal').classList.remove('open');
-          await loadUserBooksAndSales();
-        } else {
-          const d = await res.json();
-          alert(d.detail || 'Gagal menyimpan perubahan');
         }
       });
 

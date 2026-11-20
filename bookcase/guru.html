@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Modul Guru — EBOOK LABS (books.labschool.xyz/guru)</title>
+  <link rel="icon" href="/viewer/assets/branding/labschool-logo.svg">
+  <link rel="stylesheet" href="/bookcase/bookcase.css?v=3.4">
+  <style>
+    .guru-wrap {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 32px 28px 80px;
+    }
+    .guru-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 24px 28px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 24px;
+    }
+    .guru-user-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .guru-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #0088ff, #1e40af);
+      color: #ffffff;
+      font-size: 22px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 20px rgba(0, 136, 255, 0.25);
+    }
+    .guru-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 26px;
+    }
+    .guru-kpi-card {
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 20px 22px;
+      box-shadow: var(--shadow-card);
+    }
+    .guru-kpi-card .lbl {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+    .guru-kpi-card .val {
+      font-size: 28px;
+      font-weight: 900;
+      color: #0f172a;
+    }
+    .guru-kpi-card .sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .guru-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .guru-tab {
+      padding: 10px 18px;
+      border-radius: 99px;
+      border: 1px solid var(--border-subtle);
+      background: #ffffff;
+      color: var(--text-muted);
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .guru-tab.active {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+      box-shadow: 0 6px 16px rgba(0, 136, 255, 0.22);
+    }
+    .guru-panel {
+      display: none;
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 26px;
+      box-shadow: var(--shadow-card);
+    }
+    .guru-panel.active {
+      display: block;
+    }
+    .guru-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .guru-table th {
+      text-align: left;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .guru-table td {
+      padding: 14px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 13.5px;
+      vertical-align: middle;
+    }
+    .empty-box {
+      text-align: center;
+      padding: 48px 24px;
+      border: 2px dashed #cbd5e1;
+      border-radius: 16px;
+      background: #f8fafc;
+    }
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 11.5px;
+      font-weight: 800;
+    }
+    @media (max-width: 960px) {
+      .guru-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .guru-kpi-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Navbar -->
+  <nav class="landing-navbar">
+    <div style="display:flex;align-items:center;gap:28px;">
+      <a href="/" class="brand-logo" style="text-decoration:none;color:inherit;">
+        <img src="/viewer/assets/branding/labschool-logo.svg" alt="EBOOK LABS">
+        <span>EBOOK LABS</span>
+      </a>
+      <span style="font-size:12.5px;font-weight:800;color:#0088ff;border-left:1px solid var(--border-subtle);padding-left:14px;">
+        👩‍🏫 PANEL MODUL & STUDIO GURU (/guru)
+      </span>
+    </div>
+    <div class="nav-cta-group">
+      <a href="/" class="btn">🛒 Lihat Marketplace Buku</a>
+      <a href="/admin" id="btnSuperAdminNav" class="btn" style="display:none;background:#fef3c7;color:#92400e;border-color:#fde68a;">
+        🛡️ Super Admin Panel
+      </a>
+      <button class="btn btn-primary" id="btnNavUploadGuru" style="display:none;" onclick="openUploadModal()">
+        📤 Upload PDF & Buat Flipbook
+      </button>
+      <button class="btn" id="btnLogoutGuru" onclick="logoutGuruPanel()" style="display:none;">
+        🚪 Keluar
+      </button>
+    </div>
+  </nav>
+
+  <!-- Gate if not logged in as Guru -->
+  <div id="guruLoginGate" class="guru-wrap" style="display:none;max-width:520px;padding-top:56px;">
+    <div style="background:#ffffff;border:1px solid var(--border-subtle);border-radius:20px;padding:32px;box-shadow:var(--shadow-card);">
+      <div style="display:inline-flex;align-items:center;gap:6px;background:#eff6ff;color:#0088ff;border:1px solid #bfdbfe;padding:5px 12px;border-radius:99px;font-size:11.5px;font-weight:800;margin-bottom:12px;">
+        👩‍🏫 PORTAL RESMI GURU PENULIS • EBOOK LABS
+      </div>
+      <h2 style="font-size:22px;font-weight:900;margin-bottom:8px;">Masuk ke Panel Modul Guru</h2>
+      <p style="font-size:13.5px;color:var(--text-muted);line-height:1.55;margin-bottom:18px;">
+        Halaman <strong>books.labschool.xyz/guru</strong> dikhususkan bagi <strong>Guru Labschool</strong> untuk mengunggah PDF, membuat 3D Flipbook, dan menjual buku di Marketplace.
+        <br><small style="color:#64748b;">*Akun Guru ditentukan dan didaftarkan secara resmi oleh Administrator.</small>
+      </p>
+      <form id="guruLoginForm">
+        <div class="form-row">
+          <label>Email Akun Guru</label>
+          <input type="email" id="glEmail" required placeholder="guru@labschool.xyz">
+        </div>
+        <div class="form-row">
+          <label>Kata Sandi</label>
+          <input type="password" id="glPassword" required placeholder="••••••••">
+        </div>
+        <div class="form-row">
+          <label>Verifikasi Keamanan (Penjumlahan 2 Digit)</label>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <div id="glCaptchaQ" style="background:#eef6ff;border:1px solid #bfdbfe;color:#0066cc;font-weight:800;font-size:15px;padding:9px 14px;border-radius:10px;min-width:115px;text-align:center;">
+              .. + .. = ?
+            </div>
+            <input type="number" id="glCaptchaAns" required placeholder="Hasil" style="flex:1;">
+            <button type="button" class="btn" onclick="loadGuruCaptcha()">🔄</button>
+          </div>
+        </div>
+        <div id="glError" style="color:#ef4444;font-size:12.5px;font-weight:600;margin-bottom:12px;"></div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;">
+          🔐 Masuk ke Panel Modul Guru
+        </button>
+      </form>
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border-subtle);text-align:center;font-size:12.5px;color:var(--text-muted);">
+        Anda Siswa ingin membeli atau membaca buku? <a href="/" style="color:#0088ff;font-weight:800;">Buka Marketplace Utama →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Authenticated Guru Panel -->
+  <main id="guruMainContent" class="guru-wrap" style="display:none;">
+    <div class="guru-header">
+      <div class="guru-user-meta">
+        <div class="guru-avatar" id="guruAvatar">G</div>
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <h1 id="guruUserName" style="font-size:22px;font-weight:900;color:#0f172a;">Nama Guru</h1>
+            <span id="guruRoleBadge" class="badge-pill" style="background:#eff6ff;color:#0088ff;border:1px solid #bfdbfe;">GURU PENULIS</span>
+            <span id="guruTierBadge" class="badge-pill" style="background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;">PLAN: PRO</span>
+          </div>
+          <div id="guruUserSub" style="font-size:13.5px;color:var(--text-muted);margin-top:4px;">
+            guru@labschool.xyz • SMP Labschool Jakarta
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="/" class="btn">🛒 Lihat Katalog Marketplace</a>
+        <button class="btn btn-primary" onclick="openUploadModal()">📤 Upload PDF & Buat 3D Flipbook</button>
+      </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="guru-kpi-grid">
+      <div class="guru-kpi-card">
+        <div class="lbl">📚 Buku & Modul Terbitan Saya</div>
+        <div class="val" id="kpiGuruUploaded">0</div>
+        <div class="sub">Flipbook 3D yang Anda buat & terbitkan</div>
+      </div>
+      <div class="guru-kpi-card">
+        <div class="lbl">💰 Total Pendapatan Penjualan</div>
+        <div class="val" id="kpiGuruRevenue" style="color:#059669;">Rp 0</div>
+        <div class="sub" id="kpiGuruSalesCount">0 Transaksi Pembelian Siswa</div>
+      </div>
+      <div class="guru-kpi-card">
+        <div class="lbl">👁️ Total Pembacaan Modul</div>
+        <div class="val" id="kpiGuruViews">0</div>
+        <div class="sub">Akumulasi pembacaan buku Anda</div>
+      </div>
+      <div class="guru-kpi-card">
+        <div class="lbl">🛡️ Status Lisensi Guru</div>
+        <div class="val" style="font-size:20px;color:#0088ff;margin-top:4px;">✓ Guru Terdaftar</div>
+        <div class="sub">Otorisasi Pembuatan Flipbook Aktif</div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="guru-tabs">
+      <button class="guru-tab active" onclick="switchGuruTab('uploaded', this)">📚 Modul & Flipbook Saya (<span id="tabCntUploaded">0</span>)</button>
+      <button class="guru-tab" onclick="switchGuruTab('sales', this)">💰 Laporan Penjualan & Royalti</button>
+      <button class="guru-tab" onclick="switchGuruTab('profile', this)">👤 Pengaturan Profil & Sandi Guru</button>
+    </div>
+
+    <!-- TAB 1: BUKU UNGGAHAN GURU -->
+    <section id="panel-uploaded" class="guru-panel active">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h3 style="font-size:18px;font-weight:800;">📚 Daftar Flipbook & Buku Digital Terbitan Anda</h3>
+          <p style="font-size:13px;color:var(--text-muted);">Unggah file PDF modul pembelajaran untuk dikonversi menjadi Flipbook 3D dan atur harga jualnya di Marketplace.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openUploadModal()">📤 Upload PDF & Buat Flipbook Baru</button>
+      </div>
+      <div id="guruUploadedContainer"></div>
+    </section>
+
+    <!-- TAB 2: LAPORAN PENJUALAN BUKU GURU -->
+    <section id="panel-sales" class="guru-panel">
+      <div style="margin-bottom:18px;">
+        <h3 style="font-size:18px;font-weight:800;">💰 Riwayat Pembelian Buku Anda oleh Siswa</h3>
+        <p style="font-size:13px;color:var(--text-muted);">Daftar transaksi invoice pembelian buku berbayar Anda di EBOOK LABS Marketplace.</p>
+      </div>
+      <div id="guruSalesContainer"></div>
+    </section>
+
+    <!-- TAB 3: MANAJEMEN PROFIL GURU -->
+    <section id="panel-profile" class="guru-panel">
+      <div style="max-width:600px;">
+        <h3 style="font-size:18px;font-weight:800;margin-bottom:6px;">👤 Pengaturan Profil & Kata Sandi Guru</h3>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">Perbarui nama lengkap penulis, unit sekolah, atau kata sandi akun Guru Anda.</p>
+        <form id="guruProfileForm">
+          <div class="form-row">
+            <label>Alamat Email Guru (Resmi)</label>
+            <input type="email" id="profEmail" disabled style="background:#f1f5f9;color:#64748b;">
+          </div>
+          <div class="form-row">
+            <label>Nama Lengkap Guru / Penulis</label>
+            <input type="text" id="profName" required>
+          </div>
+          <div class="form-row">
+            <label>Unit Sekolah / Bidang Studi</label>
+            <input type="text" id="profUnit" required>
+          </div>
+          <div class="form-row">
+            <label>Ganti Kata Sandi Baru (Kosongkan jika tidak ingin mengubah)</label>
+            <input type="password" id="profNewPassword" placeholder="Minimal 6 karakter...">
+          </div>
+          <div id="profMsg" style="font-size:13px;font-weight:700;color:#059669;margin-bottom:12px;"></div>
+          <button type="submit" class="btn btn-primary">💾 Simpan Profil Guru</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal Upload PDF (Khusus Guru) -->
+  <div id="uploadModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h3>📤 Upload PDF & Buat 3D Flipbook Baru</h3>
+        <button class="btn" onclick="closeUploadModal()" style="padding:4px 10px;">✕</button>
+      </div>
+      <form id="uploadForm">
+        <div class="form-row">
+          <label>Judul Buku / Modul Pembelajaran</label>
+          <input type="text" name="title" required placeholder="Contoh: Modul Fisika SMP Kelas 8">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-row">
+            <label>Nama Guru Penulis</label>
+            <input type="text" name="author" id="upAuthorInput" required>
+          </div>
+          <div class="form-row">
+            <label>Jenjang / Kategori Kelas</label>
+            <select name="category">
+              <option value="SMP Kelas 7">SMP Kelas 7</option>
+              <option value="SMP Kelas 8" selected>SMP Kelas 8</option>
+              <option value="SMP Kelas 9">SMP Kelas 9</option>
+              <option value="SMA">SMA</option>
+              <option value="Panduan Umum">Panduan Umum</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-row">
+            <label>Mata Pelajaran</label>
+            <input type="text" name="subject" value="Matematika" required>
+          </div>
+          <div class="form-row">
+            <label>Kata Sandi Buku (Opsional)</label>
+            <input type="text" name="bookPassword" placeholder="Kosongkan jika tanpa sandi">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;background:#f0f7ff;padding:12px;border-radius:10px;border:1px solid #bfdbfe;margin-bottom:14px;">
+          <div class="form-row" style="margin-bottom:0;">
+            <label style="color:#0066cc;font-weight:700;">🛒 Harga Jual Marketplace (Rp)</label>
+            <input type="number" name="price" value="35000" min="0" step="1000">
+            <small style="color:var(--text-dim);font-size:11px;">Isi 0 jika Buku Gratis</small>
+          </div>
+          <div class="form-row" style="margin-bottom:0;">
+            <label style="color:#0066cc;font-weight:700;">📄 Batas Halaman Preview Gratis</label>
+            <input type="number" name="previewPages" value="3" min="1" max="50">
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Pilih File PDF Buku / Modul</label>
+          <input type="file" name="file" accept="application/pdf" required>
+        </div>
+        <div id="uploadStatusText" style="font-size:12.5px;color:#0088ff;margin-bottom:12px;"></div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;">
+          <button type="button" class="btn" onclick="closeUploadModal()">Batal</button>
+          <button type="submit" id="btnSubmitUpload" class="btn btn-primary">⚡ Konversi ke 3D Flipbook & Terbitkan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Edit Buku Guru -->
+  <div id="editBookModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h3>✏️ Edit Buku & Harga Marketplace</h3>
+        <button class="btn" onclick="document.getElementById('editBookModal').classList.remove('open')" style="padding:4px 10px;">✕</button>
+      </div>
+      <form id="editBookForm">
+        <input type="hidden" id="ebId">
+        <div class="form-row">
+          <label>Judul Buku</label>
+          <input type="text" id="ebTitle" required>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-row">
+            <label>Guru Penulis</label>
+            <input type="text" id="ebAuthor" required>
+          </div>
+          <div class="form-row">
+            <label>Kategori Kelas</label>
+            <input type="text" id="ebCategory" required>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-row">
+            <label>Mata Pelajaran</label>
+            <input type="text" id="ebSubject" required>
+          </div>
+          <div class="form-row">
+            <label>Harga Jual Marketplace (Rp)</label>
+            <input type="number" id="ebPrice" min="0" step="1000" value="0">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-row">
+            <label>Batas Halaman Preview Gratis</label>
+            <input type="number" id="ebPreviewPages" min="1" max="50" value="3">
+          </div>
+          <div class="form-row">
+            <label>Kata Sandi Buku (Kosongkan jika tanpa sandi)</label>
+            <input type="text" id="ebPassword" placeholder="Tanpa sandi">
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px;">
+          <button type="button" class="btn" onclick="document.getElementById('editBookModal').classList.remove('open')">Batal</button>
+          <button type="submit" class="btn btn-primary">💾 Simpan Perubahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+    let guruUploadedBooks = [];
+    let guruSales = [];
+    let guruRevenue = 0;
+    let guruCaptchaId = '';
+
+    function getToken() {
+      return localStorage.getItem('fliplabs_token') || '';
+    }
+
+    function authHeaders(extra = {}) {
+      const t = getToken();
+      return {
+        ...(t ? { Authorization: `Bearer ${t}` } : {}),
+        ...extra,
+      };
+    }
+
+    function formatRupiah(num) {
+      return 'Rp ' + Number(num || 0).toLocaleString('id-ID');
+    }
+
+    async function loadGuruCaptcha() {
+      try {
+        const res = await fetch('/api/auth/captcha');
+        const d = await res.json();
+        guruCaptchaId = d.captchaId;
+        document.getElementById('glCaptchaQ').textContent = d.question;
+        document.getElementById('glCaptchaAns').value = '';
+      } catch (e) {}
+    }
+
+    async function initGuruPanel() {
+      const token = getToken();
+      if (!token) {
+        showGuruLoginGate();
+        return;
+      }
+      try {
+        const res = await fetch('/api/auth/me', { headers: authHeaders() });
+        if (!res.ok) {
+          showGuruLoginGate();
+          return;
+        }
+        const data = await res.json();
+        currentUser = data.user;
+        localStorage.setItem('fliplabs_user', JSON.stringify(currentUser));
+
+        if (!['guru', 'admin'].includes(currentUser.role)) {
+          showGuruLoginGate('🔒 Akses Ditolak: Akun Anda terdaftar sebagai Siswa. Panel /guru hanya untuk Akun Guru Resmi. Mengalihkan ke Marketplace Utama...');
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 1800);
+          return;
+        }
+
+        renderGuruHeader();
+        await loadGuruBooksAndSales();
+      } catch (err) {
+        showGuruLoginGate();
+      }
+    }
+
+    function showGuruLoginGate(errMsg = '') {
+      document.getElementById('guruLoginGate').style.display = 'block';
+      document.getElementById('guruMainContent').style.display = 'none';
+      document.getElementById('btnLogoutGuru').style.display = 'none';
+      document.getElementById('btnNavUploadGuru').style.display = 'none';
+      if (errMsg) {
+        document.getElementById('glError').textContent = errMsg;
+      }
+      loadGuruCaptcha();
+    }
+
+    function renderGuruHeader() {
+      document.getElementById('guruLoginGate').style.display = 'none';
+      document.getElementById('guruMainContent').style.display = 'block';
+      document.getElementById('btnLogoutGuru').style.display = 'inline-flex';
+      document.getElementById('btnNavUploadGuru').style.display = 'inline-flex';
+
+      document.getElementById('guruAvatar').textContent = (currentUser.name || 'G').charAt(0).toUpperCase();
+      document.getElementById('guruUserName').textContent = currentUser.name;
+      document.getElementById('guruRoleBadge').textContent = currentUser.role === 'admin' ? 'SUPER ADMIN' : 'GURU PENULIS';
+      document.getElementById('guruTierBadge').textContent = `PLAN: ${(currentUser.license_tier || 'pro').toUpperCase()}`;
+      document.getElementById('guruUserSub').textContent = `${currentUser.email} • ${currentUser.unit || 'Labschool'}`;
+
+      document.getElementById('profEmail').value = currentUser.email;
+      document.getElementById('profName').value = currentUser.name;
+      document.getElementById('profUnit').value = currentUser.unit || '';
+      document.getElementById('upAuthorInput').value = currentUser.name;
+
+      const superBtn = document.getElementById('btnSuperAdminNav');
+      if (superBtn) {
+        superBtn.style.display = currentUser.role === 'admin' ? 'inline-flex' : 'none';
+      }
+    }
+
+    async function loadGuruBooksAndSales() {
+      const res = await fetch('/api/marketplace/my-collection', { headers: authHeaders() });
+      if (!res.ok) return;
+      const data = await res.json();
+
+      guruUploadedBooks = data.uploadedBooks || [];
+      guruSales = data.sales || [];
+      guruRevenue = data.totalRevenue || 0;
+
+      const totalViews = guruUploadedBooks.reduce((acc, b) => acc + (b.viewsCount || 0), 0);
+
+      document.getElementById('kpiGuruUploaded').textContent = guruUploadedBooks.length;
+      document.getElementById('kpiGuruRevenue').textContent = formatRupiah(guruRevenue);
+      document.getElementById('kpiGuruSalesCount').textContent = `${guruSales.length} Transaksi Pembelian Siswa`;
+      document.getElementById('kpiGuruViews').textContent = totalViews;
+      document.getElementById('tabCntUploaded').textContent = guruUploadedBooks.length;
+
+      renderGuruUploadedTable();
+      renderGuruSalesTable();
+    }
+
+    function renderGuruUploadedTable() {
+      const box = document.getElementById('guruUploadedContainer');
+      if (!guruUploadedBooks.length) {
+        box.innerHTML = `
+          <div class="empty-box">
+            <div style="font-size:36px;margin-bottom:10px;">📚</div>
+            <h4 style="font-size:16px;font-weight:800;margin-bottom:6px;">Belum Ada Buku atau Modul yang Anda Terbitkan</h4>
+            <p style="font-size:13.5px;color:var(--text-muted);max-width:480px;margin:0 auto 18px;">
+              Unggah file PDF buku ajar atau modul praktikum Anda untuk dikonversi menjadi 3D Flipbook interaktif dan dijual di EBOOK LABS Marketplace.
+            </p>
+            <button class="btn btn-primary" onclick="openUploadModal()">📤 Upload PDF & Buat Flipbook Pertama Saya</button>
+          </div>
+        `;
+        return;
+      }
+
+      box.innerHTML = `
+        <table class="guru-table">
+          <thead>
+            <tr>
+              <th>Judul Buku / Modul</th>
+              <th>Kategori & Mapel</th>
+              <th>Halaman</th>
+              <th>Harga Marketplace</th>
+              <th>Proteksi Sandi</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${guruUploadedBooks.map((b) => `
+              <tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:12px;">
+                    <img src="/books/${b.id}/files/shot.jpg" onerror="this.src='/books/${b.id}/files/thumb/1.webp'" style="width:38px;height:52px;object-fit:cover;border-radius:6px;border:1px solid #e2e8f0;">
+                    <div>
+                      <div style="font-weight:800;color:#0f172a;">${b.title}</div>
+                      <div style="font-size:12px;color:var(--text-dim);">👁 ${b.viewsCount || 1} dibaca • Terjual: ${b.salesCount || 0}x</div>
+                    </div>
+                  </div>
+                </td>
+                <td>${b.category || '-'}<br><small style="color:var(--text-dim);">${b.subject || ''}</small></td>
+                <td><b>${b.totalPageCount}</b> Hal</td>
+                <td>
+                  ${b.isForSale && b.price > 0
+                    ? `<span class="badge-pill" style="background:#eff6ff;color:#0088ff;">🛒 ${formatRupiah(b.price)}</span><br><small style="color:var(--text-dim);">Preview: ${b.previewPages} Hal</small>`
+                    : `<span class="badge-pill" style="background:#f1f5f9;color:#475569;">Gratis</span>`}
+                </td>
+                <td>
+                  ${b.isPasswordProtected
+                    ? `<span class="badge-pill" style="background:#fefce8;color:#854d0e;">🔒 Terkunci Sandi</span>`
+                    : `<span class="badge-pill" style="background:#ecfdf5;color:#047857;">🔓 Publik</span>`}
+                </td>
+                <td>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <a href="/view/${b.id}#p=1" class="btn" style="padding:6px 10px;font-size:12px;">📖 Buka 3D</a>
+                    <button class="btn" style="padding:6px 10px;font-size:12px;" onclick="openEditGuruBook('${b.id}')">✏️ Edit & Harga</button>
+                    <button class="btn" style="padding:6px 10px;font-size:12px;color:#ef4444;border-color:#fecaca;" onclick="deleteGuruBook('${b.id}', '${b.title.replace(/'/g, "\\'")}')">🗑 Hapus</button>
+                  </div>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderGuruSalesTable() {
+      const box = document.getElementById('guruSalesContainer');
+      if (!guruSales.length) {
+        box.innerHTML = `
+          <div class="empty-box">
+            <div style="font-size:36px;margin-bottom:10px;">💰</div>
+            <h4 style="font-size:16px;font-weight:800;margin-bottom:6px;">Belum Ada Transaksi Pembelian Siswa</h4>
+            <p style="font-size:13.5px;color:var(--text-muted);max-width:460px;margin:0 auto;">
+              Setiap pembelian buku Anda oleh siswa di Marketplace akan otomatis tercatat beserta nomor invoice dan nominalnya di sini.
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      box.innerHTML = `
+        <table class="guru-table">
+          <thead>
+            <tr>
+              <th>No. Invoice</th>
+              <th>ID Buku</th>
+              <th>Email Siswa Pembeli</th>
+              <th>Metode Pembayaran</th>
+              <th>Pendapatan</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${guruSales.map((s) => `
+              <tr>
+                <td><b>${s.invoice_id}</b></td>
+                <td><code>${s.book_id}</code></td>
+                <td>${s.buyer_email}</td>
+                <td>${s.payment_method}</td>
+                <td style="font-weight:800;color:#059669;">+ ${formatRupiah(s.amount)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function switchGuruTab(tabName, btn) {
+      document.querySelectorAll('.guru-tab').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.guru-panel').forEach((p) => p.classList.remove('active'));
+      document.getElementById(`panel-${tabName}`).classList.add('active');
+    }
+
+    function openUploadModal() {
+      document.getElementById('uploadModal').classList.add('open');
+    }
+    function closeUploadModal() {
+      document.getElementById('uploadModal').classList.remove('open');
+    }
+
+    function openEditGuruBook(bookId) {
+      const b = guruUploadedBooks.find((x) => x.id === bookId);
+      if (!b) return;
+      document.getElementById('ebId').value = b.id;
+      document.getElementById('ebTitle').value = b.title;
+      document.getElementById('ebAuthor').value = b.author || '';
+      document.getElementById('ebCategory').value = b.category || '';
+      document.getElementById('ebSubject').value = b.subject || '';
+      document.getElementById('ebPrice').value = b.price || 0;
+      document.getElementById('ebPreviewPages').value = b.previewPages || 3;
+      document.getElementById('ebPassword').value = '';
+      document.getElementById('editBookModal').classList.add('open');
+    }
+
+    async function deleteGuruBook(bookId, title) {
+      if (!confirm(`Hapus buku "${title}" milik Anda secara permanen?`)) return;
+      const res = await fetch(`/api/admin/books/${bookId}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+      if (res.ok) {
+        await loadGuruBooksAndSales();
+      } else {
+        const d = await res.json();
+        alert(d.detail || 'Gagal menghapus buku');
+      }
+    }
+
+    async function logoutGuruPanel() {
+      await fetch('/api/auth/logout', { method: 'POST', headers: authHeaders() }).catch(() => {});
+      localStorage.removeItem('fliplabs_token');
+      localStorage.removeItem('fliplabs_user');
+      window.location.href = '/guru';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initGuruPanel();
+
+      document.getElementById('guruLoginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errEl = document.getElementById('glError');
+        errEl.textContent = '';
+        try {
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: document.getElementById('glEmail').value.trim(),
+              password: document.getElementById('glPassword').value,
+              captchaId: guruCaptchaId,
+              captchaAnswer: document.getElementById('glCaptchaAns').value.trim(),
+            }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.detail || 'Login gagal');
+          if (!['guru', 'admin'].includes(data.user.role)) {
+            throw new Error('Akun ini adalah akun Siswa. Panel /guru hanya dapat diakses oleh akun Guru yang didaftarkan Administrator.');
+          }
+          localStorage.setItem('fliplabs_token', data.token);
+          localStorage.setItem('fliplabs_user', JSON.stringify(data.user));
+          currentUser = data.user;
+          renderGuruHeader();
+          await loadGuruBooksAndSales();
+        } catch (err) {
+          errEl.textContent = '❌ ' + err.message;
+          loadGuruCaptcha();
+        }
+      });
+
+      document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const statusEl = document.getElementById('uploadStatusText');
+        const btn = document.getElementById('btnSubmitUpload');
+        statusEl.textContent = '⏳ Mengunggah dan mengonversi halaman PDF ke 3D Flipbook WebP...';
+        btn.disabled = true;
+        try {
+          const fd = new FormData(e.target);
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            headers: authHeaders(),
+            body: fd,
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.detail || 'Gagal mengunggah PDF');
+          closeUploadModal();
+          e.target.reset();
+          await loadGuruBooksAndSales();
+        } catch (err) {
+          statusEl.textContent = '❌ ' + err.message;
+        } finally {
+          btn.disabled = false;
+        }
+      });
+
+      document.getElementById('editBookForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const bookId = document.getElementById('ebId').value;
+        const priceVal = parseInt(document.getElementById('ebPrice').value || '0', 10);
+        const pwVal = document.getElementById('ebPassword').value.trim();
+        const res = await fetch(`/api/admin/books/${bookId}`, {
+          method: 'PUT',
+          headers: authHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({
+            title: document.getElementById('ebTitle').value,
+            author: document.getElementById('ebAuthor').value,
+            category: document.getElementById('ebCategory').value,
+            subject: document.getElementById('ebSubject').value,
+            licenseTier: currentUser.license_tier || 'pro',
+            visibility: 'public',
+            isPasswordProtected: Boolean(pwVal),
+            bookPassword: pwVal,
+            isForSale: priceVal > 0,
+            price: priceVal,
+            previewPages: parseInt(document.getElementById('ebPreviewPages').value || '3', 10),
+          }),
+        });
+        if (res.ok) {
+          document.getElementById('editBookModal').classList.remove('open');
+          await loadGuruBooksAndSales();
+        } else {
+          const d = await res.json();
+          alert(d.detail || 'Gagal menyimpan perubahan');
+        }
+      });
+
+      document.getElementById('guruProfileForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const msgEl = document.getElementById('profMsg');
+        msgEl.textContent = 'Menyimpan...';
+        const res = await fetch('/api/auth/profile', {
+          method: 'PUT',
+          headers: authHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({
+            name: document.getElementById('profName').value.trim(),
+            unit: document.getElementById('profUnit').value.trim(),
+            new_password: document.getElementById('profNewPassword').value || null,
+          }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          msgEl.textContent = '✅ ' + data.message;
+          document.getElementById('profNewPassword').value = '';
+          await initGuruPanel();
+        } else {
+          msgEl.textContent = '❌ ' + (data.detail || 'Gagal memperbarui profil');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

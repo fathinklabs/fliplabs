@@ -47,12 +47,13 @@ async function checkAuthState() {
     localStorage.setItem('fliplabs_user', JSON.stringify(currentUser));
     if (currentUser.role !== 'admin') {
       showGate(true);
+      const targetUrl = currentUser.role === 'guru' ? '/guru' : '/dashboard';
       const msgEl = document.getElementById('gateAuthMsg');
       if (msgEl) {
-        msgEl.textContent = '🔒 Akses Ditolak: Portal /admin hanya untuk Super Administrator. Mengalihkan ke User Panel (/dashboard)...';
+        msgEl.textContent = `🔒 Akses Ditolak: Portal /admin khusus Super Administrator. Mengalihkan ke ${targetUrl}...`;
       }
       setTimeout(() => {
-        window.location.href = '/dashboard';
+        window.location.href = targetUrl;
       }, 1200);
       return;
     }
@@ -115,9 +116,10 @@ async function submitGateLogin(e) {
     localStorage.setItem('fliplabs_token', data.token);
     localStorage.setItem('fliplabs_user', JSON.stringify(data.user));
     if (data.user && data.user.role !== 'admin') {
-      msgEl.textContent = '🔒 Akun ini bukan Super Admin. Mengalihkan ke User Panel (/dashboard)...';
+      const targetUrl = data.user.role === 'guru' ? '/guru' : '/dashboard';
+      msgEl.textContent = `🔒 Akun ini bukan Super Admin. Mengalihkan ke ${targetUrl}...`;
       setTimeout(() => {
-        window.location.href = '/dashboard';
+        window.location.href = targetUrl;
       }, 1000);
       return;
     }
@@ -180,9 +182,10 @@ async function submitGateVerifyOtp(e) {
     localStorage.setItem('fliplabs_token', data.token);
     localStorage.setItem('fliplabs_user', JSON.stringify(data.user));
     if (data.user && data.user.role !== 'admin') {
-      msgEl.textContent = '🔒 Akun ini bukan Super Admin. Mengalihkan ke User Panel (/dashboard)...';
+      const targetUrl = data.user.role === 'guru' ? '/guru' : '/dashboard';
+      msgEl.textContent = `🔒 Akun ini bukan Super Admin. Mengalihkan ke ${targetUrl}...`;
       setTimeout(() => {
-        window.location.href = '/dashboard';
+        window.location.href = targetUrl;
       }, 1000);
       return;
     }

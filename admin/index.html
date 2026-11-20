@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FlipLabs — Portal Manajemen, Pengguna & Marketplace</title>
-  <link rel="stylesheet" href="/admin-assets/admin.css?v=3.2">
+  <title>EBOOK LABS — Portal Super Admin, Pengguna & Marketplace</title>
+  <link rel="stylesheet" href="/admin-assets/admin.css?v=3.4">
 </head>
 <body>
 
@@ -13,17 +13,17 @@
     <div style="display:flex;align-items:center;gap:14px;">
       <a href="/" class="brand-link">
         <div class="brand-icon">📖</div>
-        <span>FLIPLABS</span>
+        <span>EBOOK LABS</span>
       </a>
       <span style="font-size:12.5px;font-weight:800;color:#0088ff;border-left:1px solid var(--border-subtle);padding-left:12px;">
-        PORTAL MANAJEMEN & ADMINISTRASI
+        PORTAL SUPER ADMINISTRATOR
       </span>
     </div>
     <div style="display:flex;align-items:center;gap:10px;">
       <span id="topUserSummary" style="font-size:12.5px;font-weight:600;color:var(--text-dim);">Belum Masuk</span>
-      <a href="/dashboard" class="btn">👤 User Panel</a>
-      <a href="/marketplace" class="btn">🛒 Marketplace</a>
-      <a href="/" class="btn">📚 Rak Buku Digital</a>
+      <a href="/guru" class="btn">👩‍🏫 Panel Modul Guru</a>
+      <a href="/dashboard" class="btn">🎒 Panel Siswa</a>
+      <a href="/" class="btn">🛒 Marketplace Utama</a>
       <button id="btnTopLogout" class="btn btn-danger" style="display:none;" onclick="logoutAdmin()">Keluar</button>
     </div>
   </header>
@@ -38,7 +38,7 @@
         </div>
         <h3 style="margin-bottom:6px;">🔐 Portal Super Administrator</h3>
         <p style="font-size:12.5px;color:var(--text-dim);margin-bottom:16px;">
-          Halaman ini khusus untuk <b>Super Administrator</b> FlipLabs. Bagi Guru dan Siswa, silakan gunakan <a href="/dashboard" style="color:#0088ff;font-weight:700;">User Panel (/dashboard)</a>.
+          Halaman ini khusus untuk <b>Super Administrator</b> EBOOK LABS. Bagi Guru silakan gunakan <a href="/guru" style="color:#0088ff;font-weight:700;">Panel Modul Guru (/guru)</a>, dan bagi Siswa silakan gunakan <a href="/" style="color:#0088ff;font-weight:700;">Marketplace Utama</a>.
         </p>
         <form id="gateLoginForm">
           <div class="form-row">
@@ -63,7 +63,7 @@
           </button>
         </form>
         <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border-subtle);text-align:center;font-size:12.5px;color:var(--text-dim);">
-          Masuk sebagai Guru atau Siswa? <a href="/dashboard" style="color:#0088ff;font-weight:800;">Buka User Panel →</a>
+          Masuk sebagai Guru? <a href="/guru" style="color:#0088ff;font-weight:800;">Buka Panel Modul Guru (/guru) →</a>
         </div>
       </div>
     </section>
@@ -116,7 +116,7 @@
               Atur judul, tingkat lisensi (Basic/Pro/Enterprise), harga jual buku di Marketplace (Rp), dan proteksi kata sandi.
             </p>
           </div>
-          <a href="/#upload" class="btn btn-primary">➕ Unggah PDF Baru</a>
+          <a href="/guru" class="btn btn-primary">➕ Unggah PDF Baru (Panel Guru)</a>
         </div>
         <div style="overflow-x:auto;">
           <table class="data-table">
@@ -140,12 +140,12 @@
       <div id="panel-users" class="panel-box" style="display:none;">
         <div class="panel-head">
           <div>
-            <h3>👥 Manajemen Pengguna, Peran & Paket Lisensi</h3>
+            <h3>👥 Manajemen Pengguna, Pendaftaran Akun Guru &amp; Paket Lisensi</h3>
             <p style="font-size:12.5px;color:var(--text-dim);margin-top:2px;">
-              Kelola akun Admin, Guru, dan Siswa serta tingkatkan paket lisensi pengguna (Basic, Pro, Enterprise).
+              Daftarkan dan tentukan akun <b>Guru Resmi (role = guru)</b> untuk akses <code>/guru</code>, serta kelola akun Siswa dan Admin.
             </p>
           </div>
-          <button class="btn btn-primary" onclick="openCreateUserModal()">➕ Tambah Pengguna Baru</button>
+          <button class="btn btn-primary" onclick="openCreateUserModal()">➕ Daftarkan Guru / Pengguna Baru</button>
         </div>
         <div style="overflow-x:auto;">
           <table class="data-table">

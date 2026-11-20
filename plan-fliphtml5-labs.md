@@ -539,4 +539,19 @@ flowchart LR
      - **💰 Laporan Penjualan Buku**: Riwayat invoice pembelian dan total pendapatan dari buku yang dijual pengguna tersebut.
      - **👤 Manajemen Profil & Kata Sandi**: Pembaruan nama lengkap, unit sekolah/kelas, dan penggantian kata sandi (`PUT /api/auth/profile`).
 
+### 11.6. Revisi Arsitektur EBOOK LABS (v3.4 — Marketplace Utama & Panel Modul Guru `/guru`)
+1. **Rebranding ke `EBOOK LABS`**:
+   - Seluruh identitas merek pada aplikasi, logo SVG, viewer 3D, email verifikasi XOAUTH2, dan panel manajemen diubah menjadi **`EBOOK LABS`**.
+2. **Penghapusan Fitur AI**:
+   - Seluruh tombol, *drawer*, dan endpoint *AI Book Tutor* (`/api/ai-chat`) dihapus dari 3D Viewer dan halaman publik.
+3. **Situs Utama (`https://books.labschool.xyz`) Khusus Marketplace Pembelian Buku Siswa**:
+   - Halaman utama (`/` dan `/marketplace`) difokuskan sepenuhnya untuk katalog pembelian buku digital, baca sampel gratis (*Free Preview*), dan akses **Koleksi Buku Saya**.
+   - Tombol pembuatan flipbook / *upload PDF* dihilangkan dari halaman utama dan panel siswa (`/dashboard`).
+4. **Panel Modul Guru (`https://books.labschool.xyz/guru`) Khusus Pembuatan Flipbook & Upload PDF**:
+   - Fitur **Upload PDF & Konversi ke 3D Flipbook** (`POST /api/upload`) hanya tersedia untuk pengguna dengan peran **Guru (`role = 'guru'`)** (atau Super Admin) melalui portal khusus **`https://books.labschool.xyz/guru`**.
+5. **Pendaftaran Mandiri sebagai Guru Dinonaktifkan**:
+   - Endpoint `POST /api/auth/register` dan form registrasi publik di situs utama **hanya mendaftarkan akun sebagai Siswa (`role = 'siswa'`)** yang ingin membeli atau membaca buku.
+   - Akun **Guru (`role = 'guru'`)** ditentukan dan didaftarkan secara resmi oleh Super Administrator melalui **`https://books.labschool.xyz/admin`**.
+
+
 
